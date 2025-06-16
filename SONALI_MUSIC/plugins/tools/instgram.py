@@ -1,60 +1,89 @@
-import re
-import requests
-from pyrogram import filters
-from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-
+from pyrogram import Client, filters
+from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
+from yt_dlp import YoutubeDL
+import os
+import math
 from SONALI_MUSIC import app
-from config import LOGGER_ID
 
+os.makedirs("downloads", exist_ok=True)
 
-@app.on_message(filters.command(["ig", "instagram", "reel"]))
-async def download_instagram_video(client, message):
-    if len(message.command) < 2:
-        await message.reply_text(
-            "**ᴘʟᴇᴀsᴇ ᴘʀᴏᴠɪᴅᴇ ᴛʜᴇ ɪɴsᴛᴀɢʀᴀᴍ ʀᴇᴇʟ ᴜʀʟ ᴀғᴛᴇʀ ᴛʜᴇ ᴄᴏᴍᴍᴀɴᴅ 🙌**"
-        )
-        return
+def get_readable_file_size(size_in_bytes):
+    if size_in_bytes == 0:
+        return "0B"
+    size_name = ("B", "KB", "MB", "GB")
+    i = int(math.floor(math.log(size_in_bytes, 1024)))
+    p = math.pow(1024, i)
+    s = round(size_in_bytes / p, 2)
+    return f"{s} {size_name[i]}"
 
-    url = message.text.split()[1]
-    if not re.match(
-        re.compile(r"^(https?://)?(www\.)?(instagram\.com|instagr\.am)/.*$"), url
-    ):
-        return await message.reply_text(
-            "**ᴛʜᴇ ᴘʀᴏᴠɪᴅᴇᴅ ᴜʀʟ ɪs ɴᴏᴛ ᴀ ᴠᴀʟɪᴅ ɪɴsᴛᴀɢʀᴀᴍ ᴜʀʟ 😅😅**"
-        )
-
-    a = await message.reply_text("**🎀 ᴅᴏᴡɴʟᴏᴀᴅɪɴɢ...**")
-    api_url = f"https://insta-dl.hazex.workers.dev/?url={url}"
-
-    response = requests.get(api_url)
+def download_instagram_reel(url):
+    ydl_opts = {
+        'outtmpl': 'downloads/%(title)s.%(ext)s',
+        'format': 'best',
+        'noplaylist': True,
+        'quiet': True,
+    }
     try:
-        result = response.json()
-        data = result["result"]
+        with YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(url, download=True)
+            file_path = ydl.prepare_filename(info)
+            return file_path, info, None
     except Exception as e:
-        f = f"ᴇʀʀᴏʀ :\n{e}"
-        try:
-            await a.edit(f)
-        except Exception:
-            await message.reply_text(f)
-            return await app.send_message(LOGGER_ID, f)
-        return await app.send_message(LOGGER_ID, f)
+        return None, None, str(e)
 
-    if not result["error"]:
-        video_url = data["url"]
-        duration = data["duration"]
-        quality = data["quality"]
-        type = data["extension"]
-        size = data["formattedSize"]
-        caption = f"**◍ ᴅᴜʀᴀᴛɪᴏɴ :** {duration}\n**◍ ǫᴜᴀʟɪᴛʏ :** {quality}\n**◍ ᴛʏᴘᴇ :** {type}\n**◍ sɪᴢᴇ :** {size}"
-        buttons = InlineKeyboardMarkup(
-            [
-                [InlineKeyboardButton("✙ ʌᴅᴅ ϻє ɪη ʏσυʀ ɢʀσυᴘ ✙", url="https://t.me/Sonali_Music_bot?startgroup=s&admin=delete_messages+manage_video_chats+pin_messages+invite_users")]
-            ]
+@app.on_message(filters.command(["reel", "ig"]) & (filters.private | filters.group))
+async def reel_handler(client: Client, message: Message):
+    if len(message.command) < 2:
+        return await message.reply(
+            "**ᴘʟᴇᴀsᴇ ᴘʀᴏᴠɪᴅᴇ ᴛʜᴇ ɪɴsᴛᴀɢʀᴀᴍ ʀᴇᴇʟ ᴜʀʟ ᴀғᴛᴇʀ ᴛʜᴇ ᴄᴏᴍᴍᴀɴᴅ 🙌**",
+            quote=True
         )
-        await a.delete()
-        await message.reply_video(video_url, caption=caption, reply_markup=buttons)
-    else:
+
+    url = message.text.split(maxsplit=1)[1]
+
+    if "instagram.com/reel" not in url:
+        return await message.reply("**ᴛʜᴇ ᴘʀᴏᴠɪᴅᴇᴅ ᴜʀʟ ɪs ɴᴏᴛ ᴀ ᴠᴀʟɪᴅ ɪɴsᴛᴀɢʀᴀᴍ ᴜʀʟ 😅😅**", quote=True)
+
+    status = await message.reply("**⏳ ᴅᴏᴡɴʟᴏᴀᴅɪɴɢ ʀᴇᴇʟ, ᴘʟᴇᴀꜱᴇ ᴡᴀɪᴛ...**", quote=True)
+
+    file_path, info, error = download_instagram_reel(url)
+    if file_path:
         try:
-            return await a.edit("ғᴀɪʟᴇᴅ ᴛᴏ ᴅᴏᴡɴʟᴏᴀᴅ ʀᴇᴇʟ")
-        except Exception:
-            return await message.reply_text("ғᴀɪʟᴇᴅ ᴛᴏ ᴅᴏᴡɴʟᴏᴀᴅ ʀᴇᴇʟ")
+            title = info.get("title", "Instagram Reel")
+            duration = round(info.get("duration", 0))
+            filesize = os.path.getsize(file_path)
+            size = get_readable_file_size(filesize)
+            quality = info.get("format", "Best")
+
+            bot_username = (await client.get_me()).username
+
+            caption = (
+                f"**◍ ᴜᴘʟᴏᴀᴅᴇʀ :-** `{title}`\n"
+                f"**◍ ǫᴜᴀʟɪᴛʏ :-** `{quality}`\n"
+                f"**◍ ᴅᴜʀᴀᴛɪᴏɴ :-** `{duration} sec`\n"
+                f"**◍ ꜱɪᴢᴇ :-** `{size}`"
+            )
+
+            buttons = InlineKeyboardMarkup([
+                [
+                    InlineKeyboardButton(
+                        "✙ ʌᴅᴅ ϻє ɪη ʏσυʀ ɢʀσυᴘ ✙",
+                        url=f"https://t.me/{bot_username}?startgroup=s&admin=delete_messages+manage_video_chats+pin_messages+invite_users"
+                    )
+                ]
+            ])
+
+            await client.send_video(
+                chat_id=message.chat.id,
+                video=file_path,
+                caption=caption,
+                reply_markup=buttons
+            )
+
+            os.remove(file_path)
+            await status.delete()
+
+        except Exception as e:
+            await status.edit(f"**⚠️ ᴇʀʀᴏʀ ᴡʜɪʟᴇ ꜱᴇɴᴅɪɴɢ ᴠɪᴅᴇᴏ :** `{e}`")
+    else:
+        await status.edit(f"**⚠️ ꜰᴀɪʟᴇᴅ ᴛᴏ ᴅᴏᴡɴʟᴏᴀᴅ ʀᴇᴇʟ :** `{error}`")
