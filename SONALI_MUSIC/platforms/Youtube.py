@@ -1,102 +1,68 @@
+
 import asyncio
 import os
 import re
 import json
+import aiohttp
 from typing import Union
-import requests
+
 import yt_dlp
 from pyrogram.enums import MessageEntityType
 from pyrogram.types import Message
 from youtubesearchpython.__future__ import VideosSearch
+
 from SONALI_MUSIC.utils.database import is_on_off
 from SONALI_MUSIC.utils.formatters import time_to_seconds
+
+
+
 import os
 import glob
 import random
 import logging
-import aiohttp
-import config
-#from config import API_URL, API_KEY
-
-from os import getenv
-
-API_URL = getenv("API_URL", 'https://ytapi-1fd43e42f22f.herokuapp.com')
-API_KEY = getenv("API_KEY", 'api_861f95a5a0874f7ab9f7')
 
 
 def cookie_txt_file():
-    cookie_dir = f"{os.getcwd()}/cookies"
-    cookies_files = [f for f in os.listdir(cookie_dir) if f.endswith(".txt")]
+    folder_path = f"{os.getcwd()}/cookies"
+    filename = f"{os.getcwd()}/cookies/logs.csv"
+    txt_files = glob.glob(os.path.join(folder_path, '*.txt'))
+    if not txt_files:
+        raise FileNotFoundError("No .txt files found in the specified folder.")
+    cookie_txt_file = random.choice(txt_files)
+    with open(filename, 'a') as file:
+        file.write(f'Choosen File : {cookie_txt_file}\n')
+    return f"""cookies/{str(cookie_txt_file).split("/")[-1]}"""
 
-    cookie_file = os.path.join(cookie_dir, random.choice(cookies_files))
-    return cookie_file
 
+YOUR_API_KEY = "api_861f95a5a0874f7ab9f7"
+MUSIC_API_BASE_URL = "https://ytapi-1fd43e42f22f.herokuapp.com"  
 
-async def download_song(link: str):
-    video_id = link.split('v=')[-1].split('&')[0]
-
-    download_folder = "downloads"
-    os.makedirs(download_folder, exist_ok=True)
-
-    for ext in ["mp3", "m4a", "webm"]:
-        file_path = f"{download_folder}/{video_id}.{ext}"
-        if os.path.exists(file_path):
-            return file_path
-
-    song_url = f"{API_URL}/song/{video_id}?api={API_KEY}"
-
-    async with aiohttp.ClientSession() as session:
-        download_url = None
-        file_format = "mp3"
-
-        for attempt in range(10):
-            try:
-                async with session.get(song_url) as response:
-                    if response.status != 200:
-                        raise Exception(f"API request failed with status code {response.status}")
-                    
+async def get_audio_stream_from_api(query: str):
+    """Get audio stream URL from our Music Stream API with API key"""
+    try:
+        async with aiohttp.ClientSession() as session:
+            params = {
+                'query': query,
+                'api_key': YOUR_API_KEY
+            }
+            async with session.get(
+                f"{MUSIC_API_BASE_URL}/stream",
+                params=params,
+                timeout=aiohttp.ClientTimeout(total=30)
+            ) as response:
+                if response.status == 200:
                     data = await response.json()
-                    status = data.get("status", "").lower()
+                    return data.get('stream_url'), data.get('title', query)
+                else:
+                    logging.error(f"Music API failed with status: {response.status}")
+                    return None, None
+    except Exception as e:
+        logging.error(f"Error calling Music Stream API: {str(e)}")
+        return None, None
 
-                    if status == "done":
-                        download_url = data.get("link")
-                        file_format = data.get("format", "mp3").lower()
-                        break
-                    elif status == "downloading":
-                        await asyncio.sleep(4)
-                    else:
-                        error_msg = data.get("error") or data.get("message") or f"Unexpected status '{status}'"
-                        raise Exception(f"API error: {error_msg}")
-            except Exception as e:
-                print(f"[Attempt {attempt+1}/10] Failed: {e}")
-                await asyncio.sleep(2)
 
-        if not download_url:
-            print("Download URL not received after multiple attempts.")
-            return None
 
-        file_name = f"{video_id}.{file_format}"
-        file_path = os.path.join(download_folder, file_name)
 
-        try:
-            async with session.get(download_url) as file_response:
-                if file_response.status != 200:
-                    raise Exception(f"File download failed with status code {file_response.status}")
-                
-                with open(file_path, 'wb') as f:
-                    while True:
-                        chunk = await file_response.content.read(8192)
-                        if not chunk:
-                            break
-                        f.write(chunk)
-
-            return file_path
-        except aiohttp.ClientError as e:
-            print(f"Network or client error occurred while downloading: {e}")
-            return None
-        except Exception as e:
-            print(f"Error occurred while saving the song: {e}")
-            return None
 
 async def check_file_size(link):
     async def get_format_info(link):
@@ -361,6 +327,36 @@ class YouTubeAPI:
     ) -> str:
         if videoid:
             link = self.base + link
+        
+        # For audio requests, use our Music Stream API
+        if not video and not songvideo:
+            try:
+                # Get title for API search
+                search_title = title
+                if not search_title:
+                    # Extract title from YouTube if not provided
+                    results = VideosSearch(link, limit=1)
+                    for result in (await results.next())["result"]:
+                        search_title = result["title"]
+                        break
+                
+                if search_title:
+                    logging.info(f"Searching Music API for: {search_title}")
+                    
+                    # Get stream URL from our API
+                    stream_url, api_title = await get_audio_stream_from_api(search_title)
+                    
+                    if stream_url:
+                        logging.info(f"Got audio stream from Music API: {api_title}")
+                        # Return the stream URL directly (no download needed)
+                        return stream_url, False  # False means direct streaming
+                    else:
+                        logging.warning("Music API failed, falling back to yt-dlp")
+                
+            except Exception as e:
+                logging.error(f"Music API error, falling back to yt-dlp: {str(e)}")
+        
+        # Fallback to original yt-dlp logic for video or if API fails
         loop = asyncio.get_running_loop()
         def audio_dl():
             ydl_optssx = {
@@ -438,17 +434,17 @@ class YouTubeAPI:
             x.download([link])
 
         if songvideo:
-            await download_song(link)
-            fpath = f"downloads/{link}.mp3"
+            await loop.run_in_executor(None, song_video_dl)
+            fpath = f"downloads/{title}.mp4"
             return fpath
         elif songaudio:
-            await download_song(link)
-            fpath = f"downloads/{link}.mp3"
+            await loop.run_in_executor(None, song_audio_dl)
+            fpath = f"downloads/{title}.mp3"
             return fpath
         elif video:
             if await is_on_off(1):
                 direct = True
-                downloaded_file = await download_song(link)
+                downloaded_file = await loop.run_in_executor(None, video_dl)
             else:
                 proc = await asyncio.create_subprocess_exec(
                     "yt-dlp",
@@ -477,5 +473,5 @@ class YouTubeAPI:
                    downloaded_file = await loop.run_in_executor(None, video_dl)
         else:
             direct = True
-            downloaded_file = await download_song(link)
+            downloaded_file = await loop.run_in_executor(None, audio_dl)
         return downloaded_file, direct
