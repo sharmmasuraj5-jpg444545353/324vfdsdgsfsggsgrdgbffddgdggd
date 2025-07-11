@@ -28,9 +28,8 @@ async def chat_gpt(bot, message):
             if "answer" in json_data:
                 answer = json_data["answer"]
 
-                # Unwanted phrases remove
                 unwanted_phrases = [
-                    "Join our community",
+                    "🔗 Join our community",
                     "t.me/",
                     "Answered by",
                     "Join our Telegram"
@@ -39,15 +38,15 @@ async def chat_gpt(bot, message):
                     if phrase.lower() in answer.lower():
                         answer = answer.split(phrase)[0].strip()
 
-                # Inline Add Me Button
+            
                 buttons = InlineKeyboardMarkup(
                     [[
-                        InlineKeyboardButton("➕ Add Me", url=f"https://t.me/{app.username}?startgroup=true")
+                        InlineKeyboardButton("✙ ʌᴅᴅ ϻє ɪη ʏσυʀ ɢʀσυᴘ ✙", url=f"https://t.me/{app.username}?startgroup=true")
                     ]]
                 )
 
                 return await message.reply_text(
-                    f"**🤖 ChatGPT Response:**\n\n{answer}",
+                    f"**🤖 𝐘ᴏᴜʀ ᴀɴsᴡᴇʀ :**\n\n{answer}",
                     parse_mode=ParseMode.MARKDOWN,
                     reply_markup=buttons
                 )
