@@ -21,7 +21,7 @@ import config
 from os import getenv
 
 API_URL = getenv("API_URL", 'https://api.thequickearn.xyz')
-API_KEY = getenv("API_KEY", 'NxGBNexGenBots1ee9b8')
+API_KEY = getenv("API_KEY", '30DxNexGenBots571043')
 
 def cookie_txt_file():
     cookie_dir = f"{os.getcwd()}/cookies"
