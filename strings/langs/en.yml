@@ -175,7 +175,7 @@ queue_6 : "<b>🕚 ᴅυʀᴧᴛɪση :</b> υηᴋησᴡη ᴅυʀᴧᴛɪσ�
 queue_7 : "\n❖ ᴄʟɪᴄᴋ ση ʙυᴛᴛση ʙєʟσᴡ ᴛσ ɢєᴛ ᴡʜσʟє ǫυєυєᴅ ʟɪsᴛ."
 queue_8 : "❖ <b>{0} ᴘʟᴧʏєʀ</b>\n\n🎄 <b>sᴛʀєᴧϻɪηɢ :</b> {1}\n\n🔗 <b>sᴛʀєᴧϻ ᴛʏᴘє :</b> {2}\n🥀 <b>ʀєǫυєsᴛєᴅ ʙʏ :</b> {3}\n❖ {4}"
 
-stream_1 : "<b><blockquote>✮ 𝐒ʈᴧʀʈ𝛆ɗ 𝐒ʈʀ𝛆ɑɱɩŋʛ 𝐍๏Ꮗ ✮</blockquote></b>\n<blockquote><b>✯ 𝐓ɩttɭ𝛆 »</b> <a href={0}>{1}</a>\n<b>✬ 𝐃ʋɽɑʈɩσŋ »</b> {2} ϻɪηᴜᴛєs\n<b>✭ 𝐁ɣ »</b> {3}</blockquote>\n<b><blockquote>❖  ϻᴧᴅє  ʙʏ  ➛  [˹ᴘᴜʀᴠɪ-ʙᴏᴛs˼](https://t.me/purvi_bots)</b></blockquote>"
+stream_1 : "<b><blockquote>✮ 𝐒ʈᴧʀʈ𝛆ɗ 𝐒ʈʀ𝛆ɑɱɩŋʛ 𝐍๏Ꮗ ✮</blockquote></b>\n<blockquote><b>✯ 𝐓ɩttɭ𝛆 »</b> <a href={0}>{1}</a>\n<b>✬ 𝐃ʋɽɑʈɩσŋ »</b> {2} ϻɪηᴜᴛєs\n<b>✭ 𝐁ɣ »</b> {3}</blockquote>\n<b><blockquote>❖  𝐌ᴧᴅє  ʙʏ  ➛  [˹ᴘᴜʀᴠɪ-ʙᴏᴛs˼](https://t.me/purvi_bots)</b></blockquote>"
 stream_2 : "<b><blockquote>✮ 𝐒ʈᴧʀʈ𝛆ɗ 𝐒ʈʀ𝛆ɑɱɩŋʛ 𝐍๏Ꮗ ✮</blockquote></b>\n<blockquote><b>❍ 𝛅ᴛʀєᴧϻ ᴛʏᴘᴇ :</b> ʟɪᴠᴇ sᴛʀᴇᴀᴍ [ᴜʀʟ]\n<b>✭ 𝐁ɣ »</b> {0}</blockquote>"
 
 CLOSE_BUTTON  : "⌯ ᴄʟσsє ⌯"
