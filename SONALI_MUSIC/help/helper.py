@@ -466,8 +466,6 @@ class Helper(object):
 ❖ υᴘᴅᴧᴛєs ᴄʜᴧηηєʟ ➥ [ᴘᴜʀᴠɪ-ʙσᴛs](https://t.me/PURVI_BOTS)
 ❖ sυᴘᴘσʀᴛ ᴄʜᴧᴛ ➥ [ᴘᴜʀᴠɪ-ᴜᴘᴅᴧᴛєs](https://t.me/PURVI_UPDATES)
 ❖ ɢɪᴛ ʜᴜʙ ʟɪηᴋ ➥ [тєᴧϻ-ᴘᴜʀᴠɪ](github.com/TEAMPURVI)
-─────────────────────────
-✦ ᴘʀɪᴠᴧᴄʏ ᴘσʟɪᴄʏ ➥ [тᴧᴘ нєʀє](https://telegra.ph/Privacy-Policy--Purvi-Bots-by-ALPHA-BABY-08-06)
 ─────────────────────────**
 '''
 
