@@ -185,8 +185,9 @@ async def mb_plugin_button(client, CallbackQuery):
     cb = callback_data.split(None, 1)[1]
     keyboard = InlineKeyboardMarkup(
     [
-    [
-    InlineKeyboardButton("ʙᴀᴄᴋ", callback_data=f"MAIN_CP")
+    [    
+    InlineKeyboardButton("ʙᴀᴄᴋ", callback_data=f"MAIN_CP"),
+    InlineKeyboardButton("˹ ᴘʀɪᴠᴧᴄʏ ˼", url="https://telegra.ph/Privacy-Policy--Purvi-Bots-by-ALPHA-BABY-08-06")]
     ]
     ]
     )
