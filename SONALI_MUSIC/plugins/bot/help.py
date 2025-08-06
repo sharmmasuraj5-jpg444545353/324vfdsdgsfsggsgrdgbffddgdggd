@@ -179,23 +179,29 @@ async def helper_cb(client, CallbackQuery):
     await CallbackQuery.edit_message_text(Helper.HELP_Sona, reply_markup=InlineKeyboardMarkup(BUTTONS.SBUTTON))
 
         
-@app.on_callback_query(filters.regex('MAIN_BACK'))      
+@app.on_callback_query(filters.regex('MAIN_BACK'))
 async def mb_plugin_button(client, CallbackQuery):
     callback_data = CallbackQuery.data.strip()
-    cb = callback_data.split(None, 1)[1]
-    keyboard = InlineKeyboardMarkup(
-    [
-    [    
-    InlineKeyboardButton("ʙᴀᴄᴋ", callback_data=f"MAIN_CP"),
-    InlineKeyboardButton("˹ ᴘʀɪᴠᴧᴄʏ ˼", url="https://telegra.ph/Privacy-Policy--Purvi-Bots-by-ALPHA-BABY-08-06")]
-    ]
-    ]
-    )
-    if cb == "MAIN":
-        await CallbackQuery.edit_message_text(f"`something errors`",reply_markup=keyboard,parse_mode=enums.ParseMode.MARKDOWN)
-    else:
-        await CallbackQuery.edit_message_text(getattr(Helper, cb), reply_markup=keyboard)
+    cb = callback_data.split(None, 1)[1] if len(callback_data.split(None, 1)) > 1 else "MAIN"
 
+    keyboard = InlineKeyboardMarkup([
+        [    
+            InlineKeyboardButton("ʙᴀᴄᴋ", callback_data="MAIN_CP"),
+            InlineKeyboardButton("˹ ᴘʀɪᴠᴧᴄʏ ˼", url="https://telegra.ph/Privacy-Policy--Purvi-Bots-by-ALPHA-BABY-08-06")
+        ]
+    ])
+
+    if cb == "MAIN":
+        await CallbackQuery.edit_message_text(
+            "`something errors`", 
+            reply_markup=keyboard,
+            parse_mode=enums.ParseMode.MARKDOWN
+        )
+    else:
+        await CallbackQuery.edit_message_text(
+            getattr(Helper, cb), 
+            reply_markup=keyboard
+        )
 
 
 
