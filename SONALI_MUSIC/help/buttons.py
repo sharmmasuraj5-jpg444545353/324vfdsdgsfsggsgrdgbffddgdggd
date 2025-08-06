@@ -114,9 +114,9 @@ class BUTTONS(object):
             InlineKeyboardButton("˹ sυᴘᴘσʀᴛ ˼", url="https://t.me/PURVI_BOTS"),
             InlineKeyboardButton("˹ υᴘᴅᴧᴛєs ˼", url="https://t.me/+gMy8Cp190ediNzZl"),
         ],
-        [
+        [  
+            InlineKeyboardButton("˹ ᴘʀɪᴠᴧᴄʏ ˼", url="https://telegra.ph/Privacy-Policy--Purvi-Bots-by-ALPHA-BABY-08-06"),
             InlineKeyboardButton("⌯ ʙᴧᴄᴋ ⌯", callback_data="settingsback_helper"),
-            
         ]
         ]
     
