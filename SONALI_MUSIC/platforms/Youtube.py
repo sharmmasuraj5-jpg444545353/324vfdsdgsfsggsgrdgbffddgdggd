@@ -14,8 +14,6 @@ from youtubesearchpython.__future__ import VideosSearch
 from SONALI_MUSIC.utils.database import is_on_off
 from SONALI_MUSIC.utils.formatters import time_to_seconds
 
-
-
 import os
 import glob
 import random
@@ -34,7 +32,7 @@ def cookie_txt_file():
     return f"""cookies/{str(cookie_txt_file).split("/")[-1]}"""
 
 
-YOUR_API_KEY = "api_861f95a5a0874f7ab9f7"
+YOUR_API_KEY = "SONALI8235"
 MUSIC_API_BASE_URL = "https://ytapi-1fd43e42f22f.herokuapp.com"  
 
 async def get_audio_stream_from_api(query: str):
