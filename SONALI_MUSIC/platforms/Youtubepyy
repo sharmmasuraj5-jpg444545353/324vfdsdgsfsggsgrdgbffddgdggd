@@ -13,7 +13,7 @@ from youtubesearchpython.__future__ import VideosSearch
 from SONALI_MUSIC.utils.database import is_on_off
 from SONALI_MUSIC.utils.formatters import time_to_seconds
 
-YOUR_API_KEY = getenv("YOUR_API_KEY", "strangerapi909126488")
+YOUR_API_KEY = getenv("YOUR_API_KEY", "strangerapi8da44ab5a")
 YOUR_API_URL = getenv("YOUR_API_URL", "http://46.38.237.240:8000")
 
 async def get_file_from_api(video_id, audio=True):
