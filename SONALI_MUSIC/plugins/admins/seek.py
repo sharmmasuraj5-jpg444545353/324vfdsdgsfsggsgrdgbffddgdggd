@@ -1,13 +1,12 @@
 from pyrogram import filters
-from pyrogram.types import Message
+from pyrogram.types import Message, CallbackQuery
 
 from SONALI_MUSIC import YouTube, app
-from SONALI_MUSIC.core.call import Sona
-from SONALI_MUSIC.misc import db
+from SONALI_MUSIC.core.call import Sona as Anony
+from SONALI_MUSIC.misc import db, SUDOERS
 from SONALI_MUSIC.utils import AdminRightsCheck, seconds_to_min
 from SONALI_MUSIC.utils.inline import close_markup
 from config import BANNED_USERS
-
 
 @app.on_message(
     filters.command(["seek", "cseek", "seekback", "cseekback"])
@@ -56,7 +55,7 @@ async def seek_comm(cli, message: Message, _, chat_id):
     if "index_" in file_path:
         file_path = playing[0]["vidid"]
     try:
-        await Sona.seek_stream(
+        await Anony.seek_stream(
             chat_id,
             file_path,
             seconds_to_min(to_seek),
@@ -73,3 +72,140 @@ async def seek_comm(cli, message: Message, _, chat_id):
         text=_["admin_25"].format(seconds_to_min(to_seek), message.from_user.mention),
         reply_markup=close_markup(_),
     )
+
+
+#__________________________________[ SEEK AND SEEKBACK CALLBACKS ]_____________________________________
+
+async def check_callback_admin(client, callback_query: CallbackQuery):
+    # Check if user is banned
+    if callback_query.from_user.id in BANNED_USERS:
+        await callback_query.answer("🚫 ʏᴏᴜ'ʀᴇ ʙᴀɴɴᴇᴅ ғʀᴏᴍ ᴜsɪɴɢ ᴛʜɪs ʙᴏᴛ!", show_alert=True)
+        return False
+    
+    # Check if user is SUDOER
+    if callback_query.from_user.id in SUDOERS:
+        return True
+    
+    # Check admin privileges in group
+    try:
+        chat_id = callback_query.message.chat.id
+        member = await app.get_chat_member(chat_id, callback_query.from_user.id)
+        if member.privileges and member.privileges.can_manage_video_chats:
+            return True
+    except Exception as e:
+        print(f"Error checking admin status: {e}")
+    
+    await callback_query.answer("ʏᴏᴜ ᴅᴏɴ'ᴛ ʜᴀᴠᴇ ᴘᴇʀᴍɪssɪᴏɴ ᴛᴏ ᴍᴀɴᴀɢᴇ ᴠɪᴅᴇᴏ ᴄʜᴀᴛ's\n\nʀᴇʟᴏᴀᴅ ᴀᴅᴍɪɴs ᴄᴀᴄʜᴇ ᴠɪᴀ : /reload ", show_alert=True)
+    return False
+
+@app.on_callback_query(filters.regex("seek_forward_20"))
+async def seek_forward_20_cb(client, callback_query: CallbackQuery):
+    if not await check_callback_admin(client, callback_query):
+        return
+    
+    try:
+        chat_id = callback_query.message.chat.id
+        playing = db.get(chat_id)
+        
+        if not playing:
+            await callback_query.answer("ᴛʜᴇ ʙᴏᴛ ɪsɴ'ᴛ sᴛʀᴇᴀᴍɪɴɢ ᴏɴ ᴠɪᴅᴇᴏ ᴄʜᴀᴛ.", show_alert=True)
+            return
+            
+        duration_seconds = int(playing[0]["seconds"])
+        if duration_seconds == 0:
+            await callback_query.answer("ᴄᴀɴ'ᴛ sᴇᴇᴋ ɪɴ ʟɪᴠᴇ sᴛʀᴇᴀᴍs!", show_alert=True)
+            return
+            
+        duration_to_skip = 20
+        duration_played = int(playing[0]["played"])
+        duration = playing[0]["dur"]
+        file_path = playing[0]["file"]
+        
+        if (duration_seconds - (duration_played + duration_to_skip)) <= 10:
+            await callback_query.answer("ᴀʟʀᴇᴀᴅʏ ɴᴇᴀʀ ᴛʜᴇ ᴇɴᴅ ᴏғ ᴛʀᴀᴄᴋ!", show_alert=True)
+            return
+            
+        to_seek = duration_played + duration_to_skip + 1
+        
+        if "vid_" in file_path:
+            n, file_path = await YouTube.video(playing[0]["vidid"], True)
+            if n == 0:
+                await callback_query.answer("ᴠɪᴅᴇᴏ ɴᴏᴛ ᴀᴠᴀɪʟᴀʙʟᴇ!", show_alert=True)
+                return
+                
+        check = (playing[0]).get("speed_path")
+        if check:
+            file_path = check
+        if "index_" in file_path:
+            file_path = playing[0]["vidid"]
+            
+        await Anony.seek_stream(
+            chat_id,
+            file_path,
+            seconds_to_min(to_seek),
+            duration,
+            playing[0]["streamtype"],
+        )
+        
+        db[chat_id][0]["played"] += duration_to_skip
+        await callback_query.answer(f"✅ » sᴛʀᴇᴀᴍ sᴜᴄᴄᴇssғᴜʟʟʏ sᴇᴇᴋᴇᴅ — 20 sᴇᴄᴏɴᴅ's !")
+        
+    except Exception as e:
+        print(f"Error in seek_forward_20_cb: {e}")
+        await callback_query.answer("🚫 ғᴀɪʟᴇᴅ ᴛᴏ sᴇᴇᴋ ғᴏʀᴡᴀʀᴅ!", show_alert=True)
+
+@app.on_callback_query(filters.regex("seek_backward_20"))
+async def seek_backward_20_cb(client, callback_query: CallbackQuery):
+    if not await check_callback_admin(client, callback_query):
+        return
+    
+    try:
+        chat_id = callback_query.message.chat.id
+        playing = db.get(chat_id)
+        
+        if not playing:
+            await callback_query.answer("ᴛʜᴇ ʙᴏᴛ ɪsɴ'ᴛ sᴛʀᴇᴀᴍɪɴɢ ᴏɴ ᴠɪᴅᴇᴏ ᴄʜᴀᴛ.", show_alert=True)
+            return
+            
+        duration_seconds = int(playing[0]["seconds"])
+        if duration_seconds == 0:
+            await callback_query.answer("ᴄᴀɴ'ᴛ sᴇᴇᴋ ɪɴ ʟɪᴠᴇ sᴛʀᴇᴀᴍ's!", show_alert=True)
+            return
+            
+        duration_to_skip = 20
+        duration_played = int(playing[0]["played"])
+        duration = playing[0]["dur"]
+        file_path = playing[0]["file"]
+        
+        if (duration_played - duration_to_skip) <= 10:
+            await callback_query.answer("ᴀʟʀᴇᴀᴅʏ ɴᴇᴀʀ ᴛʜᴇ sᴛᴀʀᴛ ᴏғ ᴛʀᴀᴄᴋ!", show_alert=True)
+            return
+            
+        to_seek = duration_played - duration_to_skip + 1
+        
+        if "vid_" in file_path:
+            n, file_path = await YouTube.video(playing[0]["vidid"], True)
+            if n == 0:
+                await callback_query.answer("ᴠɪᴅᴇᴏ ɴᴏᴛ ᴀᴠᴀɪʟᴀʙʟᴇ!", show_alert=True)
+                return
+                
+        check = (playing[0]).get("speed_path")
+        if check:
+            file_path = check
+        if "index_" in file_path:
+            file_path = playing[0]["vidid"]
+            
+        await Anony.seek_stream(
+            chat_id,
+            file_path,
+            seconds_to_min(to_seek),
+            duration,
+            playing[0]["streamtype"],
+        )
+        
+        db[chat_id][0]["played"] -= duration_to_skip
+        await callback_query.answer(f"✅ sᴛʀᴇᴀᴍ sᴜᴄᴄᴇssғᴜʟʟʏ sᴇᴇᴋᴇᴅ ʙᴀᴄᴋ 20 sᴇᴄᴏɴᴅ's")
+        
+    except Exception as e:
+        print(f"Error in seek_backward_20_cb: {e}")
+        await callback_query.answer("🚫 ғᴀɪʟᴇᴅ ᴛᴏ sᴇᴇᴋ ʙᴀᴄᴋᴡᴀʀᴅ!", show_alert=True)
