@@ -66,7 +66,7 @@ def stream_markup_timer(_, chat_id, played, dur):
         ],
         [
             InlineKeyboardButton(text="< - 𝟤𝟢ˢ", callback_data="seek_backward_20"),
-            InlineKeyboardButton(text="• ᴘʀᴏᴍᴏ •", callback_data=f"open_promo|{chat_id}"),
+            InlineKeyboardButton(text="• sᴜᴘᴘᴏʀᴛ •", callback_data=f"open_promo|{chat_id}"),
             InlineKeyboardButton(text="𝟤𝟢ˢ + >", callback_data="seek_forward_20")
         ],
         [
@@ -90,7 +90,7 @@ def stream_markup(_, chat_id):
         ],
         [
             InlineKeyboardButton(text="< - 𝟤𝟢ˢ", callback_data="seek_backward_20"),
-            InlineKeyboardButton(text="• ᴘʀᴏᴍᴏ •", callback_data=f"open_promo|{chat_id}"),
+            InlineKeyboardButton(text="• sᴜᴘᴘᴏʀᴛ •", callback_data=f"open_promo|{chat_id}"),
             InlineKeyboardButton(text="𝟤𝟢ˢ + >", callback_data="seek_forward_20")
         ],
         [
@@ -114,11 +114,11 @@ def promo_markup_simple(chat_id):
            # )
         #],
         [
-            InlineKeyboardButton(text="Support", url="https://t.me/purvi_support"),
-            InlineKeyboardButton(text="Updates", url="https://t.me/TheSigmaCoder")
+            InlineKeyboardButton(text="ᴜᴘᴅᴀᴛᴇs", url="https://t.me/PURVI_UPDATES"),
+            InlineKeyboardButton(text="sᴜᴘᴘᴏʀᴛ", url="https://t.me/PURVI_BOTS")
         ],
         [
-            InlineKeyboardButton(text="Back", callback_data=f"stream_back|{chat_id}")
+            InlineKeyboardButton(text="ʙᴀᴄᴋ", callback_data=f"stream_back|{chat_id}")
         ]
     ]
     return buttons
