@@ -109,14 +109,14 @@ def stream_markup(_, chat_id):
 # ===================== Promo Markup =====================
 def promo_markup_simple(chat_id):
     buttons = [
-        [
-            InlineKeyboardButton(
-                text="• ᴘʀᴏᴍᴏ •",
-                web_app=WebAppInfo(
-                    url="https://t.me/TheSigmaCoder/?text=HII+OWNER+😅+I+WANT+PROMOTION+GIVE+ME+PRICE+LIST...😙"
-                )
-            )
-        ],
+        #[
+          #  InlineKeyboardButton(
+              #  text="• ᴘʀᴏᴍᴏ •",
+               # web_app=WebAppInfo(
+               #     url="https://t.me/TheSigmaCoder/?text=HII+OWNER+😅+I+WANT+PROMOTION+GIVE+ME+PRICE+LIST...😙"
+                #)
+           # )
+        #],
         [
             InlineKeyboardButton(text="Support", url="https://t.me/purvi_support"),
             InlineKeyboardButton(text="Updates", url="https://t.me/TheSigmaCoder")
