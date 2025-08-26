@@ -1,13 +1,10 @@
 import math
 from config import SUPPORT_CHAT, OWNER_USERNAME
-from pyrogram.types import InlineKeyboardButton, WebAppInfo, CallbackQuery, InlineKeyboardMarkup
+from pyrogram.types import InlineKeyboardButton
 from SONALI_MUSIC import app
 import config
 from SONALI_MUSIC.utils.formatters import time_to_seconds
 
-
-# Global variable to store current playback state
-current_playback = {}
 
 def track_markup(_, videoid, user_id, channel, fplay):
     buttons = [
@@ -34,13 +31,7 @@ def track_markup(_, videoid, user_id, channel, fplay):
 def stream_markup_timer(_, chat_id, played, dur):
     played_sec = time_to_seconds(played)
     duration_sec = time_to_seconds(dur)
-    
-    # Zero division protection
-    if duration_sec == 0:
-        percentage = 0
-    else:
-        percentage = (played_sec / duration_sec) * 100
-        
+    percentage = (played_sec / duration_sec) * 100
     umm = math.floor(percentage)
     if 0 < umm <= 10:
         bar = "◉—————————"
@@ -62,26 +53,27 @@ def stream_markup_timer(_, chat_id, played, dur):
         bar = "————————◉—"
     else:
         bar = "—————————◉"
-
     buttons = [
-        [InlineKeyboardButton(text=f"{played} {bar} {dur}", callback_data="GetTimer")],
+        [
+            InlineKeyboardButton(
+                text=f"{played} {bar} {dur}",
+                callback_data="GetTimer",
+            )
+        ],
         [
             InlineKeyboardButton(text="▷", callback_data=f"ADMIN Resume|{chat_id}"),
             InlineKeyboardButton(text="II", callback_data=f"ADMIN Pause|{chat_id}"),
             InlineKeyboardButton(text="↻", callback_data=f"ADMIN Replay|{chat_id}"),
             InlineKeyboardButton(text="‣‣I", callback_data=f"ADMIN Skip|{chat_id}"),
-            InlineKeyboardButton(text="▢", callback_data=f"ADMIN Stop|{chat_id}")
+            InlineKeyboardButton(text="▢", callback_data=f"ADMIN Stop|{chat_id}"),
         ],
+         [
+             InlineKeyboardButton(text="< - 𝟤𝟢ˢ", callback_data="seek_backward_20"),
+             InlineKeyboardButton(text=_["CLOSE_BUTTON"], callback_data="close"),
+             InlineKeyboardButton(text="𝟤𝟢ˢ + >", callback_data="seek_forward_20")
+         ],
         [
-            InlineKeyboardButton(text="< - 𝟤𝟢ˢ", callback_data="seek_backward_20"),
-            InlineKeyboardButton(text="• sᴜᴘᴘᴏʀᴛ •", callback_data=f"open_promo|{chat_id}"),
-            InlineKeyboardButton(text="𝟤𝟢ˢ + >", callback_data="seek_forward_20")
-        ],
-        [
-            InlineKeyboardButton(
-                text="✙ ʌᴅᴅ ϻє ɪη ʏσυʀ ɢʀσυᴘ ✙",
-                url=f"https://t.me/{app.username}?startgroup=true"
-            )
+            InlineKeyboardButton(text="✙ ʌᴅᴅ ϻє ɪη ʏσυʀ ɢʀσυᴘ ✙", url=f"https://t.me/{app.username}?startgroup=true"),
         ]
     ]
     return buttons
@@ -94,125 +86,18 @@ def stream_markup(_, chat_id):
             InlineKeyboardButton(text="II", callback_data=f"ADMIN Pause|{chat_id}"),
             InlineKeyboardButton(text="↻", callback_data=f"ADMIN Replay|{chat_id}"),
             InlineKeyboardButton(text="‣‣I", callback_data=f"ADMIN Skip|{chat_id}"),
-            InlineKeyboardButton(text="▢", callback_data=f"ADMIN Stop|{chat_id}")
-        ],
+            InlineKeyboardButton(text="▢", callback_data=f"ADMIN Stop|{chat_id}"),
+         ],
         [
-            InlineKeyboardButton(text="< - 𝟤𝟢ˢ", callback_data="seek_backward_20"),
-            InlineKeyboardButton(text="• sᴜᴘᴘᴏʀᴛ •", callback_data=f"open_promo|{chat_id}"),
-            InlineKeyboardButton(text="𝟤𝟢ˢ + >", callback_data="seek_forward_20")
-        ],
+             InlineKeyboardButton(text="< - 𝟤𝟢ˢ", callback_data="seek_backward_20"),
+             InlineKeyboardButton(text=_["CLOSE_BUTTON"], callback_data="close"),
+             InlineKeyboardButton(text="𝟤𝟢ˢ + >", callback_data="seek_forward_20")
+         ],
         [
-            InlineKeyboardButton(
-                text="✙ ʌᴅᴅ ϻє ɪη ʏσυʀ ɢʀσυᴘ ✙",
-                url=f"https://t.me/{app.username}?startgroup=true"
-            )
+            InlineKeyboardButton(text="✙ ʌᴅᴅ ϻє ɪη ʏσυʀ ɢʀσυᴘ ✙", url=f"https://t.me/{app.username}?startgroup=true"),
         ]
     ]
     return buttons
-
-
-def promo_markup_with_duration(chat_id, played, dur):
-    # Progress bar calculation with zero division protection
-    played_sec = time_to_seconds(played)
-    duration_sec = time_to_seconds(dur)
-    
-    if duration_sec == 0:
-        percentage = 0
-        bar = "◉—————————"
-    else:
-        percentage = (played_sec / duration_sec) * 100
-        umm = math.floor(percentage)
-        
-        if 0 < umm <= 10:
-            bar = "◉—————————"
-        elif 10 < umm < 20:
-            bar = "—◉————————"
-        elif 20 <= umm < 30:
-            bar = "——◉———————"
-        elif 30 <= umm < 40:
-            bar = "———◉——————"
-        elif 40 <= umm < 50:
-            bar = "————◉—————"
-        elif 50 <= umm < 60:
-            bar = "—————◉————"
-        elif 60 <= umm < 70:
-            bar = "——————◉———"
-        elif 70 <= umm < 80:
-            bar = "———————◉——"
-        elif 80 <= umm < 95:
-            bar = "————————◉—"
-        else:
-            bar = "—————————◉"
-
-    buttons = [
-        [InlineKeyboardButton(text=f"{played} {bar} {dur}", callback_data="GetTimer")],
-        [
-            InlineKeyboardButton(text="ᴜᴘᴅᴀᴛᴇs", url="https://t.me/PURVI_UPDATES"),
-            InlineKeyboardButton(text="sᴜᴘᴘᴏʀᴛ", url="https://t.me/PURVI_BOTS")
-        ],
-        [
-            InlineKeyboardButton(text="ʙᴀᴄᴋ", callback_data=f"stream_back_promo|{chat_id}")
-        ]
-    ]
-    return buttons
-
-
-def promo_markup_simple(chat_id):
-    buttons = [
-        [
-            InlineKeyboardButton(text="ᴜᴘᴅᴀᴛᴇs", url="https://t.me/PURVI_UPDATES"),
-            InlineKeyboardButton(text="sᴜᴘᴘᴏʀᴛ", url="https://t.me/PURVI_BOTS")
-        ],
-        [
-            InlineKeyboardButton(text="ʙᴀᴄᴋ", callback_data=f"stream_back_promo|{chat_id}")
-        ]
-    ]
-    return buttons
-
-
-@app.on_callback_query()
-async def callback_handler(client, query):
-    data = query.data
-    if data.startswith("open_promo"):
-        chat_id = int(data.split("|")[1])
-        
-        # Get current playback state or use defaults
-        if chat_id in current_playback:
-            played = current_playback[chat_id]["played"]
-            dur = current_playback[chat_id]["dur"]
-        else:
-            played = "0:00"
-            dur = "0:00"
-        
-        await query.message.edit_reply_markup(
-            reply_markup=InlineKeyboardMarkup(promo_markup_with_duration(chat_id, played, dur))
-        )
-
-    elif data.startswith("stream_back_promo"):
-        chat_id = int(data.split("|")[1])
-        
-        # Get stored playback state or use defaults
-        if chat_id in current_playback:
-            played = current_playback[chat_id]["played"]
-            dur = current_playback[chat_id]["dur"]
-        else:
-            played = "0:00"
-            dur = "0:00"
-        
-        # Create simple _ function for basic text
-        class _:
-            def __getitem__(self, key):
-                return key
-        _ = _()
-        
-        await query.message.edit_reply_markup(
-            reply_markup=InlineKeyboardMarkup(stream_markup_timer(_, chat_id, played, dur))
-        )
-
-
-# Function to update playback state (call this when playback changes)
-def update_playback_state(chat_id, played, dur):
-    current_playback[chat_id] = {"played": played, "dur": dur}
 
 
 def playlist_markup(_, videoid, user_id, ptype, channel, fplay):
@@ -236,6 +121,7 @@ def playlist_markup(_, videoid, user_id, ptype, channel, fplay):
     ]
     return buttons
                 
+
 
 def livestream_markup(_, videoid, user_id, mode, channel, fplay):
     buttons = [
