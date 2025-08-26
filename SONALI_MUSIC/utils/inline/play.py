@@ -28,7 +28,7 @@ def track_markup(_, videoid, user_id, channel, fplay):
     return buttons
 
 
-def stream_markup_timer(_, chat_id, played, dur, app_username):
+def stream_markup_timer(_, chat_id, played, dur):
     played_sec = time_to_seconds(played)
     duration_sec = time_to_seconds(dur)
     percentage = (played_sec / duration_sec) * 100
@@ -84,7 +84,7 @@ def stream_markup_timer(_, chat_id, played, dur, app_username):
     return buttons
 
 
-def stream_markup(_, chat_id, app_username):
+def stream_markup(_, chat_id):
     buttons = [
         [
             InlineKeyboardButton(text="▷", callback_data=f"ADMIN Resume|{chat_id}"),
