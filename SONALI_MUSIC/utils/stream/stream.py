@@ -3,6 +3,7 @@ from random import randint
 from typing import Union
 
 from pyrogram.types import InlineKeyboardMarkup
+from pyrogram import enums
 
 import config
 from SONALI_MUSIC import Carbon, YouTube, app
@@ -14,6 +15,11 @@ from SONALI_MUSIC.utils.inline import aq_markup, close_markup, stream_markup
 from SONALI_MUSIC.utils.pastebin import SonaBin
 from SONALI_MUSIC.utils.stream.queue import put_queue, put_queue_index
 from SONALI_MUSIC.utils.thumbnails import get_thumb
+
+
+# Helper to mention user
+def user_mention(user_id, name):
+    return f'<a href="tg://user?id={user_id}">{name}</a>'
 
 
 async def stream(
@@ -31,8 +37,12 @@ async def stream(
 ):
     if not result:
         return
+
+    mention = user_mention(user_id, user_name)
+
     if forceplay:
         await Sona.force_stop_stream(chat_id)
+
     if streamtype == "playlist":
         msg = f"{_['play_19']}\n\n"
         count = 0
@@ -60,7 +70,7 @@ async def stream(
                     f"vid_{vidid}",
                     title,
                     duration_min,
-                    user_name,
+                    mention,
                     vidid,
                     user_id,
                     "video" if video else "audio",
@@ -92,7 +102,7 @@ async def stream(
                     file_path if direct else f"vid_{vidid}",
                     title,
                     duration_min,
-                    user_name,
+                    mention,
                     vidid,
                     user_id,
                     "video" if video else "audio",
@@ -107,9 +117,10 @@ async def stream(
                         f"https://t.me/{app.username}?start=info_{vidid}",
                         title[:23],
                         duration_min,
-                        user_name,
+                        mention,
                     ),
                     reply_markup=InlineKeyboardMarkup(button),
+                    parse_mode=enums.ParseMode.HTML,
                 )
                 db[chat_id][0]["mystic"] = run
                 db[chat_id][0]["markup"] = "stream"
@@ -129,7 +140,9 @@ async def stream(
                 photo=carbon,
                 caption=_["play_21"].format(position, link),
                 reply_markup=upl,
+                parse_mode=enums.ParseMode.HTML,
             )
+
     elif streamtype == "youtube":
         link = result["link"]
         vidid = result["vidid"]
@@ -150,7 +163,7 @@ async def stream(
                 file_path if direct else f"vid_{vidid}",
                 title,
                 duration_min,
-                user_name,
+                mention,
                 vidid,
                 user_id,
                 "video" if video else "audio",
@@ -159,8 +172,9 @@ async def stream(
             button = aq_markup(_, chat_id)
             await app.send_message(
                 chat_id=original_chat_id,
-                text=_["queue_4"].format(position, title[:27], duration_min, user_name),
+                text=_["queue_4"].format(position, title[:27], duration_min, mention),
                 reply_markup=InlineKeyboardMarkup(button),
+                parse_mode=enums.ParseMode.HTML,
             )
         else:
             if not forceplay:
@@ -178,7 +192,7 @@ async def stream(
                 file_path if direct else f"vid_{vidid}",
                 title,
                 duration_min,
-                user_name,
+                mention,
                 vidid,
                 user_id,
                 "video" if video else "audio",
@@ -193,12 +207,14 @@ async def stream(
                     f"https://t.me/{app.username}?start=info_{vidid}",
                     title[:23],
                     duration_min,
-                    user_name,
+                    mention,
                 ),
                 reply_markup=InlineKeyboardMarkup(button),
+                parse_mode=enums.ParseMode.HTML,
             )
             db[chat_id][0]["mystic"] = run
             db[chat_id][0]["markup"] = "stream"
+
     elif streamtype == "soundcloud":
         file_path = result["filepath"]
         title = result["title"]
@@ -210,7 +226,7 @@ async def stream(
                 file_path,
                 title,
                 duration_min,
-                user_name,
+                mention,
                 streamtype,
                 user_id,
                 "audio",
@@ -219,8 +235,9 @@ async def stream(
             button = aq_markup(_, chat_id)
             await app.send_message(
                 chat_id=original_chat_id,
-                text=_["queue_4"].format(position, title[:27], duration_min, user_name),
+                text=_["queue_4"].format(position, title[:27], duration_min, mention),
                 reply_markup=InlineKeyboardMarkup(button),
+                parse_mode=enums.ParseMode.HTML,
             )
         else:
             if not forceplay:
@@ -232,7 +249,7 @@ async def stream(
                 file_path,
                 title,
                 duration_min,
-                user_name,
+                mention,
                 streamtype,
                 user_id,
                 "audio",
@@ -243,12 +260,14 @@ async def stream(
                 original_chat_id,
                 photo=config.SOUNCLOUD_IMG_URL,
                 caption=_["stream_1"].format(
-                    config.SUPPORT_CHAT, title[:23], duration_min, user_name
+                    config.SUPPORT_CHAT, title[:23], duration_min, mention
                 ),
                 reply_markup=InlineKeyboardMarkup(button),
+                parse_mode=enums.ParseMode.HTML,
             )
             db[chat_id][0]["mystic"] = run
             db[chat_id][0]["markup"] = "tg"
+
     elif streamtype == "telegram":
         file_path = result["path"]
         link = result["link"]
@@ -262,7 +281,7 @@ async def stream(
                 file_path,
                 title,
                 duration_min,
-                user_name,
+                mention,
                 streamtype,
                 user_id,
                 "video" if video else "audio",
@@ -271,8 +290,9 @@ async def stream(
             button = aq_markup(_, chat_id)
             await app.send_message(
                 chat_id=original_chat_id,
-                text=_["queue_4"].format(position, title[:27], duration_min, user_name),
+                text=_["queue_4"].format(position, title[:27], duration_min, mention),
                 reply_markup=InlineKeyboardMarkup(button),
+                parse_mode=enums.ParseMode.HTML,
             )
         else:
             if not forceplay:
@@ -284,7 +304,7 @@ async def stream(
                 file_path,
                 title,
                 duration_min,
-                user_name,
+                mention,
                 streamtype,
                 user_id,
                 "video" if video else "audio",
@@ -296,11 +316,13 @@ async def stream(
             run = await app.send_photo(
                 original_chat_id,
                 photo=config.TELEGRAM_VIDEO_URL if video else config.TELEGRAM_AUDIO_URL,
-                caption=_["stream_1"].format(link, title[:23], duration_min, user_name),
+                caption=_["stream_1"].format(link, title[:23], duration_min, mention),
                 reply_markup=InlineKeyboardMarkup(button),
+                parse_mode=enums.ParseMode.HTML,
             )
             db[chat_id][0]["mystic"] = run
             db[chat_id][0]["markup"] = "tg"
+
     elif streamtype == "live":
         link = result["link"]
         vidid = result["vidid"]
@@ -315,7 +337,7 @@ async def stream(
                 f"live_{vidid}",
                 title,
                 duration_min,
-                user_name,
+                mention,
                 vidid,
                 user_id,
                 "video" if video else "audio",
@@ -324,8 +346,9 @@ async def stream(
             button = aq_markup(_, chat_id)
             await app.send_message(
                 chat_id=original_chat_id,
-                text=_["queue_4"].format(position, title[:27], duration_min, user_name),
+                text=_["queue_4"].format(position, title[:27], duration_min, mention),
                 reply_markup=InlineKeyboardMarkup(button),
+                parse_mode=enums.ParseMode.HTML,
             )
         else:
             if not forceplay:
@@ -346,7 +369,7 @@ async def stream(
                 f"live_{vidid}",
                 title,
                 duration_min,
-                user_name,
+                mention,
                 vidid,
                 user_id,
                 "video" if video else "audio",
@@ -361,12 +384,14 @@ async def stream(
                     f"https://t.me/{app.username}?start=info_{vidid}",
                     title[:23],
                     duration_min,
-                    user_name,
+                    mention,
                 ),
                 reply_markup=InlineKeyboardMarkup(button),
+                parse_mode=enums.ParseMode.HTML,
             )
             db[chat_id][0]["mystic"] = run
             db[chat_id][0]["markup"] = "tg"
+
     elif streamtype == "index":
         link = result
         title = "ɪɴᴅᴇx ᴏʀ ᴍ3ᴜ8 ʟɪɴᴋ"
@@ -378,15 +403,16 @@ async def stream(
                 "index_url",
                 title,
                 duration_min,
-                user_name,
+                mention,
                 link,
                 "video" if video else "audio",
             )
             position = len(db.get(chat_id)) - 1
             button = aq_markup(_, chat_id)
             await mystic.edit_text(
-                text=_["queue_4"].format(position, title[:27], duration_min, user_name),
+                text=_["queue_4"].format(position, title[:27], duration_min, mention),
                 reply_markup=InlineKeyboardMarkup(button),
+                parse_mode=enums.ParseMode.HTML,
             )
         else:
             if not forceplay:
@@ -403,7 +429,7 @@ async def stream(
                 "index_url",
                 title,
                 duration_min,
-                user_name,
+                mention,
                 link,
                 "video" if video else "audio",
                 forceplay=forceplay,
@@ -412,8 +438,9 @@ async def stream(
             run = await app.send_photo(
                 original_chat_id,
                 photo=config.STREAM_IMG_URL,
-                caption=_["stream_2"].format(user_name),
+                caption=_["stream_2"].format(mention),
                 reply_markup=InlineKeyboardMarkup(button),
+                parse_mode=enums.ParseMode.HTML,
             )
             db[chat_id][0]["mystic"] = run
             db[chat_id][0]["markup"] = "tg"
