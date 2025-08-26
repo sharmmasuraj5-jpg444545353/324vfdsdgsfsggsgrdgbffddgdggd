@@ -135,7 +135,7 @@ async def callback_handler(client, query):
     if data.startswith("open_promo"):
         chat_id = int(data.split("|")[1])
         await query.message.edit_reply_markup(
-            reply_markup=promo_markup_simple(_, chat_id)
+            reply_markup=promo_markup_simple(chat_id)
         )
 
     elif data.startswith("stream_back"):
