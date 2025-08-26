@@ -17,12 +17,13 @@ INFO_TEXT = """
 <b>● ꜱᴄᴀᴍ ➠</b> {}
 """
 
+# --- decode user_id into created date ---
 def get_creation_date(user_id: int):
-    """ Decode Telegram Snowflake ID into creation date """
     telegram_epoch = 1514764800000
     timestamp = (user_id >> 32) + telegram_epoch
     return datetime.datetime.utcfromtimestamp(timestamp / 1000)
 
+# --- user online status ---
 async def userstatus(user_id):
     try:
         user = await app.get_users(user_id)
@@ -38,8 +39,9 @@ async def userstatus(user_id):
         elif x == enums.UserStatus.ONLINE:
             return "ᴏɴʟɪɴᴇ"
     except:
-        return "**✦ sᴏᴍᴇᴛʜɪɴɢ ᴡʀᴏɴɢ ʜᴀᴘᴘᴇɴᴇᴅ !**"
+        return "❌ ᴇʀʀᴏʀ"
 
+# --- main command handler ---
 @app.on_message(filters.command(["info", "information", "userinfo", "whois"], prefixes=["/", "!"]))
 async def userinfo(_, message: Message):
     chat_id = message.chat.id
@@ -57,7 +59,9 @@ async def userinfo(_, message: Message):
 
         # case: no input
         else:
-            await message.reply_text("**⚠️ ᴘʟᴇᴀꜱᴇ ꜱᴇɴᴅ ᴜꜱᴇʀɴᴀᴍᴇ, ɪᴅ ᴏʀ ʀᴇᴘʟʏ ᴀꜰᴛᴇʀ ᴄᴏᴍᴍᴀɴᴅ.**")
+            await message.reply_text(
+                "**⚠️ ᴘʟᴇᴀꜱᴇ ꜱᴇɴᴅ ᴜꜱᴇʀɴᴀᴍᴇ/ɪᴅ ᴏʀ ʀᴇᴘʟʏ ᴀꜰᴛᴇʀ ᴄᴏᴍᴍᴀɴᴅ.**"
+            )
             return
 
         # get user info
@@ -75,13 +79,14 @@ async def userinfo(_, message: Message):
 
         # profile photo link
         photos = await app.get_profile_photos(user.id, limit=1)
-        if photos:
+        if photos.total_count > 0:
             sent = await app.send_photo(chat_id, photos[0].file_id, caption=".")
             photo_link = f"https://t.me/c/{str(chat_id)[4:]}/{sent.id}"
             await sent.delete()
         else:
             photo_link = profile_url
 
+        # send info
         await app.send_message(
             chat_id,
             text=INFO_TEXT.format(
@@ -93,18 +98,16 @@ async def userinfo(_, message: Message):
                 user.dc_id,
                 creation_date,
                 premium,
-                scam
+                scam,
             ),
             reply_to_message_id=message.id,
             reply_markup=InlineKeyboardMarkup(
-                [
-                    [
-                        InlineKeyboardButton(f"{user.first_name}", url=profile_url),
-                        InlineKeyboardButton("ᴄʟᴏꜱᴇ", callback_data="close")
-                    ]
-                ]
+                [[
+                    InlineKeyboardButton(f"{user.first_name}", url=profile_url),
+                    InlineKeyboardButton("ᴄʟᴏꜱᴇ", callback_data="close")
+                ]]
             ),
-            disable_web_page_preview=True
+            disable_web_page_preview=True,
         )
 
     except Exception as e:
