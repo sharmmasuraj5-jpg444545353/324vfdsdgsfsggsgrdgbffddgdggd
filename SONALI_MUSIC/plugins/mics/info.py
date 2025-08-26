@@ -57,12 +57,9 @@ async def userinfo(_, message: Message):
         elif message.reply_to_message:
             user_id = message.reply_to_message.from_user.id
 
-        # case: no input
+        # case: no input - show own info
         else:
-            await message.reply_text(
-                "**⚠️ ᴘʟᴇᴀꜱᴇ ꜱᴇɴᴅ ᴜꜱᴇʀɴᴀᴍᴇ/ɪᴅ ᴏʀ ʀᴇᴘʟʏ ᴀꜰᴛᴇʀ ᴄᴏᴍᴍᴀɴᴅ.**"
-            )
-            return
+            user_id = message.from_user.id
 
         # get user info
         user = await app.get_users(user_id)
@@ -77,30 +74,52 @@ async def userinfo(_, message: Message):
         else:
             profile_url = f"tg://user?id={user.id}"
 
-        # profile photo link
-        photos = await app.get_profile_photos(user.id, limit=1)
-        if photos.total_count > 0:
-            sent = await app.send_photo(chat_id, photos[0].file_id, caption=".")
-            photo_link = f"https://t.me/c/{str(chat_id)[4:]}/{sent.id}"
-            await sent.delete()
-        else:
-            photo_link = profile_url
+        # FIXED: Safe profile photo handling
+        photo_link = profile_url  # Default to profile URL
+        
+        try:
+            # Check if the app object has the get_profile_photos method
+            if hasattr(app, 'get_profile_photos'):
+                # Get user's profile photos
+                photos = await app.get_profile_photos(user.id, limit=1)
+                
+                if photos.total_count > 0:
+                    # Get the file_id of the first (most recent) profile photo
+                    file_id = photos.photos[0][-1].file_id
+                    
+                    # Send the photo temporarily to get a message ID
+                    sent_message = await app.send_photo(chat_id, file_id, caption="Processing...")
+                    
+                    # Generate the direct link to the photo
+                    if str(chat_id).startswith("-100"):
+                        # For supergroups/channels
+                        photo_link = f"https://t.me/c/{str(chat_id)[4:]}/{sent_message.id}"
+                    else:
+                        # For private chats
+                        photo_link = f"https://t.me/c/{str(chat_id)[1:]}/{sent_message.id}"
+                    
+                    # Delete the temporary message
+                    await sent_message.delete()
+            else:
+                # If get_profile_photos method doesn't exist, use alternative approach
+                photo_link = profile_url
+        except Exception as e:
+            print(f"Error getting profile photo: {e}")
+            # If anything fails, use the profile URL as fallback
 
         # send info
-        await app.send_message(
-            chat_id,
+        await message.reply_text(
             text=INFO_TEXT.format(
                 photo_link,
                 user.id,
                 user.username or "N/A",
                 user.mention,
                 status,
-                user.dc_id,
+                user.dc_id or "N/A",
                 creation_date,
                 premium,
                 scam,
             ),
-            reply_to_message_id=message.id,
             reply_markup=InlineKeyboardMarkup(
                 [[
                     InlineKeyboardButton(f"{user.first_name}", url=profile_url),
@@ -111,4 +130,4 @@ async def userinfo(_, message: Message):
         )
 
     except Exception as e:
-        await message.reply_text(str(e))
+        await message.reply_text(f"Error: {str(e)}")
