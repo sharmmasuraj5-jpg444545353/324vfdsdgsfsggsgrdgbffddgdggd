@@ -3,7 +3,6 @@ from random import randint
 from typing import Union
 
 from pyrogram.types import InlineKeyboardMarkup
-from pyrogram import enums
 
 import config
 from SONALI_MUSIC import Carbon, YouTube, app
@@ -17,12 +16,14 @@ from SONALI_MUSIC.utils.stream.queue import put_queue, put_queue_index
 from SONALI_MUSIC.utils.thumbnails import get_thumb
 
 
-# Helper to mention user in MarkdownV2
+# ---------------------- UNIVERSAL USER MENTION ----------------------
 def user_mention(user_id, name):
-    name = name.replace("_", "\\_").replace("-", "\\-").replace(".", "\\.")  # escape MarkdownV2 chars
-    return f"[{name}](tg://user?id={user_id})"
+    # Telegram-safe name
+    name = name.replace("[", "").replace("]", "").replace("(", "").replace(")", "")
+    return f"{name} (tg://user?id={user_id})"
 
 
+# ---------------------- STREAM FUNCTION ----------------------
 async def stream(
     _,
     mystic,
@@ -82,8 +83,7 @@ async def stream(
                     photo=img,
                     caption=_["stream_1"].format(f"https://t.me/{app.username}?start=info_{vidid}", title[:23], duration_min, mention),
                     reply_markup=InlineKeyboardMarkup(button),
-                    disable_web_page_preview=True,
-                    parse_mode=enums.ParseMode.MARKDOWN_V2
+                    disable_web_page_preview=True
                 )
                 db[chat_id][0]["mystic"] = run
                 db[chat_id][0]["markup"] = "stream"
@@ -92,10 +92,7 @@ async def stream(
         else:
             link = await SonaBin(msg)
             lines = msg.count("\n")
-            if lines >= 17:
-                car = os.linesep.join(msg.split(os.linesep)[:17])
-            else:
-                car = msg
+            car = os.linesep.join(msg.split(os.linesep)[:17]) if lines >= 17 else msg
             carbon = await Carbon.generate(car, randint(100, 10000000))
             upl = close_markup(_)
             return await app.send_photo(
@@ -103,8 +100,7 @@ async def stream(
                 photo=carbon,
                 caption=_["play_21"].format(position, link),
                 reply_markup=upl,
-                disable_web_page_preview=True,
-                parse_mode=enums.ParseMode.MARKDOWN_V2
+                disable_web_page_preview=True
             )
 
     # ------------------------- YOUTUBE -------------------------
@@ -127,8 +123,7 @@ async def stream(
                 chat_id=original_chat_id,
                 text=_["queue_4"].format(position, title[:27], duration_min, mention),
                 reply_markup=InlineKeyboardMarkup(button),
-                disable_web_page_preview=True,
-                parse_mode=enums.ParseMode.MARKDOWN_V2
+                disable_web_page_preview=True
             )
         else:
             if not forceplay:
@@ -142,8 +137,7 @@ async def stream(
                 photo=img,
                 caption=_["stream_1"].format(f"https://t.me/{app.username}?start=info_{vidid}", title[:23], duration_min, mention),
                 reply_markup=InlineKeyboardMarkup(button),
-                disable_web_page_preview=True,
-                parse_mode=enums.ParseMode.MARKDOWN_V2
+                disable_web_page_preview=True
             )
             db[chat_id][0]["mystic"] = run
             db[chat_id][0]["markup"] = "stream"
@@ -161,8 +155,7 @@ async def stream(
                 chat_id=original_chat_id,
                 text=_["queue_4"].format(position, title[:27], duration_min, mention),
                 reply_markup=InlineKeyboardMarkup(button),
-                disable_web_page_preview=True,
-                parse_mode=enums.ParseMode.MARKDOWN_V2
+                disable_web_page_preview=True
             )
         else:
             if not forceplay:
@@ -175,8 +168,7 @@ async def stream(
                 photo=config.SOUNCLOUD_IMG_URL,
                 caption=_["stream_1"].format(config.SUPPORT_CHAT, title[:23], duration_min, mention),
                 reply_markup=InlineKeyboardMarkup(button),
-                disable_web_page_preview=True,
-                parse_mode=enums.ParseMode.MARKDOWN_V2
+                disable_web_page_preview=True
             )
             db[chat_id][0]["mystic"] = run
             db[chat_id][0]["markup"] = "tg"
@@ -196,8 +188,7 @@ async def stream(
                 chat_id=original_chat_id,
                 text=_["queue_4"].format(position, title[:27], duration_min, mention),
                 reply_markup=InlineKeyboardMarkup(button),
-                disable_web_page_preview=True,
-                parse_mode=enums.ParseMode.MARKDOWN_V2
+                disable_web_page_preview=True
             )
         else:
             if not forceplay:
@@ -212,8 +203,7 @@ async def stream(
                 photo=config.TELEGRAM_VIDEO_URL if video else config.TELEGRAM_AUDIO_URL,
                 caption=_["stream_1"].format(link, title[:23], duration_min, mention),
                 reply_markup=InlineKeyboardMarkup(button),
-                disable_web_page_preview=True,
-                parse_mode=enums.ParseMode.MARKDOWN_V2
+                disable_web_page_preview=True
             )
             db[chat_id][0]["mystic"] = run
             db[chat_id][0]["markup"] = "tg"
@@ -234,8 +224,7 @@ async def stream(
                 chat_id=original_chat_id,
                 text=_["queue_4"].format(position, title[:27], duration_min, mention),
                 reply_markup=InlineKeyboardMarkup(button),
-                disable_web_page_preview=True,
-                parse_mode=enums.ParseMode.MARKDOWN_V2
+                disable_web_page_preview=True
             )
         else:
             if not forceplay:
@@ -252,8 +241,7 @@ async def stream(
                 photo=img,
                 caption=_["stream_1"].format(f"https://t.me/{app.username}?start=info_{vidid}", title[:23], duration_min, mention),
                 reply_markup=InlineKeyboardMarkup(button),
-                disable_web_page_preview=True,
-                parse_mode=enums.ParseMode.MARKDOWN_V2
+                disable_web_page_preview=True
             )
             db[chat_id][0]["mystic"] = run
             db[chat_id][0]["markup"] = "tg"
@@ -270,8 +258,7 @@ async def stream(
             await mystic.edit_text(
                 text=_["queue_4"].format(position, title[:27], duration_min, mention),
                 reply_markup=InlineKeyboardMarkup(button),
-                disable_web_page_preview=True,
-                parse_mode=enums.ParseMode.MARKDOWN_V2
+                disable_web_page_preview=True
             )
         else:
             if not forceplay:
@@ -284,8 +271,7 @@ async def stream(
                 photo=config.STREAM_IMG_URL,
                 caption=_["stream_2"].format(user_name),
                 reply_markup=InlineKeyboardMarkup(button),
-                disable_web_page_preview=True,
-                parse_mode=enums.ParseMode.MARKDOWN_V2
+                disable_web_page_preview=True
             )
             db[chat_id][0]["mystic"] = run
             db[chat_id][0]["markup"] = "tg"
