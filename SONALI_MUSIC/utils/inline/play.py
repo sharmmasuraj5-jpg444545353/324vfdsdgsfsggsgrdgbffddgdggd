@@ -28,14 +28,17 @@ def track_markup(_, videoid, user_id, channel, fplay):
     return buttons
 
 
-
-# ===================== Stream Markup Timer =====================
 def stream_markup_timer(_, chat_id, played, dur):
     played_sec = time_to_seconds(played)
     duration_sec = time_to_seconds(dur)
-    percentage = (played_sec / duration_sec) * 100
+    
+    # Zero division protection
+    if duration_sec == 0:
+        percentage = 0
+    else:
+        percentage = (played_sec / duration_sec) * 100
+        
     umm = math.floor(percentage)
-
     if 0 < umm <= 10:
         bar = "◉—————————"
     elif 10 < umm < 20:
@@ -68,7 +71,7 @@ def stream_markup_timer(_, chat_id, played, dur):
         ],
         [
             InlineKeyboardButton(text="< - 𝟤𝟢ˢ", callback_data="seek_backward_20"),
-            InlineKeyboardButton(text="• ᴘʀᴏᴍᴏ •", callback_data=f"open_promo|{chat_id}"),
+            InlineKeyboardButton(text="• sᴜᴘᴘᴏʀᴛ •", callback_data=f"open_promo|{chat_id}"),
             InlineKeyboardButton(text="𝟤𝟢ˢ + >", callback_data="seek_forward_20")
         ],
         [
@@ -81,7 +84,6 @@ def stream_markup_timer(_, chat_id, played, dur):
     return buttons
 
 
-# ===================== Stream Markup =====================
 def stream_markup(_, chat_id):
     buttons = [
         [
@@ -93,7 +95,7 @@ def stream_markup(_, chat_id):
         ],
         [
             InlineKeyboardButton(text="< - 𝟤𝟢ˢ", callback_data="seek_backward_20"),
-            InlineKeyboardButton(text="• ᴘʀᴏᴍᴏ •", callback_data=f"open_promo|{chat_id}"),
+            InlineKeyboardButton(text="• sᴜᴘᴘᴏʀᴛ •", callback_data=f"open_promo|{chat_id}"),
             InlineKeyboardButton(text="𝟤𝟢ˢ + >", callback_data="seek_forward_20")
         ],
         [
@@ -106,76 +108,89 @@ def stream_markup(_, chat_id):
     return buttons
 
 
-# ===================== Promo Markup =====================
-def promo_markup_simple(chat_id):
+def promo_markup_with_bar(_, chat_id, played, dur):
+    # Progress bar calculation with zero division protection
+    played_sec = time_to_seconds(played)
+    duration_sec = time_to_seconds(dur)
+    
+    if duration_sec == 0:
+        percentage = 0
+    else:
+        percentage = (played_sec / duration_sec) * 100
+        
+    umm = math.floor(percentage)
+    
+    if 0 < umm <= 10:
+        bar = "◉—————————"
+    elif 10 < umm < 20:
+        bar = "—◉————————"
+    elif 20 <= umm < 30:
+        bar = "——◉———————"
+    elif 30 <= umm < 40:
+        bar = "———◉——————"
+    elif 40 <= umm < 50:
+        bar = "————◉—————"
+    elif 50 <= umm < 60:
+        bar = "—————◉————"
+    elif 60 <= umm < 70:
+        bar = "——————◉———"
+    elif 70 <= umm < 80:
+        bar = "———————◉——"
+    elif 80 <= umm < 95:
+        bar = "————————◉—"
+    else:
+        bar = "—————————◉"
+
     buttons = [
-        #[
-          #  InlineKeyboardButton(
-              #  text="• ᴘʀᴏᴍᴏ •",
-               # web_app=WebAppInfo(
-               #     url="https://t.me/TheSigmaCoder/?text=HII+OWNER+😅+I+WANT+PROMOTION+GIVE+ME+PRICE+LIST...😙"
-                #)
-           # )
-        #],
+        [InlineKeyboardButton(text=f"{played} {bar} {dur}", callback_data="GetTimer")],
         [
-            InlineKeyboardButton(text="Support", url="https://t.me/purvi_support"),
-            InlineKeyboardButton(text="Updates", url="https://t.me/TheSigmaCoder")
+            InlineKeyboardButton(text="ᴜᴘᴅᴀᴛᴇs", url="https://t.me/PURVI_UPDATES"),
+            InlineKeyboardButton(text="sᴜᴘᴘᴏʀᴛ", url="https://t.me/PURVI_BOTS")
         ],
         [
-            InlineKeyboardButton(text="Back", callback_data=f"stream_back|{chat_id}")
+            InlineKeyboardButton(text="ʙᴀᴄᴋ", callback_data=f"stream_back|{chat_id}")
         ]
     ]
     return buttons
 
 
-# ===================== Callback Handler =====================
+def promo_markup_simple(chat_id):
+    buttons = [
+        [
+            InlineKeyboardButton(text="ᴜᴘᴅᴀᴛᴇs", url="https://t.me/PURVI_UPDATES"),
+            InlineKeyboardButton(text="sᴜᴘᴘᴏʀᴛ", url="https://t.me/PURVI_BOTS")
+        ],
+        [
+            InlineKeyboardButton(text="ʙᴀᴄᴋ", callback_data=f"stream_back|{chat_id}")
+        ]
+    ]
+    return buttons
+
+
 @app.on_callback_query()
 async def callback_handler(client, query):
     data = query.data
     if data.startswith("open_promo"):
         chat_id = int(data.split("|")[1])
+        
+        # Safe default values to avoid zero division
+        played = "0:00"
+        dur = "1:00"  # Never use "0:00" for duration
+        
         await query.message.edit_reply_markup(
-            reply_markup=InlineKeyboardMarkup(promo_markup_simple(chat_id))
+            reply_markup=InlineKeyboardMarkup(promo_markup_with_bar(_, chat_id, played, dur))
         )
 
     elif data.startswith("stream_back"):
         chat_id = int(data.split("|")[1])
         
-        # You need to get these values from somewhere
-        played = "0:00"  # Replace with actual value
-        dur = "0:00"     # Replace with actual value
-        _ = None         # Replace with actual value
+        # Safe default values to avoid zero division
+        played = "0:00"
+        dur = "1:00"  # Never use "0:00" for duration
         
-        played_sec = time_to_seconds(played)
-        duration_sec = time_to_seconds(dur)
-        percentage = (played_sec / duration_sec) * 100
-        umm = math.floor(percentage)
-
-        if 0 < umm <= 10:
-            bar = "◉—————————"
-        elif 10 < umm < 20:
-            bar = "—◉————————"
-        elif 20 <= umm < 30:
-            bar = "——◉———————"
-        elif 30 <= umm < 40:
-            bar = "———◉——————"
-        elif 40 <= umm < 50:
-            bar = "————◉—————"
-        elif 50 <= umm < 60:
-            bar = "—————◉————"
-        elif 60 <= umm < 70:
-            bar = "——————◉———"
-        elif 70 <= umm < 80:
-            bar = "———————◉——"
-        elif 80 <= umm < 95:
-            bar = "————————◉—"
-        else:
-            bar = "—————————◉"
-            
         await query.message.edit_reply_markup(
-            reply_markup=InlineKeyboardMarkup(stream_markup_timer(_, chat_id, played, dur, bar))
+            reply_markup=InlineKeyboardMarkup(stream_markup_timer(_, chat_id, played, dur))
         )
-
 
 
 def playlist_markup(_, videoid, user_id, ptype, channel, fplay):
