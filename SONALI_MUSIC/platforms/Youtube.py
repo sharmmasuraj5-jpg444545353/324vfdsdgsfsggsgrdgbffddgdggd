@@ -19,8 +19,11 @@ import config
 
 from os import getenv
 
-API_URL = getenv("API_URL", 'https://api.thequickearn.xyz')
-API_KEY = getenv("API_KEY", 'NxGBNexGenBots9189cf')
+#API_URL = getenv("API_URL", 'https://api.thequickearn.xyz')
+#API_KEY = getenv("API_KEY", 'NxGBNexGenBots9189cf')
+
+API_URL = getenv("API_URL", 'https://bitflow.in/api/youtube')
+API_KEY = getenv("API_KEY", '1spiderkey2')
 
 def cookie_txt_file():
     cookie_dir = f"{os.getcwd()}/cookies"
