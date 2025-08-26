@@ -107,7 +107,7 @@ def stream_markup(_, chat_id):
 
 
 # ===================== Promo Markup =====================
-def promo_markup_simple(_, chat_id):
+def promo_markup_simple(chat_id):
     buttons = [
         [
             InlineKeyboardButton(
