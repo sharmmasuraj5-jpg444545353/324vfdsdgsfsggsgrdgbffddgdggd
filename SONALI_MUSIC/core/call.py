@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from typing import Union
 
 from pyrogram import Client
-from pyrogram.types import InlineKeyboardMarkup
+from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from pytgcalls import PyTgCalls, StreamType
 from pytgcalls.exceptions import (
     AlreadyJoinedError,
@@ -51,7 +51,7 @@ async def _clear_(chat_id):
 class Call(PyTgCalls):
     def __init__(self):
         self.userbot1 = Client(
-            name="PURVIAss1",
+            name="SonaAss1",
             api_id=config.API_ID,
             api_hash=config.API_HASH,
             session_string=str(config.STRING1),
@@ -61,7 +61,7 @@ class Call(PyTgCalls):
             cache_duration=100,
         )
         self.userbot2 = Client(
-            name="PURVIAss2",
+            name="SonaAss2",
             api_id=config.API_ID,
             api_hash=config.API_HASH,
             session_string=str(config.STRING2),
@@ -71,7 +71,7 @@ class Call(PyTgCalls):
             cache_duration=100,
         )
         self.userbot3 = Client(
-            name="PURVIAss3",
+            name="SonaXAss3",
             api_id=config.API_ID,
             api_hash=config.API_HASH,
             session_string=str(config.STRING3),
@@ -81,7 +81,7 @@ class Call(PyTgCalls):
             cache_duration=100,
         )
         self.userbot4 = Client(
-            name="PURVIAss4",
+            name="SonaXAss4",
             api_id=config.API_ID,
             api_hash=config.API_HASH,
             session_string=str(config.STRING4),
@@ -91,7 +91,7 @@ class Call(PyTgCalls):
             cache_duration=100,
         )
         self.userbot5 = Client(
-            name="PURVIAss5",
+            name="SonaAss5",
             api_id=config.API_ID,
             api_hash=config.API_HASH,
             session_string=str(config.STRING5),
@@ -213,7 +213,7 @@ class Call(PyTgCalls):
                 db[chat_id][0]["old_second"] = db[chat_id][0]["seconds"]
             db[chat_id][0]["played"] = con_seconds
             db[chat_id][0]["dur"] = duration
-            db[chat_id][0]["seconds"] = dur
+            db[chat_id][0["seconds"] = dur
             db[chat_id][0]["speed_path"] = out
             db[chat_id][0]["speed"] = speed
 
@@ -350,7 +350,7 @@ class Call(PyTgCalls):
                                     "✙ ʌᴅᴅ ϻє вᴧʙʏ ✙", url=f"https://t.me/{app.username}?startgroup=true"
                                 ),
                                 InlineKeyboardButton(
-                                    "⋞ ᴄʟᴏsє ⋟", callback_data="close"
+                                    "⋞ ᴄʟᴏsє ⋟", callback_data="close_message"
                                 )
                             ]
                         ]
@@ -638,4 +638,4 @@ class Call(PyTgCalls):
             await self.change_stream(client, update.chat_id)
 
 
-Sona = Call()                        
+Sona = Call()
