@@ -24,10 +24,10 @@
 
 ---
 
-<h2 id="quick-setup" align="center"> ─「 ǫᴜɪᴄᴋ sᴇᴛᴜᴘ 」─ </h2>
+<details>
+<summary align="center"><b>─「 ǫᴜɪᴄᴋ sᴇᴛᴜᴘ 」─</b></summary>
 
-
-## 1. 🔧 ᴜᴘᴅᴀᴛᴇ & ᴜᴘɢʀᴀᴅᴇ
+ 1. **🔧 ᴜᴘᴅᴀᴛᴇ & ᴜᴘɢʀᴀᴅᴇ**
    ```bash
    sudo apt-get update && sudo apt-get upgrade -y
    ```
@@ -72,6 +72,8 @@
     ```bash
     bash start
     ```
+</details>
+
 <h2 align="center"> ─「 ᴄᴏɴᴛᴀᴄᴛ ᴍᴇ 」─ </h2>
 
 <p align="center">
