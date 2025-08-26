@@ -16,9 +16,12 @@ INFO_TEXT = """
 <b>● ᴅᴄ ɪᴅ ➠</b> {dcid}
 <b>● ᴘʀᴇᴍɪᴜᴍ ➠</b> {premium}
 <b>● ꜱᴄᴀᴍ ➠</b> {scam}
+
+<b>● ᴘᴏᴡᴇʀᴇᴅ ʙʏ ➠</b> <a href="https://t.me/purvi_bots">ᴘᴜʀᴠɪ-ʙᴏᴛꜱ</a>
 """
 
 
+# --- user online status ---
 async def userstatus(user_id):
     try:
         user = await app.get_users(user_id)
@@ -34,9 +37,10 @@ async def userstatus(user_id):
         elif x == enums.UserStatus.ONLINE:
             return "ᴏɴʟɪɴᴇ"
     except:
-        return "❌ ᴇʀʀᴏʀ"
+        return "ᴇʀʀᴏʀ"
 
 
+# --- main command handler ---
 @app.on_message(filters.command(["info", "information", "userinfo", "whois"], prefixes=["/", "!"]))
 async def userinfo(_, message: Message):
     try:
@@ -45,6 +49,8 @@ async def userinfo(_, message: Message):
             user_id = message.text.split(None, 1)[1]
         elif message.reply_to_message:
             user_id = message.reply_to_message.from_user.id
+        elif not message.reply_to_message and len(message.command) == 1:
+            return await message.reply_text("**✦ ᴘʟᴇᴀꜱᴇ ꜱᴇɴᴅ ᴜꜱᴇʀɴᴀᴍᴇ, ɪᴅ ᴏʀ ʀᴇᴘʟʏ ᴀꜰᴛᴇʀ ᴄᴏᴍᴍᴀɴᴅ.**")
         else:
             user_id = message.from_user.id
 
