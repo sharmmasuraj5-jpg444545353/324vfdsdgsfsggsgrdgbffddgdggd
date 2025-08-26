@@ -1,6 +1,6 @@
 import math
 from config import SUPPORT_CHAT, OWNER_USERNAME
-from pyrogram.types import InlineKeyboardButton, WebAppInfo, CallbackQuery
+from pyrogram.types import InlineKeyboardButton, WebAppInfo, CallbackQuery, InlineKeyboardMarkup
 from SONALI_MUSIC import app
 import config
 from SONALI_MUSIC.utils.formatters import time_to_seconds
@@ -135,14 +135,15 @@ async def callback_handler(client, query):
     if data.startswith("open_promo"):
         chat_id = int(data.split("|")[1])
         await query.message.edit_reply_markup(
-            reply_markup=promo_markup_simple(chat_id)
-        )
+    reply_markup=InlineKeyboardMarkup(promo_markup_simple(chat_id))
+)
 
     elif data.startswith("stream_back"):
         chat_id = int(data.split("|")[1])
         await query.message.edit_reply_markup(
-            reply_markup=stream_markup_timer(_, chat_id, played, dur)
-    )
+    reply_markup=InlineKeyboardMarkup(stream_markup_timer(_, chat_id, played, dur))
+)
+
 
 
 def playlist_markup(_, videoid, user_id, ptype, channel, fplay):
