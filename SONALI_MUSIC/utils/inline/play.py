@@ -1,9 +1,7 @@
 import math
 from config import SUPPORT_CHAT, OWNER_USERNAME
-from pyrogram.types import InlineKeyboardButton
+from pyrogram.types import InlineKeyboardButton, WebAppInfo
 from SONALI_MUSIC import app
-from pyrogram.types import WebAppInfo
-from pyrogram.enums import ParseMode
 import config
 from SONALI_MUSIC.utils.formatters import time_to_seconds
 
@@ -30,11 +28,12 @@ def track_markup(_, videoid, user_id, channel, fplay):
     return buttons
 
 
-def stream_markup_timer(_, chat_id, played, dur):
+def stream_markup_timer(_, chat_id, played, dur, app_username):
     played_sec = time_to_seconds(played)
     duration_sec = time_to_seconds(dur)
     percentage = (played_sec / duration_sec) * 100
     umm = math.floor(percentage)
+
     if 0 < umm <= 10:
         bar = "◉—————————"
     elif 10 < umm < 20:
@@ -55,54 +54,60 @@ def stream_markup_timer(_, chat_id, played, dur):
         bar = "————————◉—"
     else:
         bar = "—————————◉"
+
     buttons = [
-        [
-            InlineKeyboardButton(
-                text=f"{played} {bar} {dur}",
-                callback_data="GetTimer",
-            )
-        ],
+        [InlineKeyboardButton(text=f"{played} {bar} {dur}", callback_data="GetTimer")],
         [
             InlineKeyboardButton(text="▷", callback_data=f"ADMIN Resume|{chat_id}"),
             InlineKeyboardButton(text="II", callback_data=f"ADMIN Pause|{chat_id}"),
             InlineKeyboardButton(text="↻", callback_data=f"ADMIN Replay|{chat_id}"),
             InlineKeyboardButton(text="‣‣I", callback_data=f"ADMIN Skip|{chat_id}"),
-            InlineKeyboardButton(text="▢", callback_data=f"ADMIN Stop|{chat_id}"),
+            InlineKeyboardButton(text="▢", callback_data=f"ADMIN Stop|{chat_id}")
         ],
-         [
-             InlineKeyboardButton(text="< - 𝟤𝟢ˢ", callback_data="seek_backward_20"),
-             InlineKeyboardButton(  
-                        "• ᴘʀᴏᴍᴏ •",  
-                        web_app=WebAppInfo(url="https://t.me/TheSigmaCoder/?text=HII+OWNER+😄+I+WANT+PROMOTION+GIVE+ME+PRICE+LIST..+😙")  
-                    ),  
-             InlineKeyboardButton(text="𝟤𝟢ˢ + >", callback_data="seek_forward_20")
-         ],
         [
-            InlineKeyboardButton(text="✙ ʌᴅᴅ ϻє ɪη ʏσυʀ ɢʀσυᴘ ✙", url=f"https://t.me/{app.username}?startgroup=true"),
+            InlineKeyboardButton(text="< - 𝟤𝟢ˢ", callback_data="seek_backward_20"),
+            InlineKeyboardButton(
+                text="• ᴘʀᴏᴍᴏ •",
+                web_app=WebAppInfo(
+                    url="https://t.me/TheSigmaCoder/?text=HII+OWNER+😅+I+WANT+PROMOTION+GIVE+ME+PRICE+LIST...😙"
+                )
+            ),
+            InlineKeyboardButton(text="𝟤𝟢ˢ + >", callback_data="seek_forward_20")
+        ],
+        [
+            InlineKeyboardButton(
+                text="✙ ʌᴅᴅ ϻє ɪη ʏσυʀ ɢʀσυᴘ ✙",
+                url=f"https://t.me/{app_username}?startgroup=true"
+            )
         ]
     ]
     return buttons
 
 
-def stream_markup(_, chat_id):
+def stream_markup(_, chat_id, app_username):
     buttons = [
         [
             InlineKeyboardButton(text="▷", callback_data=f"ADMIN Resume|{chat_id}"),
             InlineKeyboardButton(text="II", callback_data=f"ADMIN Pause|{chat_id}"),
             InlineKeyboardButton(text="↻", callback_data=f"ADMIN Replay|{chat_id}"),
             InlineKeyboardButton(text="‣‣I", callback_data=f"ADMIN Skip|{chat_id}"),
-            InlineKeyboardButton(text="▢", callback_data=f"ADMIN Stop|{chat_id}"),
-         ],
+            InlineKeyboardButton(text="▢", callback_data=f"ADMIN Stop|{chat_id}")
+        ],
         [
-             InlineKeyboardButton(text="< - 𝟤𝟢ˢ", callback_data="seek_backward_20"),
-             InlineKeyboardButton(  
-                        "• ᴘʀᴏᴍᴏ •",  
-                        web_app=WebAppInfo(url="https://t.me/TheSigmaCoder/?text=HII+OWNER+😄+I+WANT+PROMOTION+GIVE+ME+PRICE+LIST..+😙")  
-                    ),  
-             InlineKeyboardButton(text="𝟤𝟢ˢ + >", callback_data="seek_forward_20")
-         ],
+            InlineKeyboardButton(text="< - 𝟤𝟢ˢ", callback_data="seek_backward_20"),
+            InlineKeyboardButton(
+                text="• ᴘʀᴏᴍᴏ •",
+                web_app=WebAppInfo(
+                    url="https://t.me/TheSigmaCoder/?text=HII+OWNER+😅+I+WANT+PROMOTION+GIVE+ME+PRICE+LIST...😙"
+                )
+            ),
+            InlineKeyboardButton(text="𝟤𝟢ˢ + >", callback_data="seek_forward_20")
+        ],
         [
-            InlineKeyboardButton(text="✙ ʌᴅᴅ ϻє ɪη ʏσυʀ ɢʀσυᴘ ✙", url=f"https://t.me/{app.username}?startgroup=true"),
+            InlineKeyboardButton(
+                text="✙ ʌᴅᴅ ϻє ɪη ʏσυʀ ɢʀσυᴘ ✙",
+                url=f"https://t.me/{app_username}?startgroup=true"
+            )
         ]
     ]
     return buttons
@@ -177,3 +182,4 @@ def slider_markup(_, videoid, user_id, query, query_type, channel, fplay):
         ],
     ]
     return buttons
+
