@@ -75,13 +75,13 @@
 <h2 align="center"> ─「 ᴄᴏɴᴛᴀᴄᴛ ᴍᴇ 」─ </h2>
 
 <p align="center">
-  <a href="https://t.me/alphababy">
-    <img src="https://img.shields.io/badge/ᴅᴇᴠ-ᴀʟᴘʜᴀʙᴀʙʏ-1E90FF?style=for-the-badge&logo=github"/>
+  <a href="https://t.me/TheSigmaCoder">
+    <img src="https://img.shields.io/badge/ᴅᴇᴠ-ᴀʟᴘʜᴀ-1E90FF?style=for-the-badge&logo=github"/>
   </a>
   <a href="https://t.me/purvi_bots">
-    <img src="https://img.shields.io/badge/sᴜᴘᴘᴏʀᴛ-ᴘᴜʀᴠɪ%20ʙᴏᴛs-32CD32?style=for-the-badge&logo=telegram"/>
+    <img src="https://img.shields.io/badge/ᴘᴜʀᴠɪ-%20ʙᴏᴛs-32CD32?style=for-the-badge&logo=telegram"/>
   </a>
   <a href="https://instagram.com/careless__02">
-    <img src="https://img.shields.io/badge/ɪɴsᴛᴀɢʀᴀᴍ-ᴄᴀʀᴇʟᴇss__02-E4405F?style=for-the-badge&logo=instagram"/>
+    <img src="https://img.shields.io/badge/ɪɴsᴛᴀɢʀᴀᴍ-E4405F?style=for-the-badge&logo=instagram"/>
   </a>
 </p>
