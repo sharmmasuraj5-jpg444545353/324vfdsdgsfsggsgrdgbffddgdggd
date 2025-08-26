@@ -33,12 +33,12 @@
         "required": true
       },
       "OWNER_ID": {
-        "description": "Go @PURVI_AI_BOT And type /id and get The user id of user whom you would like to add as OWNER.",
+        "description": "Go @MissRose_Bot And type /id and get The user id of user whom you would like to add as OWNER.",
         "value": "",
         "required": true
       },
       "STRING_SESSION": {
-        "description": "A Pyrogram v2 String Session from @KING_STRING_SESSION_BOT on Telegram.",
+        "description": "A Pyrogram v2 String Session from @StringFatherRobot  on Telegram.",
         "value": "",
         "required": true
       },
