@@ -6,6 +6,9 @@ import config
 from SONALI_MUSIC.utils.formatters import time_to_seconds
 
 
+# Global variable to store current playback state
+current_playback = {}
+
 def track_markup(_, videoid, user_id, channel, fplay):
     buttons = [
         [
@@ -108,6 +111,52 @@ def stream_markup(_, chat_id):
     return buttons
 
 
+def promo_markup_with_duration(chat_id, played, dur):
+    # Progress bar calculation with zero division protection
+    played_sec = time_to_seconds(played)
+    duration_sec = time_to_seconds(dur)
+    
+    if duration_sec == 0:
+        percentage = 0
+        bar = "◉—————————"
+    else:
+        percentage = (played_sec / duration_sec) * 100
+        umm = math.floor(percentage)
+        
+        if 0 < umm <= 10:
+            bar = "◉—————————"
+        elif 10 < umm < 20:
+            bar = "—◉————————"
+        elif 20 <= umm < 30:
+            bar = "——◉———————"
+        elif 30 <= umm < 40:
+            bar = "———◉——————"
+        elif 40 <= umm < 50:
+            bar = "————◉—————"
+        elif 50 <= umm < 60:
+            bar = "—————◉————"
+        elif 60 <= umm < 70:
+            bar = "——————◉———"
+        elif 70 <= umm < 80:
+            bar = "———————◉——"
+        elif 80 <= umm < 95:
+            bar = "————————◉—"
+        else:
+            bar = "—————————◉"
+
+    buttons = [
+        [InlineKeyboardButton(text=f"{played} {bar} {dur}", callback_data="GetTimer")],
+        [
+            InlineKeyboardButton(text="ᴜᴘᴅᴀᴛᴇs", url="https://t.me/PURVI_UPDATES"),
+            InlineKeyboardButton(text="sᴜᴘᴘᴏʀᴛ", url="https://t.me/PURVI_BOTS")
+        ],
+        [
+            InlineKeyboardButton(text="ʙᴀᴄᴋ", callback_data=f"stream_back_promo|{chat_id}")
+        ]
+    ]
+    return buttons
+
+
 def promo_markup_simple(chat_id):
     buttons = [
         [
@@ -121,26 +170,22 @@ def promo_markup_simple(chat_id):
     return buttons
 
 
-# Global variable to store current playback state
-current_playback = {}
-
 @app.on_callback_query()
 async def callback_handler(client, query):
     data = query.data
     if data.startswith("open_promo"):
         chat_id = int(data.split("|")[1])
         
-        # Store current playback state before opening promo
+        # Get current playback state or use defaults
         if chat_id in current_playback:
             played = current_playback[chat_id]["played"]
             dur = current_playback[chat_id]["dur"]
         else:
-            # Default values if no playback state exists
             played = "0:00"
             dur = "0:00"
         
         await query.message.edit_reply_markup(
-            reply_markup=InlineKeyboardMarkup(promo_markup_simple(chat_id))
+            reply_markup=InlineKeyboardMarkup(promo_markup_with_duration(chat_id, played, dur))
         )
 
     elif data.startswith("stream_back_promo"):
