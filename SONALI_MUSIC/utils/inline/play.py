@@ -28,8 +28,6 @@ def track_markup(_, videoid, user_id, channel, fplay):
     return buttons
 
 
-
-# ===================== Stream Markup Timer =====================
 def stream_markup_timer(_, chat_id, played, dur):
     played_sec = time_to_seconds(played)
     duration_sec = time_to_seconds(dur)
@@ -81,7 +79,6 @@ def stream_markup_timer(_, chat_id, played, dur):
     return buttons
 
 
-# ===================== Stream Markup =====================
 def stream_markup(_, chat_id):
     buttons = [
         [
@@ -106,7 +103,6 @@ def stream_markup(_, chat_id):
     return buttons
 
 
-# ===================== Promo Markup =====================
 def promo_markup_simple(chat_id):
     buttons = [
         #[
@@ -128,7 +124,6 @@ def promo_markup_simple(chat_id):
     return buttons
 
 
-# ===================== Callback Handler =====================
 @app.on_callback_query()
 async def callback_handler(client, query):
     data = query.data
@@ -141,41 +136,44 @@ async def callback_handler(client, query):
     elif data.startswith("stream_back"):
         chat_id = int(data.split("|")[1])
         
-        # You need to get these values from somewhere
-        played = "0:00"  # Replace with actual value
-        dur = "0:00"     # Replace with actual value
-        _ = None         # Replace with actual value
+        played = "0:00"  
+        dur = "0:00"     
+        _ = None         
         
         played_sec = time_to_seconds(played)
         duration_sec = time_to_seconds(dur)
-        percentage = (played_sec / duration_sec) * 100
-        umm = math.floor(percentage)
-
-        if 0 < umm <= 10:
-            bar = "◉—————————"
-        elif 10 < umm < 20:
-            bar = "—◉————————"
-        elif 20 <= umm < 30:
-            bar = "——◉———————"
-        elif 30 <= umm < 40:
-            bar = "———◉——————"
-        elif 40 <= umm < 50:
-            bar = "————◉—————"
-        elif 50 <= umm < 60:
-            bar = "—————◉————"
-        elif 60 <= umm < 70:
-            bar = "——————◉———"
-        elif 70 <= umm < 80:
-            bar = "———————◉——"
-        elif 80 <= umm < 95:
-            bar = "————————◉—"
+        
+        if duration_sec == 0:
+            bar = "◉—————————" 
+            percentage = 0
         else:
-            bar = "—————————◉"
+            percentage = (played_sec / duration_sec) * 100
+            umm = math.floor(percentage)
+
+            if 0 < umm <= 10:
+                bar = "◉—————————"
+            elif 10 < umm < 20:
+                bar = "—◉————————"
+            elif 20 <= umm < 30:
+                bar = "——◉———————"
+            elif 30 <= umm < 40:
+                bar = "———◉——————"
+            elif 40 <= umm < 50:
+                bar = "————◉—————"
+            elif 50 <= umm < 60:
+                bar = "—————◉————"
+            elif 60 <= umm < 70:
+                bar = "——————◉———"
+            elif 70 <= umm < 80:
+                bar = "———————◉——"
+            elif 80 <= umm < 95:
+                bar = "————————◉—"
+            else:
+                bar = "—————————◉"
             
         await query.message.edit_reply_markup(
             reply_markup=InlineKeyboardMarkup(stream_markup_timer(_, chat_id, played, dur, bar))
         )
-
 
 
 def playlist_markup(_, videoid, user_id, ptype, channel, fplay):
