@@ -52,38 +52,3 @@ async def getid(client, message):
 
 
 
-@app.on_message(filters.command("fid"))
-async def fid_handler(client, message):
-    reply = message.reply_to_message
-
-    if not reply:
-        return await message.reply_text("● ʀᴇᴘʟʏ ᴛᴏ ᴀ ғᴏʀᴡᴀʀᴅᴇᴅ ᴍᴇssᴀɢᴇ.")
-
-    text = ""
-
-    # Forwarded from a user
-    if reply.forward_from:
-        user = reply.forward_from
-        text += f"**● ғᴏʀᴡᴀʀᴅᴇᴅ ᴜsᴇʀ ɪᴅ:** `{user.id}`\n"
-        if user.username:
-            text += f"**● ᴜsᴇʀɴᴀᴍᴇ:** @{user.username}\n"
-        if user.first_name:
-            text += f"**● ɴᴀᴍᴇ:** {user.first_name}\n"
-
-    # Forwarded from a channel / chat
-    elif reply.forward_from_chat:
-        chat = reply.forward_from_chat
-        text += f"**● ғᴏʀᴡᴀʀᴅᴇᴅ ᴄʜᴀɴɴᴇʟ ɪᴅ:** `{chat.id}`\n"
-        text += f"**● ᴄʜᴀɴɴᴇʟ ɴᴀᴍᴇ:** {chat.title}\n"
-
-    else:
-        text = "● ᴛʜɪs ᴍᴇssᴀɢᴇ ɪs ɴᴏᴛ ғᴏʀᴡᴀʀᴅᴇᴅ."
-
-    await message.reply_text(
-        text,
-        disable_web_page_preview=True,
-        parse_mode=ParseMode.DEFAULT,
-        reply_markup=InlineKeyboardMarkup(
-            [[InlineKeyboardButton("ᴄʟᴏsᴇ", callback_data="close")]]
-        )
-    )
