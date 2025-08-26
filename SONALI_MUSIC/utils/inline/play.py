@@ -172,7 +172,7 @@ async def callback_handler(client, query):
                 bar = "—————————◉"
             
         await query.message.edit_reply_markup(
-            reply_markup=InlineKeyboardMarkup(stream_markup_timer(_, chat_id, played, dur, bar))
+            reply_markup=InlineKeyboardMarkup(stream_markup_timer(_, chat_id, played, dur))
         )
 
 
