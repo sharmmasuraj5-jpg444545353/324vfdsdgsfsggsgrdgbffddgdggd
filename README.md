@@ -24,8 +24,10 @@
 
 ---
 
+<b align="center">─「 ǫᴜɪᴄᴋ sᴇᴛᴜᴘ 」─</b>
+
 <details>
-<summary align="center"><b>─「 ǫᴜɪᴄᴋ sᴇᴛᴜᴘ 」─</b></summary>
+<summary><b>⟪ ᴠᴘs / ʟᴏᴄᴀʟ ʜᴏsᴛɪɴɢ ⟫</b></summary>
 
  1. **🔧 ᴜᴘᴅᴀᴛᴇ & ᴜᴘɢʀᴀᴅᴇ**
    ```bash
@@ -74,7 +76,15 @@
     ```
 </details>
 
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif"/>
+</p>
+
 <h2 align="center"> ─「 ᴄᴏɴᴛᴀᴄᴛ ᴍᴇ 」─ </h2>
+
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif"/>
+</p>
 
 <p align="center">
   <a href="https://t.me/TheSigmaCoder">
@@ -86,4 +96,8 @@
   <a href="https://instagram.com/careless__02">
     <img src="https://img.shields.io/badge/ɪɴsᴛᴀɢʀᴀᴍ-E4405F?style=for-the-badge&logo=instagram"/>
   </a>
+</p>
+
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif"/>
 </p>
