@@ -45,20 +45,20 @@ async def _whisper(_, inline_query):
             ]
         
         try:
-            whisper_btn = InlineKeyboardMarkup([[InlineKeyboardButton("💒 ᴡʜɪsᴘᴇʀ 💒", callback_data=f"fdaywhisper_{inline_query.from_user.id}_{user.id}")]])
-            one_time_whisper_btn = InlineKeyboardMarkup([[InlineKeyboardButton("🔩 ᴏɴᴇ-ᴛɪᴍᴇ ᴡʜɪsᴘᴇʀ", callback_data=f"fdaywhisper_{inline_query.from_user.id}_{user.id}_one")]])
+            whisper_btn = InlineKeyboardMarkup([[InlineKeyboardButton("💒 sʜᴏᴡ ᴡʜɪsᴘᴇʀ ᴍᴇssᴀɢᴇ 💒", callback_data=f"fdaywhisper_{inline_query.from_user.id}_{user.id}")]])
+            one_time_whisper_btn = InlineKeyboardMarkup([[InlineKeyboardButton("🔩 sᴇᴇ ᴏɴᴇ-ᴛɪᴍᴇ ᴡʜɪsᴘᴇʀ", callback_data=f"fdaywhisper_{inline_query.from_user.id}_{user.id}_one")]])
             mm = [
                 InlineQueryResultArticle(
                     title="💒 ᴡʜɪsᴘᴇʀ 💒",
                     description=f"sᴇɴᴅ ᴀ ᴡʜɪsᴘᴇʀ ᴛᴏ{user.first_name}!",
-                    input_message_content=InputTextMessageContent(f"💒 ʏᴏᴜ ᴀʀᴇ sᴇɴᴅɪɴɢ ᴀ ᴡʜɪsᴘᴇʀ{user.first_name}. 🏩\n\nᴛʏᴘᴇ ʏᴏᴜʀ ᴍᴇssᴀɢᴇ/sᴇɴᴛᴇɴᴄᴇ.😆"),
+                    input_message_content=InputTextMessageContent(f"💒 ʏᴏᴜ ᴀʀᴇ sᴇɴᴅɪɴɢ ᴀ ᴡʜɪsᴘᴇʀ ᴍᴇssᴀɢᴇ ᴛᴏ {user.first_name}. 🏩\n\n➻ ᴏɴʟʏ {user.first_name} sᴇᴇ ᴛʜɪs ʏᴏᴜʀ ᴍᴇssᴀɢᴇ.😆"),
                     thumb_url="https://files.catbox.moe/ynsu0c.jpg",
                     reply_markup=whisper_btn
                 ),
                 InlineQueryResultArticle(
                     title="🔩 ᴏɴᴇ-ᴛɪᴍᴇ ᴡʜɪsᴘᴇʀ",
                     description=f"sᴇɴᴅ ᴀ ᴏɴᴇ-ᴛɪᴍᴇ ᴡʜɪsᴘᴇʀ ᴛᴏ {user.first_name}!",
-                    input_message_content=InputTextMessageContent(f"🔩 ʏᴏᴜ ᴀʀᴇ sᴇɴᴅɪɴɢ ᴀ ᴏɴᴇ ᴛɪᴍᴇ ᴡʜɪsᴘᴇʀ ᴛᴏ {user.first_name}. 🏩\n\nᴛʏᴘᴇ ʏᴏᴜʀ ᴍᴇssᴀɢᴇ/sᴇɴᴛᴇɴᴄᴇ.😆"),
+                    input_message_content=InputTextMessageContent(f"🔩 ʏᴏᴜ ᴀʀᴇ sᴇɴᴅɪɴɢ ᴀ ᴏɴᴇ ᴛɪᴍᴇ ᴡʜɪsᴘᴇʀ ᴍᴇssᴀɢᴇ ᴛᴏ {user.first_name}. 🏩\n\n➻ ᴏɴʟʏ {user.first_name} sᴇᴇ ᴛʜɪs ʏᴏᴜʀ ᴍᴇssᴀɢᴇ.😆"),
                     thumb_url="https://files.catbox.moe/ynsu0c.jpg",
                     reply_markup=one_time_whisper_btn
                 )
@@ -88,7 +88,7 @@ async def whispes_cb(_, query):
         except Unauthorized:
             pass
         
-        return await query.answer("⚠️ ᴛʜɪs ᴡʜɪsᴘᴇʀ ɪs ɴᴏᴛ ғᴏʀ ʏᴏᴜ 🚨", show_alert=True)
+        return await query.answer("⚠️ ᴛʜɪs ᴡʜɪsᴘᴇʀ ɪs ɴᴏᴛ ғᴏʀ ʏᴏᴜ ʙᴀʙʏ 🚨", show_alert=True)
     
     search_msg = f"{from_user}_{to_user}"
     
@@ -111,7 +111,7 @@ async def in_help():
         InlineQueryResultArticle(
             title="💒 ᴡʜɪsᴘᴇʀ 💒",
             description=f"@Sonali_Music_Bot [USERNAME / ID] [ YOUR TEXT]",
-            input_message_content=InputTextMessageContent(f"**📍ᴜsᴀɢᴇ:**\n\n@Sonali_Music_Bot (Target Username or ID) (Your Message).\n\n**Example:**\n@Sonali_Music_bot @ll_UNLUCKY_PERSON_ll I love You 😘"),
+            input_message_content=InputTextMessageContent(f"**📍ᴜsᴀɢᴇ :-**\n\n@Sonali_Music_Bot (Target Username or ID) (Your Message).\n\n**Example :-**\n@Sonali_Music_bot @TheSigmaCoder I love You 😘"),
             thumb_url="https://files.catbox.moe/ynsu0c.jpg",
             reply_markup=switch_btn
         )
