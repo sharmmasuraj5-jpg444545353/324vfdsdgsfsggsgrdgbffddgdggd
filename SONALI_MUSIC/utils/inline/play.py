@@ -124,7 +124,6 @@ def promo_markup_simple(chat_id):
 
 
 @app.on_callback_query()
-@app.on_callback_query()
 async def callback_handler(client, query):
     data = query.data
     if data.startswith("open_promo"):
@@ -141,35 +140,30 @@ async def callback_handler(client, query):
         dur = "0:00"     
         _ = None         
         
-        played_sec = time_to_seconds(played)
-        duration_sec = time_to_seconds(dur)
-        
-        if duration_sec == 0:
-            bar = "◉—————————"
-        else:
-            percentage = (played_sec / duration_sec) * 100
-            umm = math.floor(percentage)
-            
-            if 0 < umm <= 10:
-                bar = "◉—————————"
-            elif 10 < umm < 20:
-                bar = "—◉————————"
-            elif 20 <= umm < 30:
-                bar = "——◉———————"
-            elif 30 <= umm < 40:
-                bar = "———◉——————"
-            elif 40 <= umm < 50:
-                bar = "————◉—————"
-            elif 50 <= umm < 60:
-                bar = "—————◉————"
-            elif 60 <= umm < 70:
-                bar = "——————◉———"
-            elif 70 <= umm < 80:
-                bar = "———————◉——"
-            elif 80 <= umm < 95:
-                bar = "————————◉—"
-            else:
-                bar = "—————————◉"
+    played_sec = time_to_seconds(played)
+    duration_sec = time_to_seconds(dur)
+    percentage = (played_sec / duration_sec) * 100
+    umm = math.floor(percentage)
+    if 0 < umm <= 10:
+        bar = "◉—————————"
+    elif 10 < umm < 20:
+        bar = "—◉————————"
+    elif 20 <= umm < 30:
+        bar = "——◉———————"
+    elif 30 <= umm < 40:
+        bar = "———◉——————"
+    elif 40 <= umm < 50:
+        bar = "————◉—————"
+    elif 50 <= umm < 60:
+        bar = "—————◉————"
+    elif 60 <= umm < 70:
+        bar = "——————◉———"
+    elif 70 <= umm < 80:
+        bar = "———————◉——"
+    elif 80 <= umm < 95:
+        bar = "————————◉—"
+    else:
+        bar = "—————————◉"
         
         await query.message.edit_reply_markup(
             reply_markup=InlineKeyboardMarkup(stream_markup_timer(_, chat_id, played, dur, bar))
