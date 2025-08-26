@@ -108,7 +108,7 @@ def stream_markup(_, chat_id):
     return buttons
 
 
-def promo_markup_with_bar(_, chat_id, played, dur):
+def promo_markup_with_bar(chat_id, played, dur):
     # Progress bar calculation with zero division protection
     played_sec = time_to_seconds(played)
     duration_sec = time_to_seconds(dur)
@@ -178,7 +178,7 @@ async def callback_handler(client, query):
         dur = "1:00"  # Never use "0:00" for duration
         
         await query.message.edit_reply_markup(
-            reply_markup=InlineKeyboardMarkup(promo_markup_with_bar(_, chat_id, played, dur))
+            reply_markup=InlineKeyboardMarkup(promo_markup_with_bar(chat_id, played, dur))
         )
 
     elif data.startswith("stream_back"):
@@ -187,6 +187,10 @@ async def callback_handler(client, query):
         # Safe default values to avoid zero division
         played = "0:00"
         dur = "1:00"  # Never use "0:00" for duration
+        
+        # Get the actual _ object from your app
+        from SONALI_MUSIC import app as sonali_app
+        _ = sonali_app.get_translation(chat_id)  # Adjust this based on your translation system
         
         await query.message.edit_reply_markup(
             reply_markup=InlineKeyboardMarkup(stream_markup_timer(_, chat_id, played, dur))
