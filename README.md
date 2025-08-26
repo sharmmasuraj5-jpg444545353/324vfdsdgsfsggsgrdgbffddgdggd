@@ -27,7 +27,7 @@
 <h2 id="quick-setup" align="center"> ─「 ǫᴜɪᴄᴋ sᴇᴛᴜᴘ 」─ </h2>
 
 
-1. <b>🔧 ᴜᴘᴅᴀᴛᴇ & ᴜᴘɢʀᴀᴅᴇ</b>
+## 1. 🔧 ᴜᴘᴅᴀᴛᴇ & ᴜᴘɢʀᴀᴅᴇ
    ```bash
    sudo apt-get update && sudo apt-get upgrade -y
    ```
@@ -72,4 +72,16 @@
     ```bash
     bash start
     ```
-<p align="center">✨ ᴍᴀᴅᴇ ʙʏ <a href="https://t.me/purvi_bots"><b>ᴘᴜʀᴠɪ ʙᴏᴛs</b></a> ✨</p>
+<h2 align="center"> ─「 ᴄᴏɴᴛᴀᴄᴛ ᴍᴇ 」─ </h2>
+
+<p align="center">
+  <a href="https://t.me/alphababy">
+    <img src="https://img.shields.io/badge/ᴅᴇᴠ-ᴀʟᴘʜᴀʙᴀʙʏ-1E90FF?style=for-the-badge&logo=github"/>
+  </a>
+  <a href="https://t.me/purvi_bots">
+    <img src="https://img.shields.io/badge/sᴜᴘᴘᴏʀᴛ-ᴘᴜʀᴠɪ%20ʙᴏᴛs-32CD32?style=for-the-badge&logo=telegram"/>
+  </a>
+  <a href="https://instagram.com/careless__02">
+    <img src="https://img.shields.io/badge/ɪɴsᴛᴀɢʀᴀᴍ-ᴄᴀʀᴇʟᴇss__02-E4405F?style=for-the-badge&logo=instagram"/>
+  </a>
+</p>
