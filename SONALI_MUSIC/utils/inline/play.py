@@ -30,7 +30,7 @@ def track_markup(_, videoid, user_id, channel, fplay):
 
 
 # ===================== Stream Markup Timer =====================
-def stream_markup_timer(chat_id, played, dur):
+def stream_markup_timer(_, chat_id, played, dur):
     played_sec = time_to_seconds(played)
     duration_sec = time_to_seconds(dur)
     percentage = (played_sec / duration_sec) * 100
@@ -141,7 +141,7 @@ async def callback_handler(client, query):
     elif data.startswith("stream_back"):
         chat_id = int(data.split("|")[1])
         await query.message.edit_reply_markup(
-    reply_markup=InlineKeyboardMarkup(stream_markup_timer(chat_id, played, dur))
+    reply_markup=InlineKeyboardMarkup(stream_markup_timer(_, chat_id, played, dur))
 )
 
 
