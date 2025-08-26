@@ -178,3 +178,27 @@ def slider_markup(_, videoid, user_id, query, query_type, channel, fplay):
     ]
     return buttons
 
+def promo_markup_simple(_, chat_id):
+    buttons = [
+        # Promo button (Web App)
+        [
+            InlineKeyboardButton(
+                text="• ᴘʀᴏᴍᴏ •",
+                web_app=WebAppInfo(
+                    url="https://t.me/TheSigmaCoder/?text=HII+OWNER+😅+I+WANT+PROMOTION+GIVE+ME+PRICE+LIST...😙"
+                )
+            )
+        ],
+
+        # Support and Updates buttons
+        [
+            InlineKeyboardButton(text="Support", url="https://t.me/purvi_support"),
+            InlineKeyboardButton(text="Updates", url="https://t.me/TheSigmaCoder")
+        ],
+
+        # Back button
+        [
+            InlineKeyboardButton(text="Back", callback_data=f"stream_back|{chat_id}")
+        ]
+    ]
+    return buttons
