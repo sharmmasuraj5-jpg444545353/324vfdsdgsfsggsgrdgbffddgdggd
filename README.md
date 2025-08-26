@@ -27,7 +27,7 @@
 <h2 id="quick-setup" align="center"> ─「 ǫᴜɪᴄᴋ sᴇᴛᴜᴘ 」─ </h2>
 
 
-1. **🔧 ᴜᴘᴅᴀᴛᴇ & ᴜᴘɢʀᴀᴅᴇ**
+1. <b>🔧 ᴜᴘᴅᴀᴛᴇ & ᴜᴘɢʀᴀᴅᴇ</b>
    ```bash
    sudo apt-get update && sudo apt-get upgrade -y
    ```
@@ -72,5 +72,4 @@
     ```bash
     bash start
     ```
-
----
+<p align="center">✨ ᴍᴀᴅᴇ ʙʏ <a href="https://t.me/purvi_bots"><b>ᴘᴜʀᴠɪ ʙᴏᴛs</b></a> ✨</p>
