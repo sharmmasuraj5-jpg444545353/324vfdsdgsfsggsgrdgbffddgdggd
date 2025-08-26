@@ -2,6 +2,8 @@ import math
 from config import SUPPORT_CHAT, OWNER_USERNAME
 from pyrogram.types import InlineKeyboardButton
 from SONALI_MUSIC import app
+from pyrogram.types import WebAppInfo
+from pyrogram.enums import ParseMode
 import config
 from SONALI_MUSIC.utils.formatters import time_to_seconds
 
@@ -69,7 +71,10 @@ def stream_markup_timer(_, chat_id, played, dur):
         ],
          [
              InlineKeyboardButton(text="< - 𝟤𝟢ˢ", callback_data="seek_backward_20"),
-             InlineKeyboardButton(text=_["CLOSE_BUTTON"], callback_data="close"),
+             InlineKeyboardButton(  
+                        "• ᴘʀᴏᴍᴏ •",  
+                        web_app=WebAppInfo(url="https://t.me/TheSigmaCoder/?text=HII+OWNER+😄+I+WANT+PROMOTION+GIVE+ME+PRICE+LIST..+😙")  
+                    ),  
              InlineKeyboardButton(text="𝟤𝟢ˢ + >", callback_data="seek_forward_20")
          ],
         [
@@ -90,7 +95,10 @@ def stream_markup(_, chat_id):
          ],
         [
              InlineKeyboardButton(text="< - 𝟤𝟢ˢ", callback_data="seek_backward_20"),
-             InlineKeyboardButton(text=_["CLOSE_BUTTON"], callback_data="close"),
+             InlineKeyboardButton(  
+                        "• ᴘʀᴏᴍᴏ •",  
+                        web_app=WebAppInfo(url="https://t.me/TheSigmaCoder/?text=HII+OWNER+😄+I+WANT+PROMOTION+GIVE+ME+PRICE+LIST..+😙")  
+                    ),  
              InlineKeyboardButton(text="𝟤𝟢ˢ + >", callback_data="seek_forward_20")
          ],
         [
