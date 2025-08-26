@@ -135,16 +135,10 @@ async def callback_handler(client, query):
     elif data.startswith("stream_back"):
         chat_id = int(data.split("|")[1])
         
-        # Yeh values aapko actual playback state se set karni hongi
-        played = "0:00"  
-        dur = "0:00"     
-        _ = None  # Actual localization object pass karna hoga
-        
-        # Directly stream_markup_timer ko call karo, yeh apne aap progress bar calculate karega
+        # Simple solution - without progress bar
         await query.message.edit_reply_markup(
-            reply_markup=InlineKeyboardMarkup(stream_markup_timer(_, chat_id, played, dur))
+            reply_markup=InlineKeyboardMarkup(stream_markup(chat_id))
         )
-
 def playlist_markup(_, videoid, user_id, ptype, channel, fplay):
     buttons = [
         [
