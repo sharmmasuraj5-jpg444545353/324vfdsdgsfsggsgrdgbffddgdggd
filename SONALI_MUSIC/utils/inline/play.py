@@ -135,40 +135,39 @@ async def callback_handler(client, query):
     elif data.startswith("stream_back"):
         chat_id = int(data.split("|")[1])
         
-    
+        # These values need to be properly set based on your actual playback state
         played = "0:00"  
         dur = "0:00"     
-        _ = None         
+        _ = None  # You need to pass the actual localization object
         
-    played_sec = time_to_seconds(played)
-    duration_sec = time_to_seconds(dur)
-    percentage = (played_sec / duration_sec) * 100
-    umm = math.floor(percentage)
-    if 0 < umm <= 10:
-        bar = "◉—————————"
-    elif 10 < umm < 20:
-        bar = "—◉————————"
-    elif 20 <= umm < 30:
-        bar = "——◉———————"
-    elif 30 <= umm < 40:
-        bar = "———◉——————"
-    elif 40 <= umm < 50:
-        bar = "————◉—————"
-    elif 50 <= umm < 60:
-        bar = "—————◉————"
-    elif 60 <= umm < 70:
-        bar = "——————◉———"
-    elif 70 <= umm < 80:
-        bar = "———————◉——"
-    elif 80 <= umm < 95:
-        bar = "————————◉—"
-    else:
-        bar = "—————————◉"
+        played_sec = time_to_seconds(played)
+        duration_sec = time_to_seconds(dur)
+        percentage = (played_sec / duration_sec) * 100
+        umm = math.floor(percentage)
+        if 0 < umm <= 10:
+            bar = "◉—————————"
+        elif 10 < umm < 20:
+            bar = "—◉————————"
+        elif 20 <= umm < 30:
+            bar = "——◉———————"
+        elif 30 <= umm < 40:
+            bar = "———◉——————"
+        elif 40 <= umm < 50:
+            bar = "————◉—————"
+        elif 50 <= umm < 60:
+            bar = "—————◉————"
+        elif 60 <= umm < 70:
+            bar = "——————◉———"
+        elif 70 <= umm < 80:
+            bar = "———————◉——"
+        elif 80 <= umm < 95:
+            bar = "————————◉—"
+        else:
+            bar = "—————————◉"
         
         await query.message.edit_reply_markup(
-            reply_markup=InlineKeyboardMarkup(stream_markup_timer(_, chat_id, played, dur, bar))
+            reply_markup=InlineKeyboardMarkup(stream_markup_timer(_, chat_id, played, dur))
         )
-
 
 def playlist_markup(_, videoid, user_id, ptype, channel, fplay):
     buttons = [
