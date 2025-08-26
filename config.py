@@ -32,7 +32,7 @@ HEROKU_API_KEY = getenv("HEROKU_API_KEY")
 UPSTREAM_REPO = getenv("UPSTREAM_REPO", "https://github.com/Im-Notcoder/New-Sonali")
 UPSTREAM_BRANCH = getenv("UPSTREAM_BRANCH", "main")
 
-GIT_TOKEN = getenv("GIT_TOKEN", "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")
+GIT_TOKEN = getenv("GIT_TOKEN", "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")
 
 # -------------------- [ LOGGER & LINKS ] --------------------
 
