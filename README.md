@@ -24,10 +24,8 @@
 
 ---
 
-<b align="center">─「 ǫᴜɪᴄᴋ sᴇᴛᴜᴘ 」─</b>
+<b></b> align="center">─「 ǫᴜɪᴄᴋ sᴇᴛᴜᴘ 」─</b>
 
-<details>
-<summary><b>⟪ ᴠᴘs / ʟᴏᴄᴀʟ ʜᴏsᴛɪɴɢ ⟫</b></summary>
 
  1. **🔧 ᴜᴘᴅᴀᴛᴇ & ᴜᴘɢʀᴀᴅᴇ**
    ```bash
@@ -74,7 +72,6 @@
     ```bash
     bash start
     ```
-</details>
 
 <p align="center">
   <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif"/>
