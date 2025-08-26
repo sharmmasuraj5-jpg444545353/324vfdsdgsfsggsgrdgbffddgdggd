@@ -110,22 +110,16 @@ async def seek_forward_20_cb(client, callback_query: CallbackQuery):
         chat_id = callback_query.message.chat.id
         playing = db.get(chat_id)
 
-        if not playing:
+        if not playing or int(playing[0]["seconds"]) == 0:
             return await callback_query.answer(
-                "ᴛʜᴇ ʙᴏᴛ ɪsɴ'ᴛ sᴛʀᴇᴀᴍɪɴɢ ᴏɴ ᴠɪᴅᴇᴏ ᴄʜᴀᴛ.", show_alert=True
+                "🚫 ʙᴏᴛ ɪs ɴᴏᴛ ɪɴ ᴠᴏɪᴄᴇ ᴄʜᴀᴛ!", show_alert=True
             )
 
         duration_seconds = int(playing[0]["seconds"])
         duration_played = int(playing[0]["played"])
-        duration = playing[0]["dur"]
+        duration_to_skip = 20
         duration_str = seconds_to_min(duration_seconds)
         file_path = playing[0]["file"]
-        duration_to_skip = 20
-
-        if duration_seconds == 0:
-            return await callback_query.answer(
-                "ᴄᴀɴ'ᴛ sᴇᴇᴋ ɪɴ ʟɪᴠᴇ sᴛʀᴇᴀᴍs!", show_alert=True
-            )
 
         if (duration_seconds - (duration_played + duration_to_skip)) <= 10:
             return await callback_query.answer(
@@ -139,7 +133,7 @@ async def seek_forward_20_cb(client, callback_query: CallbackQuery):
             n, file_path = await YouTube.video(playing[0]["vidid"], True)
             if n == 0:
                 return await callback_query.answer(
-                    "ᴠɪᴅᴇᴏ ɴᴏᴛ ᴀᴠᴀɪʟᴀʙʟᴇ!", show_alert=True
+                    "⛔ ᴠɪᴅᴇᴏ ɴᴏᴛ ᴀᴠᴀɪʟᴀʙʟᴇ!", show_alert=True
                 )
 
         check = playing[0].get("speed_path")
@@ -149,12 +143,12 @@ async def seek_forward_20_cb(client, callback_query: CallbackQuery):
             file_path = playing[0]["vidid"]
 
         await Anony.seek_stream(
-            chat_id, file_path, seconds_to_min(to_seek), duration, playing[0]["streamtype"]
+            chat_id, file_path, seconds_to_min(to_seek), playing[0]["dur"], playing[0]["streamtype"]
         )
 
         db[chat_id][0]["played"] += duration_to_skip
         await callback_query.answer(
-            f"✅ » sᴛʀᴇᴀᴍ sᴜᴄᴄᴇssғᴜʟʟʏ sᴇᴇᴋᴇᴅ — 20 sᴇᴄᴏɴᴅ's !\n▶️ ᴘʟᴀʏᴇᴅ : {seconds_to_min(db[chat_id][0]['played'])} / {duration_str}",
+            f"✅ sᴛʀᴇᴀᴍ sᴜᴄᴄᴇssғᴜʟʟʏ sᴇᴇᴋᴇᴅ → 20 sᴇᴄs!\n▶️ ᴘʟᴀʏᴇᴅ : {seconds_to_min(db[chat_id][0]['played'])} / {duration_str}",
             show_alert=True
         )
 
@@ -172,22 +166,16 @@ async def seek_backward_20_cb(client, callback_query: CallbackQuery):
         chat_id = callback_query.message.chat.id
         playing = db.get(chat_id)
 
-        if not playing:
+        if not playing or int(playing[0]["seconds"]) == 0:
             return await callback_query.answer(
-                "ᴛʜᴇ ʙᴏᴛ ɪsɴ'ᴛ sᴛʀᴇᴀᴍɪɴɢ ᴏɴ ᴠɪᴅᴇᴏ ᴄʜᴀᴛ.", show_alert=True
+                "🚫 ʙᴏᴛ ɪs ɴᴏᴛ ɪɴ ᴠᴏɪᴄᴇ ᴄʜᴀᴛ!", show_alert=True
             )
 
         duration_seconds = int(playing[0]["seconds"])
         duration_played = int(playing[0]["played"])
-        duration = playing[0]["dur"]
+        duration_to_skip = 20
         duration_str = seconds_to_min(duration_seconds)
         file_path = playing[0]["file"]
-        duration_to_skip = 20
-
-        if duration_seconds == 0:
-            return await callback_query.answer(
-                "ᴄᴀɴ'ᴛ sᴇᴇᴋ ɪɴ ʟɪᴠᴇ sᴛʀᴇᴀᴍs!", show_alert=True
-            )
 
         if (duration_played - duration_to_skip) <= 10:
             return await callback_query.answer(
@@ -201,7 +189,7 @@ async def seek_backward_20_cb(client, callback_query: CallbackQuery):
             n, file_path = await YouTube.video(playing[0]["vidid"], True)
             if n == 0:
                 return await callback_query.answer(
-                    "ᴠɪᴅᴇᴏ ɴᴏᴛ ᴀᴠᴀɪʟᴀʙʟᴇ!", show_alert=True
+                    "⛔ ᴠɪᴅᴇᴏ ɴᴏᴛ ᴀᴠᴀɪʟᴀʙʟᴇ!", show_alert=True
                 )
 
         check = playing[0].get("speed_path")
@@ -211,12 +199,12 @@ async def seek_backward_20_cb(client, callback_query: CallbackQuery):
             file_path = playing[0]["vidid"]
 
         await Anony.seek_stream(
-            chat_id, file_path, seconds_to_min(to_seek), duration, playing[0]["streamtype"]
+            chat_id, file_path, seconds_to_min(to_seek), playing[0]["dur"], playing[0]["streamtype"]
         )
 
         db[chat_id][0]["played"] -= duration_to_skip
         await callback_query.answer(
-            f"✅ sᴛʀᴇᴀᴍ sᴜᴄᴄᴇssғᴜʟʟʏ sᴇᴇᴋᴇᴅ ʙᴀᴄᴋ 20 sᴇᴄᴏɴᴅ's\n▶️ ᴘʟᴀʏᴇᴅ : {seconds_to_min(db[chat_id][0]['played'])} / {duration_str}",
+            f"✅ sᴛʀᴇᴀᴍ sᴜᴄᴄᴇssғᴜʟʟʏ sᴇᴇᴋᴇᴅ ʙᴀᴄᴋ → 20 sᴇᴄs!\n▶️ ᴘʟᴀʏᴇᴅ : {seconds_to_min(db[chat_id][0]['played'])} / {duration_str}",
             show_alert=True
         )
 
