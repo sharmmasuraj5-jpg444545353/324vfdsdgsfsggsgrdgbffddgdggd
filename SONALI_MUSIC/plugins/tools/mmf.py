@@ -36,7 +36,7 @@ async def drawText(image_path, text):
     if os.name == "nt":
         fnt = "arial.ttf"
     else:
-        fnt = "./SONALI_MUSIC/assets/default.ttf"
+        fnt = "./SONALI_MUSIC/assets/Road_Rage.otf"
 
     m_font = ImageFont.truetype(fnt, int((70 / 640) * i_width))
 
