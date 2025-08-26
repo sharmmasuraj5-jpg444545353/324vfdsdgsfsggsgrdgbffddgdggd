@@ -22,10 +22,7 @@
   <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif"/>
 </p>
 
----
-
-<b></b> align="center">─「 ǫᴜɪᴄᴋ sᴇᴛᴜᴘ 」─</b>
-
+<h1 align="center">─「 ǫᴜɪᴄᴋ sᴇᴛᴜᴘ 」─</h1>
 
  1. **🔧 ᴜᴘᴅᴀᴛᴇ & ᴜᴘɢʀᴀᴅᴇ**
    ```bash
@@ -84,14 +81,19 @@
 </p>
 
 <p align="center">
+  <!-- Dev -->
   <a href="https://t.me/TheSigmaCoder">
-    <img src="https://img.shields.io/badge/ᴅᴇᴠ-ᴀʟᴘʜᴀ-1E90FF?style=for-the-badge&logo=github"/>
+    <img src="https://img.shields.io/badge/ᴅᴇᴠ-ᴀʟᴘʜᴀ-ff9800?style=for-the-badge&logo=telegram&logoColor=white"/>
   </a>
+
+  <!-- Purvi Bots -->
   <a href="https://t.me/purvi_bots">
-    <img src="https://img.shields.io/badge/ᴘᴜʀᴠɪ-%20ʙᴏᴛs-32CD32?style=for-the-badge&logo=telegram"/>
+    <img src="https://img.shields.io/badge/ᴘᴜʀᴠɪ-%20ʙᴏᴛs-2196f3?style=for-the-badge&logo=telegram&logoColor=white"/>
   </a>
+
+  <!-- Instagram -->
   <a href="https://instagram.com/careless__02">
-    <img src="https://img.shields.io/badge/ɪɴsᴛᴀɢʀᴀᴍ-E4405F?style=for-the-badge&logo=instagram"/>
+    <img src="https://img.shields.io/badge/ɪɴsᴛᴀɢʀᴀᴍ-d62976?style=for-the-badge&logo=instagram&logoColor=white"/>
   </a>
 </p>
 
