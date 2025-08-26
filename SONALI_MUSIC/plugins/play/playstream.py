@@ -1,6 +1,7 @@
 import os
 import requests
 import subprocess
+import yt_dlp
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from pyrogram.enums import ChatType, ChatMemberStatus
@@ -9,8 +10,6 @@ from config import MONGO_DB_URI as MONGO_URI
 from SONALI_MUSIC import app
 
 # ================== CONFIG ==================
-API_URL   = "https://bitflow.in/api/youtube"
-API_KEY   = "1spiderkey2"
 TMP_FILE  = "/tmp/downloaded_video_{chat_id}.mp4"
 PID_FILE  = "/tmp/ffmpeg_{chat_id}.pid"
 
@@ -47,6 +46,34 @@ def kill_ffmpeg(chat_id: int):
     except Exception as e:
         print(f"⚠️ KILL FFMPEG ERROR: {e}")
 
+def get_video_info(url_or_query: str):
+    """Get video metadata using yt-dlp"""
+    try:
+        ydl_opts = {
+            "quiet": True,
+            "format": "best[ext=mp4]",
+            "noplaylist": True,
+        }
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            # अगर query है तो ytsearch1:
+            if "youtube.com" not in url_or_query and "youtu.be" not in url_or_query:
+                info = ydl.extract_info(f"ytsearch1:{url_or_query}", download=False)
+                if "entries" in info:
+                    info = info["entries"][0]
+            else:
+                info = ydl.extract_info(url_or_query, download=False)
+
+            return {
+                "title": info.get("title", "Unknown Title"),
+                "duration": info.get("duration_string", "N/A"),
+                "uploader": info.get("uploader", "Unknown Channel"),
+                "thumbnail": info.get("thumbnail"),
+                "url": info.get("url")
+            }
+    except Exception as e:
+        print(f"yt-dlp error: {e}")
+        return None
+
 # ================== PRIVATE CMDS ==================
 @app.on_message(filters.command("setrtmp"))
 async def set_rtmp_cmd(client, message):
@@ -78,26 +105,13 @@ async def set_rtmp_cmd(client, message):
         f"**✅ ʀᴛᴍᴘ ʟɪɴᴋ sᴇᴛ ғᴏʀ {group_name}** (`{group_id}`)\n\n**ʟɪɴᴋ :-** {link}"
     )
 
-
-
-# ================ GROUP + PRIVATE CMDS ==================
+# ================ GROUP CMDS ==================
 @app.on_message(filters.command("playstream"))
 async def play_stream(client, message):
     chat = message.chat
     user_id = message.from_user.id
 
-    if chat.type == ChatType.PRIVATE:
-        user_groups = rtmp_col.find_one({"user_id": user_id})
-        if not user_groups:
-            return await message.reply(
-                "**⚠️ ᴘʟᴇᴀsᴇ sᴇᴛ ʀᴛᴍᴘ ғɪʀsᴛ ᴜsɪɴɢ /setrtmp group_id rtmp_link**"
-            )
-        else:
-            return await message.reply(
-                "**✅ ɴᴏᴡ ᴜsᴇ :-** `/playstream song name` **ɪɴ ʏᴏᴜʀ ɢʀᴏᴜᴘ.**"
-            )
-
-    elif chat.type in [ChatType.GROUP, ChatType.SUPERGROUP]:
+    if chat.type in [ChatType.GROUP, ChatType.SUPERGROUP]:
         group_id = chat.id
         user_rtmp = get_rtmp(group_id)
 
@@ -107,30 +121,25 @@ async def play_stream(client, message):
             )
 
         if len(message.command) < 2:
-            return await message.reply("**❌ ᴜsᴀɢᴇ :-** `/playstream song name`")
+            return await message.reply("**❌ ᴜsᴀɢᴇ :-** `/playstream song name or youtube_link`")
 
-        await message.delete()
         query = " ".join(message.command[1:])
         user_mention = message.from_user.mention if message.from_user else "Unknown User"
         searching_msg = await message.reply(f"**🔎 sᴇᴀʀᴄʜɪɴɢ :-** {query}")
 
-        try:
-            response = requests.get(API_URL, params={
-                "query": query,
-                "format": "video",
-                "api_key": API_KEY
-            }, timeout=30)
-            data = response.json()
-        except Exception as e:
-            return await message.reply(f"**❌ ᴀᴘɪ ᴇʀʀᴏʀ :-** {e}")
+        # -------- Get metadata --------
+        info = get_video_info(query)
+        if not info:
+            return await searching_msg.edit("**❌ ғᴀɪʟᴇᴅ ᴛᴏ ғᴇᴛᴄʜ ᴅᴀᴛᴀ.**")
 
-        video_url = data.get("url")
-        if not video_url:
-            return await message.reply(f"**❌ ɴᴏ ʀᴇsᴜʟᴛ ғᴏᴜɴᴅ ғᴏʀ :-** {query}")
+        video_url = info["url"]
+        title = info["title"]
+        duration = info["duration"]
+        channel = info["uploader"]
+        thumbnail = info["thumbnail"]
 
-        title = data.get("title", "Unknown Title")
+        # -------- Download video --------
         tmp_path = TMP_FILE.format(chat_id=group_id)
-
         try:
             with requests.get(video_url, stream=True, timeout=60) as r:
                 r.raise_for_status()
@@ -138,8 +147,9 @@ async def play_stream(client, message):
                     for chunk in r.iter_content(chunk_size=8192):
                         f.write(chunk)
         except Exception as e:
-            return await message.reply(f"**❌ ᴅᴏᴡɴʟᴏᴀᴅ ғᴀɪʟᴇᴅ :-** {e}")
+            return await searching_msg.edit(f"**❌ ᴅᴏᴡɴʟᴏᴀᴅ ғᴀɪʟᴇᴅ :-** {e}")
 
+        # -------- Start streaming --------
         ffmpeg_command = [
             "ffmpeg", "-re", "-i", tmp_path,
             "-c:v", "copy", "-c:a", "aac",
@@ -154,23 +164,28 @@ async def play_stream(client, message):
 
             await searching_msg.delete()
 
-            msg = (
-                f"**📡 sᴛʀᴇᴀᴍɪɴɢ ɴᴏᴡ...**\n\n"
-                f"**🎵 ᴛɪᴛʟᴇ :-** {title}\n\n"
-                f"**🙋 ᴘʟᴀʏᴇᴅ ʙʏ :-** {user_mention}"
+            caption = (
+                f"**📡 Streaming Now...**\n\n"
+                f"**🎵 Title :** {title}\n"
+                f"**⏱ Duration :** {duration}\n"
+                f"**📺 Channel :** {channel}\n\n"
+                f"**🙋 Played by :** {user_mention}"
             )
 
             buttons = InlineKeyboardMarkup([
                 [InlineKeyboardButton(
-                    text="✙ ʌᴅᴅ ϻє ɪη ʏσυʀ ɢʀσυᴘ ✙",
+                    text="✙ Add Me To Your Group ✙",
                     url=f"https://t.me/{app.username}?startgroup=true"
                 )]
             ])
 
-            await message.reply(msg, reply_markup=buttons)
+            if thumbnail:
+                await message.reply_photo(thumbnail, caption=caption, reply_markup=buttons)
+            else:
+                await message.reply(caption, reply_markup=buttons)
 
         except Exception as e:
-            await message.reply(f"**❌ ғғᴍᴘᴇɢ ғᴀɪʟᴇᴅ :-** {e}")
+            await message.reply(f"**❌ FFmpeg Failed :-** {e}")
 
 # ================= END STREAM ==================
 @app.on_message(filters.command("endstream"))
@@ -182,13 +197,13 @@ async def end_stream(client, message):
         try:
             member = await client.get_chat_member(chat.id, user_id)
             if member.status not in [ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.OWNER]:
-                return await message.reply("**⚠️ ᴏɴʟʏ ᴀᴅᴍɪɴs ᴄᴀɴ sᴛᴏᴘ ᴛʜᴇ sᴛʀᴇᴀᴍ !!**")
+                return await message.reply("**⚠️ Only admins can stop the stream !!**")
         except Exception as e:
-            return await message.reply(f"**❌ ᴇʀʀᴏʀ :-** {e}")
+            return await message.reply(f"**❌ Error :-** {e}")
 
     kill_ffmpeg(chat.id)
     tmp_path = TMP_FILE.format(chat_id=chat.id)
     if os.path.exists(tmp_path):
         os.remove(tmp_path)
 
-    await message.reply(f"**🛑 sᴛʀᴇᴀᴍ sᴛᴏᴘᴘᴇᴅ ʙʏ :-** {message.from_user.mention}")
+    await message.reply(f"**🛑 Stream stopped by :-** {message.from_user.mention}")
