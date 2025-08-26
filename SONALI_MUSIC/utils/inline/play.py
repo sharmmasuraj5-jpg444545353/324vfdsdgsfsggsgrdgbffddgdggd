@@ -1,6 +1,6 @@
 import math
 from config import SUPPORT_CHAT, OWNER_USERNAME
-from pyrogram.types import InlineKeyboardButton, WebAppInfo
+from pyrogram.types import InlineKeyboardButton, WebAppInfo, CallbackQuery
 from SONALI_MUSIC import app
 import config
 from SONALI_MUSIC.utils.formatters import time_to_seconds
@@ -93,10 +93,7 @@ def stream_markup(_, chat_id):
         ],
         [
             InlineKeyboardButton(text="< - 𝟤𝟢ˢ", callback_data="seek_backward_20"),
-            InlineKeyboardButton(
-                text="• ᴘʀᴏᴍᴏ •",
-                url="https://t.me/TheSigmaCoder/?text=HII+OWNER+😅+I+WANT+PROMOTION+GIVE+ME+PRICE+LIST...😙"
-            ),
+            InlineKeyboardButton(text="• ᴘʀᴏᴍᴏ •", callback_data=""),
             InlineKeyboardButton(text="𝟤𝟢ˢ + >", callback_data="seek_forward_20")
         ],
         [
@@ -202,3 +199,12 @@ def promo_markup_simple(_, chat_id):
         ]
     ]
     return buttons
+
+
+@app.on_callback_query()
+async def callback_handler(client, query):
+    if query.data.startswith("stream_back"):
+        chat_id = int(query.data.split("|")[1])
+        await query.message.edit_reply_markup(
+            reply_markup=stream_markup_timer(_, chat_id, played, dur)
+        )
