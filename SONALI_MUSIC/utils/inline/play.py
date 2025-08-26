@@ -28,7 +28,7 @@ def track_markup(_, videoid, user_id, channel, fplay):
     return buttons
 
 
-def stream_markup_timer(_, chat_id, played, dur):
+def stream_markup_timer(_, chat_id, played, dur, bar=None):
     played_sec = time_to_seconds(played)
     duration_sec = time_to_seconds(dur)
     
@@ -130,6 +130,7 @@ def promo_markup_simple(chat_id):
 
 
 @app.on_callback_query()
+@app.on_callback_query()
 async def callback_handler(client, query):
     data = query.data
     if data.startswith("open_promo"):
@@ -141,6 +142,7 @@ async def callback_handler(client, query):
     elif data.startswith("stream_back"):
         chat_id = int(data.split("|")[1])
         
+    
         played = "0:00"  
         dur = "0:00"     
         _ = None         
@@ -149,12 +151,11 @@ async def callback_handler(client, query):
         duration_sec = time_to_seconds(dur)
         
         if duration_sec == 0:
-            bar = "◉—————————" 
-            percentage = 0
+            bar = "◉—————————"
         else:
             percentage = (played_sec / duration_sec) * 100
             umm = math.floor(percentage)
-
+            
             if 0 < umm <= 10:
                 bar = "◉—————————"
             elif 10 < umm < 20:
@@ -175,9 +176,9 @@ async def callback_handler(client, query):
                 bar = "————————◉—"
             else:
                 bar = "—————————◉"
-            
+        
         await query.message.edit_reply_markup(
-            reply_markup=InlineKeyboardMarkup(stream_markup_timer(_, chat_id, played, dur))
+            reply_markup=InlineKeyboardMarkup(stream_markup_timer(_, chat_id, played, dur, bar))
         )
 
 
