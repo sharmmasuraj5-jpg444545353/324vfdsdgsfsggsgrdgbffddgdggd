@@ -1,4 +1,3 @@
-import asyncio
 import datetime
 from pyrogram import filters, enums
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, Message
@@ -16,10 +15,6 @@ INFO_TEXT = """
 <b>● ᴄʀᴇᴀᴛᴇᴅ ᴏɴ ➠</b> {}
 <b>● ᴘʀᴇᴍɪᴜᴍ ➠</b> {}
 <b>● ꜱᴄᴀᴍ ➠</b> {}
-<b>● ꜰᴀᴋᴇ ➠</b> {}
-<b>● ꜱᴘᴀᴍ/ʀᴇꜱᴛʀɪᴄᴛ ➠</b> {}
-<b>● ʟɪᴍɪᴛᴀᴛɪᴏɴ ➠</b> {}
-<b>● ꜰʀᴏᴢᴇɴ ➠</b> {}
 """
 
 def get_creation_date(user_id: int):
@@ -33,17 +28,17 @@ async def userstatus(user_id):
         user = await app.get_users(user_id)
         x = user.status
         if x == enums.UserStatus.RECENTLY:
-            return "ʀᴇᴄᴇɴᴛʟʏ."
+            return "ʀᴇᴄᴇɴᴛʟʏ"
         elif x == enums.UserStatus.LAST_WEEK:
-            return "ʟᴀꜱᴛ ᴡᴇᴇᴋ."
+            return "ʟᴀꜱᴛ ᴡᴇᴇᴋ"
         elif x == enums.UserStatus.LONG_AGO:
-            return "ꜱᴇᴇɴ ʟᴏɴɢ ᴀɢᴏ."
+            return "ʟᴏɴɢ ᴀɢᴏ"
         elif x == enums.UserStatus.OFFLINE:
-            return "ᴏꜰꜰʟɪɴᴇ."
+            return "ᴏꜰꜰʟɪɴᴇ"
         elif x == enums.UserStatus.ONLINE:
-            return "ᴏɴʟɪɴᴇ."
+            return "ᴏɴʟɪɴᴇ"
     except:
-        return "❌ ᴇʀʀᴏʀ"
+        return "**✦ sᴏᴍᴇᴛʜɪɴɢ ᴡʀᴏɴɢ ʜᴀᴘᴘᴇɴᴇᴅ !**"
 
 @app.on_message(filters.command(["info", "information", "userinfo", "whois"], prefixes=["/", "!"]))
 async def userinfo(_, message: Message):
@@ -66,27 +61,13 @@ async def userinfo(_, message: Message):
             return
 
         # get user info
-        user_info = await app.get_chat(user_id)   
-        user = await app.get_users(user_id)       
+        user = await app.get_users(user_id)
         status = await userstatus(user.id)
-
         creation_date = get_creation_date(user.id).strftime("%d-%m-%Y %H:%M:%S")
 
         scam = "⚠️ ʏᴇꜱ" if user.is_scam else "✅ ɴᴏ"
-        fake = "⚠️ ʏᴇꜱ" if user.is_fake else "✅ ɴᴏ"
         premium = "✅ ʏᴇꜱ" if user.is_premium else "❌ ɴᴏ"
-        frozen = "❄️ ʏᴇꜱ" if getattr(user_info, "is_frozen", False) else "✅ ɴᴏ"
 
-        # restriction/ban check
-        if user_info.is_restricted:
-            restriction_reason = user_info.restriction_reason[0].reason if user_info.restriction_reason else "ᴜɴᴋɴᴏᴡɴ"
-            limitation = f"⛔ ʀᴇꜱᴛʀɪᴄᴛᴇᴅ ({restriction_reason})"
-        elif user_info.is_deleted:
-            limitation = "☠️ ᴅᴇʟᴇᴛᴇᴅ ᴀᴄᴄᴏᴜɴᴛ"
-        else:
-            limitation = "✅ ɴᴏ ʟɪᴍɪᴛᴀᴛɪᴏɴꜱ"
-
-        # profile link
         if user.username:
             profile_url = f"https://t.me/{user.username}"
         else:
@@ -101,7 +82,6 @@ async def userinfo(_, message: Message):
         else:
             photo_link = profile_url
 
-        # send final info
         await app.send_message(
             chat_id,
             text=INFO_TEXT.format(
@@ -113,11 +93,7 @@ async def userinfo(_, message: Message):
                 user.dc_id,
                 creation_date,
                 premium,
-                scam,
-                fake,
-                "⚠️ ʀᴇꜱᴛʀɪᴄᴛᴇᴅ" if user_info.is_restricted else "✅ ɴᴏ",
-                limitation,
-                frozen
+                scam
             ),
             reply_to_message_id=message.id,
             reply_markup=InlineKeyboardMarkup(
