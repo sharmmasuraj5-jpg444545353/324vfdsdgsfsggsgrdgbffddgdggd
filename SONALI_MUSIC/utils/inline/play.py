@@ -68,9 +68,7 @@ def stream_markup_timer(_, chat_id, played, dur):
             InlineKeyboardButton(text="< - 𝟤𝟢ˢ", callback_data="seek_backward_20"),
             InlineKeyboardButton(
                 text="• ᴘʀᴏᴍᴏ •",
-                web_app=WebAppInfo(
-                    url="https://t.me/TheSigmaCoder/?text=HII+OWNER+😅+I+WANT+PROMOTION+GIVE+ME+PRICE+LIST...😙"
-                )
+                url="https://t.me/TheSigmaCoder/?text=HII+OWNER+😅+I+WANT+PROMOTION+GIVE+ME+PRICE+LIST...😙"
             ),
             InlineKeyboardButton(text="𝟤𝟢ˢ + >", callback_data="seek_forward_20")
         ],
@@ -97,9 +95,7 @@ def stream_markup(_, chat_id):
             InlineKeyboardButton(text="< - 𝟤𝟢ˢ", callback_data="seek_backward_20"),
             InlineKeyboardButton(
                 text="• ᴘʀᴏᴍᴏ •",
-                web_app=WebAppInfo(
-                    url="https://t.me/TheSigmaCoder/?text=HII+OWNER+😅+I+WANT+PROMOTION+GIVE+ME+PRICE+LIST...😙"
-                )
+                url="https://t.me/TheSigmaCoder/?text=HII+OWNER+😅+I+WANT+PROMOTION+GIVE+ME+PRICE+LIST...😙"
             ),
             InlineKeyboardButton(text="𝟤𝟢ˢ + >", callback_data="seek_forward_20")
         ],
@@ -111,7 +107,6 @@ def stream_markup(_, chat_id):
         ]
     ]
     return buttons
-                
 
 def playlist_markup(_, videoid, user_id, ptype, channel, fplay):
     buttons = [
