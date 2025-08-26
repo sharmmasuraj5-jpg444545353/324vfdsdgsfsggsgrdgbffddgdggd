@@ -51,7 +51,7 @@ async def _clear_(chat_id):
 class Call(PyTgCalls):
     def __init__(self):
         self.userbot1 = Client(
-            name="SonaAss1",
+            name="PURVIAss1",
             api_id=config.API_ID,
             api_hash=config.API_HASH,
             session_string=str(config.STRING1),
@@ -61,7 +61,7 @@ class Call(PyTgCalls):
             cache_duration=100,
         )
         self.userbot2 = Client(
-            name="SonaAss2",
+            name="PURVIAss2",
             api_id=config.API_ID,
             api_hash=config.API_HASH,
             session_string=str(config.STRING2),
@@ -71,7 +71,7 @@ class Call(PyTgCalls):
             cache_duration=100,
         )
         self.userbot3 = Client(
-            name="SonaXAss3",
+            name="PURVIAss3",
             api_id=config.API_ID,
             api_hash=config.API_HASH,
             session_string=str(config.STRING3),
@@ -81,7 +81,7 @@ class Call(PyTgCalls):
             cache_duration=100,
         )
         self.userbot4 = Client(
-            name="SonaXAss4",
+            name="PURVIAss4",
             api_id=config.API_ID,
             api_hash=config.API_HASH,
             session_string=str(config.STRING4),
@@ -91,7 +91,7 @@ class Call(PyTgCalls):
             cache_duration=100,
         )
         self.userbot5 = Client(
-            name="SonaAss5",
+            name="PURVIAss5",
             api_id=config.API_ID,
             api_hash=config.API_HASH,
             session_string=str(config.STRING5),
@@ -342,10 +342,50 @@ class Call(PyTgCalls):
             await auto_clean(popped)
             if not check:
                 await _clear_(chat_id)
+                try:
+                    buttons = InlineKeyboardMarkup(
+                        [
+                            [
+                                InlineKeyboardButton(
+                                    "✙ ʌᴅᴅ ϻє вᴧʙʏ ✙", url=f"https://t.me/{app.username}?startgroup=true"
+                                ),
+                                InlineKeyboardButton(
+                                    "⋞ ᴄʟᴏsє ⋟", callback_data="close"
+                                )
+                            ]
+                        ]
+                    )
+                    await app.send_message(
+                        chat_id,
+                        "**ᴀʟʟ sᴏɴɢ ғɪɴɪsʜᴇᴅ ʙᴏᴛ ʟᴇғᴛ ᴠᴏɪᴄᴇ ᴄʜᴀᴛ ⚡️~!**\n\n**ᴘʟᴀʏ ᴀɢᴀɪɴ ᴀɴᴅ ᴇɴᴊᴏʏ sᴏɴɢs.⚡️~!**",
+                        reply_markup=buttons
+                    )
+                except:
+                    pass
                 return await client.leave_group_call(chat_id)
         except:
             try:
                 await _clear_(chat_id)
+                try:
+                    buttons = InlineKeyboardMarkup(
+                        [
+                            [
+                                InlineKeyboardButton(
+                                    "✙ ʌᴅᴅ ϻє вᴧʙʏ ✙", url=f"https://t.me/{app.username}?startgroup=true"
+                                ),
+                                InlineKeyboardButton(
+                                    "⋞ ᴄʟᴏsє ⋟", callback_data="close_message"
+                                )
+                            ]
+                        ]
+                    )
+                    await app.send_message(
+                        chat_id,
+                        "**ᴀʟʟ sᴏɴɢ ғɪɴɪsʜᴇᴅ ʙᴏᴛ ʟᴇғᴛ ᴠᴏɪᴄᴇ ᴄʜᴀᴛ ⚡️~!**\n\n**ᴘʟᴀʏ ᴀɢᴀɪɴ ᴀɴᴅ ᴇɴᴊᴏʏ sᴏɴɢs.⚡️~!**",
+                        reply_markup=buttons
+                    )
+                except:
+                    pass
                 return await client.leave_group_call(chat_id)
             except:
                 return
@@ -598,4 +638,4 @@ class Call(PyTgCalls):
             await self.change_stream(client, update.chat_id)
 
 
-Sona = Call()
+Sona = Call()                        
