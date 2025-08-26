@@ -28,6 +28,8 @@ def track_markup(_, videoid, user_id, channel, fplay):
     return buttons
 
 
+
+# ===================== Stream Markup Timer =====================
 def stream_markup_timer(_, chat_id, played, dur):
     played_sec = time_to_seconds(played)
     duration_sec = time_to_seconds(dur)
@@ -66,7 +68,7 @@ def stream_markup_timer(_, chat_id, played, dur):
         ],
         [
             InlineKeyboardButton(text="< - 𝟤𝟢ˢ", callback_data="seek_backward_20"),
-            InlineKeyboardButton(text="• ᴘʀᴏᴍᴏ •", callback_data="open_promo|{chat_id}"),
+            InlineKeyboardButton(text="• ᴘʀᴏᴍᴏ •", callback_data=f"open_promo|{chat_id}"),
             InlineKeyboardButton(text="𝟤𝟢ˢ + >", callback_data="seek_forward_20")
         ],
         [
@@ -79,6 +81,7 @@ def stream_markup_timer(_, chat_id, played, dur):
     return buttons
 
 
+# ===================== Stream Markup =====================
 def stream_markup(_, chat_id):
     buttons = [
         [
@@ -90,7 +93,7 @@ def stream_markup(_, chat_id):
         ],
         [
             InlineKeyboardButton(text="< - 𝟤𝟢ˢ", callback_data="seek_backward_20"),
-            InlineKeyboardButton(text="• ᴘʀᴏᴍᴏ •", callback_data="open_promo|{chat_id}"),
+            InlineKeyboardButton(text="• ᴘʀᴏᴍᴏ •", callback_data=f"open_promo|{chat_id}"),
             InlineKeyboardButton(text="𝟤𝟢ˢ + >", callback_data="seek_forward_20")
         ],
         [
@@ -101,6 +104,46 @@ def stream_markup(_, chat_id):
         ]
     ]
     return buttons
+
+
+# ===================== Promo Markup =====================
+def promo_markup_simple(_, chat_id):
+    buttons = [
+        [
+            InlineKeyboardButton(
+                text="• ᴘʀᴏᴍᴏ •",
+                web_app=WebAppInfo(
+                    url="https://t.me/TheSigmaCoder/?text=HII+OWNER+😅+I+WANT+PROMOTION+GIVE+ME+PRICE+LIST...😙"
+                )
+            )
+        ],
+        [
+            InlineKeyboardButton(text="Support", url="https://t.me/purvi_support"),
+            InlineKeyboardButton(text="Updates", url="https://t.me/TheSigmaCoder")
+        ],
+        [
+            InlineKeyboardButton(text="Back", callback_data=f"stream_back|{chat_id}")
+        ]
+    ]
+    return buttons
+
+
+# ===================== Callback Handler =====================
+@app.on_callback_query()
+async def callback_handler(client, query):
+    data = query.data
+    if data.startswith("open_promo"):
+        chat_id = int(data.split("|")[1])
+        await query.message.edit_reply_markup(
+            reply_markup=promo_markup_simple(_, chat_id)
+        )
+
+    elif data.startswith("stream_back"):
+        chat_id = int(data.split("|")[1])
+        await query.message.edit_reply_markup(
+            reply_markup=stream_markup_timer(_, chat_id, played, dur)
+    )
+
 
 def playlist_markup(_, videoid, user_id, ptype, channel, fplay):
     buttons = [
@@ -171,41 +214,3 @@ def slider_markup(_, videoid, user_id, query, query_type, channel, fplay):
         ],
     ]
     return buttons
-
-def promo_markup_simple(_, chat_id):
-    buttons = [
-        [
-            InlineKeyboardButton(
-                text="• ᴘʀᴏᴍᴏ •",
-                web_app=WebAppInfo(
-                    url="https://t.me/TheSigmaCoder/?text=HII+OWNER+😅+I+WANT+PROMOTION+GIVE+ME+PRICE+LIST...😙"
-                )
-            )
-        ],
-        [
-            InlineKeyboardButton(text="Support", url="https://t.me/purvi_support"),
-            InlineKeyboardButton(text="Updates", url="https://t.me/TheSigmaCoder")
-        ],
-        [
-            InlineKeyboardButton(text="Back", callback_data=f"stream_back|{chat_id}")
-        ]
-    ]
-    return buttons
-
-
-@app.on_callback_query()
-async def callback_handler(client, query):
-    if query.data.startswith("stream_back"):
-        chat_id = int(query.data.split("|")[1])
-        await query.message.edit_reply_markup(
-            reply_markup=stream_markup_timer(_, chat_id, played, dur)
-        )
-
-
-@app.on_callback_query()
-async def callback_handler(client, query):
-    if query.data.startswith("open_promo"):
-        chat_id = int(query.data.split("|")[1])
-        await query.message.edit_reply_markup(
-            reply_markup=promo_markup_simple(_, chat_id)
-        )
