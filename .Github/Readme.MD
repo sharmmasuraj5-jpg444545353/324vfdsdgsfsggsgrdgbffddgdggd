@@ -69,12 +69,11 @@
    - Edit .env with your values.
    - Press `I` button on keyboard to start editing.
    - Press `Ctrl + C`  once you are done with editing vars and type `:wq` to save .env or `:qa` to exit editing.
-
- 10. **🔗 ɪɴsᴛᴀʟʟɪɴɢ ᴛᴍᴜx**
+10. **🔗 ɪɴsᴛᴀʟʟɪɴɢ ᴛᴍᴜx**
     ```bash
     sudo apt install tmux -y && tmux
     ```
- 11. **🚀 ʀᴜɴ ᴛʜᴇ ʙᴏᴛ**
+11. **🚀 ʀᴜɴ ᴛʜᴇ ʙᴏᴛ**
     ```bash
     bash start
     ```
