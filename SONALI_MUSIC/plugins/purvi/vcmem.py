@@ -3,31 +3,14 @@ from pyrogram.enums import ChatType
 from strings import get_string
 from SONALI_MUSIC import app
 from SONALI_MUSIC.utils import SonaBin
-
-from SONALI_MUSIC.utils.database import get_assistant, get_lang
-import asyncio
-from os import getenv
-from dotenv import load_dotenv
-from pyrogram import Client
-from dotenv import load_dotenv
-import config
-
-from SONALI_MUSIC.logging import LOGGER
-from SONALI_MUSIC.utils.database import (
-    delete_filter,
-    get_cmode,
-    get_lang,
-    is_active_chat,
-    is_commanddelete_on,
-    is_maintenance,
-    is_nonadmin_chat,
-    set_loop,
-)
+from SONALI_MUSIC.utils.database import get_assistant
 from SONALI_MUSIC.core.call import Sona
 
-
 @app.on_message(
-    filters.command(["vcuser", "vcusers", "vcmember", "vcmembers", "cu", "cm"], prefixes=["/", "!", ".", "V", "v"]) & filters.admin
+    filters.command(
+        ["vcuser", "vcusers", "vcmember", "vcmembers", "cu", "cm"], 
+        prefixes=["/", "!", ".", "V", "v"]
+    ) & filters.admin
 )
 async def vc_members(client, message):
     try:
