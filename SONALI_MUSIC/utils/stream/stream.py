@@ -32,10 +32,8 @@ async def stream(
     if forceplay:
         await Sona.force_stop_stream(chat_id)
 
-    # ------------------------- CREATE USER MENTION -------------------------
     user_mention = f"[{user_name}](tg://user?id={user_id})"
 
-    # ------------------------- PLAYLIST -------------------------
     if streamtype == "playlist":
         msg = f"{_['play_19']}\n\n"
         count = 0
@@ -94,7 +92,6 @@ async def stream(
                 reply_markup=upl,
             )
 
-    # ------------------------- YOUTUBE -------------------------
     elif streamtype == "youtube":
         link = result["link"]
         vidid = result["vidid"]
@@ -132,7 +129,6 @@ async def stream(
             db[chat_id][0]["mystic"] = run
             db[chat_id][0]["markup"] = "stream"
 
-    # ------------------------- SOUNDCLOUD -------------------------
     elif streamtype == "soundcloud":
         file_path = result["filepath"]
         title = result["title"]
@@ -162,7 +158,6 @@ async def stream(
             db[chat_id][0]["mystic"] = run
             db[chat_id][0]["markup"] = "tg"
 
-    # ------------------------- TELEGRAM -------------------------
     elif streamtype == "telegram":
         file_path = result["path"]
         link = result["link"]
@@ -196,7 +191,6 @@ async def stream(
             db[chat_id][0]["mystic"] = run
             db[chat_id][0]["markup"] = "tg"
 
-    # ------------------------- LIVE -------------------------
     elif streamtype == "live":
         link = result["link"]
         vidid = result["vidid"]
@@ -233,7 +227,7 @@ async def stream(
             db[chat_id][0]["mystic"] = run
             db[chat_id][0]["markup"] = "tg"
 
-    # ------------------------- INDEX / M3U8 -------------------------
+ 
     elif streamtype == "index":
         link = result
         title = "ɪɴᴅᴇx ᴏʀ ᴍ3ᴜ8 ʟɪɴᴋ"
