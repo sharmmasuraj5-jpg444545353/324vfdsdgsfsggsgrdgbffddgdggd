@@ -32,11 +32,11 @@ async def safe_edit(msg: Message, text: str):
 @app.on_message(filters.command(["zombies"]))
 async def prompt_zombie_cleanup(_: Client, message: Message):
     if not await is_admin(message):
-        return await message.reply("👮🏻 | **Only admins can execute this command.**")
+        return await message.reply("**👮🏻 | ᴏɴʟʏ ᴀᴅᴍɪɴs ᴄᴀɴ ᴇxᴇᴄᴜᴛᴇ ᴛʜɪs ᴄᴏᴍᴍᴀɴᴅ.**")
 
     deleted_list = await scan_deleted_members(message.chat.id)
     if not deleted_list:
-        return await message.reply("⟳ | **No deleted accounts found in this chat.**")
+        return await message.reply("**⟳ | ɴᴏ ᴅᴇʟᴇᴛᴇᴅ ᴀᴄᴄᴏᴜɴᴛs ғᴏᴜɴᴅ ɪɴ ᴛʜɪs ᴄʜᴀᴛ.**")
 
     total = len(deleted_list)
     est_time = max(1, total // 5)
@@ -44,17 +44,17 @@ async def prompt_zombie_cleanup(_: Client, message: Message):
     keyboard = InlineKeyboardMarkup(
         [
             [
-                InlineKeyboardButton("✅ Yes, Clean", callback_data=f"confirm_zombies:{message.chat.id}"),
-                InlineKeyboardButton("❌ Cancel", callback_data="cancel_zombies"),
+                InlineKeyboardButton("✅ ʏᴇs, ᴄʟᴇᴀɴ", callback_data=f"confirm_zombies:{message.chat.id}"),
+                InlineKeyboardButton("❌ ᴄᴀɴᴄᴇʟ", callback_data="cancel_zombies"),
             ]
         ]
     )
 
     await message.reply(
         (
-            f"⚠️ | **Found `{total}` deleted accounts.**\n"
-            f"⏳ | **Estimated cleanup time:** `{est_time}s`\n\n"
-            "Do you want to clean them?"
+            f"**⚠️ | ғᴏᴜɴᴅ** `{total}` **ᴅᴇʟᴇᴛᴇᴅ ᴀᴄᴄᴏᴜɴᴛs.**\n"
+            f"**⏳ | ᴇsᴛɪᴍᴀᴛᴇᴅ ᴄʟᴇᴀɴᴜᴘ ᴛɪᴍᴇ :-** `{est_time}s`\n\n"
+            "ᴅ**ᴏ ʏᴏᴜ ᴡᴀɴᴛ ᴛᴏ ᴄʟᴇᴀɴ ᴛʜᴇᴍ ??**"
         ),
         reply_markup=keyboard,
     )
@@ -65,21 +65,21 @@ async def execute_zombie_cleanup(_: Client, cq: CallbackQuery):
     chat_id = int(cq.data.split(":")[1])
 
     if not await is_admin(cq):
-        return await cq.answer("👮🏻 | Only admins can confirm this action.", show_alert=True)
+        return await cq.answer("👮🏻 | ᴏɴʟʏ ᴀᴅᴍɪɴs ᴄᴀɴ ᴄᴏɴғɪʀᴍ ᴛʜɪs ᴀᴄᴛɪᴏɴ.", show_alert=True)
 
     if chat_id in chatQueue:
-        return await cq.answer("⚠️ | Cleanup already in progress.", show_alert=True)
+        return await cq.answer("⚠️ | ᴄʟᴇᴀɴᴜᴘ ᴀʟʀᴇᴀᴅʏ ɪɴ ᴘʀᴏɢʀᴇss.", show_alert=True)
 
     bot_me = await app.get_chat_member(chat_id, "self")
     if bot_me.status != ChatMemberStatus.ADMINISTRATOR:
-        return await cq.edit_message_text("➠ | **I need admin rights to remove deleted accounts.**")
+        return await cq.edit_message_text("**➠ | ɪ ɴᴇᴇᴅ ᴀᴅᴍɪɴ ʀɪɢʜᴛs ᴛᴏ ʀᴇᴍᴏᴠᴇ ᴅᴇʟᴇᴛᴇᴅ ᴀᴄᴄᴏᴜɴᴛs.**")
 
     chatQueue.add(chat_id)
     deleted_list = await scan_deleted_members(chat_id)
     total = len(deleted_list)
 
     status = await cq.edit_message_text(
-        f"🧭 | **Found `{total}` deleted accounts.**\n🥀 | **Starting cleanup...**"
+        f"**🧭 | ғᴏᴜɴᴅ** `{total}` **ᴅᴇʟᴇᴛᴇᴅ ᴀᴄᴄᴏᴜɴᴛs.**\n**🥀 | sᴛᴀʀᴛɪɴɢ ᴄʟᴇᴀɴᴜᴘ...**"
     )
 
     removed = 0
@@ -104,13 +104,12 @@ async def execute_zombie_cleanup(_: Client, cq: CallbackQuery):
     for i in range(0, len(tasks), batch_size):
         results = await asyncio.gather(*tasks[i:i + batch_size], return_exceptions=True)
         removed += sum(1 for r in results if r is True)
-        await safe_edit(status, f"♻️ | **Removed {removed}/{total} deleted accounts...**")
+        await safe_edit(status, f"**♻️ | ʀᴇᴍᴏᴠᴇᴅ** `{removed}/{total}` **ᴅᴇʟᴇᴛᴇᴅ ᴀᴄᴄᴏᴜɴᴛs...**")
         await asyncio.sleep(2)
 
     chatQueue.discard(chat_id)
-    await safe_edit(status, f"✅ | **Successfully removed `{removed}` out of `{total}` zombies.**")
+    await safe_edit(status, f"**✅ | sᴜᴄᴄᴇssғᴜʟʟʏ ʀᴇᴍᴏᴠᴇᴅ** `{removed}` **ᴏᴜᴛ ᴏғ** `{total}` **ᴢᴏᴍʙɪᴇs.**")
 
 @app.on_callback_query(filters.regex(r"^cancel_zombies$"))
 async def cancel_zombie_cleanup(_: Client, cq: CallbackQuery):
-    await cq.edit_message_text("❌ | **Cleanup cancelled.**")
-
+    await cq.edit_message_text("**❌ | ᴄʟᴇᴀɴᴜᴘ ᴄᴀɴᴄᴇʟʟᴇᴅ.**")
