@@ -90,9 +90,9 @@ async def welcome_cmd(client, message: Message):
     ])
 
     await message.reply_text(
-    f"<b>ɢʀᴏᴜᴘ ɴᴀᴍᴇ :-</b> {chat_title}\n"
-    f"<b>ɢʀᴏᴜᴘ ɪᴅ :-</b> {chat_id}\n"
-    f"<b>ᴄᴜʀʀᴇɴᴛ ᴡᴇʟᴄᴏᴍᴇ sᴛᴀᴛᴜs :-</b> {status}",
+    f"<b>⊚ ɢʀᴏᴜᴘ ɴᴀᴍᴇ :-</b> {chat_title}\n"
+    f"<b>⋟ ɢʀᴏᴜᴘ ɪᴅ :-</b> {chat_id}\n"
+    f"<b>⋟ ᴄᴜʀʀᴇɴᴛ ᴡᴇʟᴄᴏᴍᴇ sᴛᴀᴛᴜs :-</b> {status}",
     reply_markup=keyboard,
     parse_mode=enums.ParseMode.HTML
 )
@@ -111,9 +111,9 @@ async def left_cmd(client, message: Message):
     ])
 
     await message.reply_text(
-    f"<b>ɢʀᴏᴜᴘ ɴᴀᴍᴇ :-</b> {chat_title}\n"
-    f"<b>ɢʀᴏᴜᴘ ɪᴅ :-</b> {chat_id}\n"
-    f"<b>ᴄᴜʀʀᴇɴᴛ ʟᴇғᴛ sᴛᴀᴛᴜs :-</b> {status}",
+    f"<b>⊚ ɢʀᴏᴜᴘ ɴᴀᴍᴇ :-</b> {chat_title}\n"
+    f"<b>⋟ ɢʀᴏᴜᴘ ɪᴅ :-</b> {chat_id}\n"
+    f"<b>⋟ ᴄᴜʀʀᴇɴᴛ ʟᴇғᴛ sᴛᴀᴛᴜs :-</b> {status}",
     reply_markup=keyboard,
     parse_mode=enums.ParseMode.HTML
 )
@@ -158,7 +158,7 @@ async def callback_toggle(client, callback_query: CallbackQuery):
         else:
             new_text = f"<b>⋟ ʟᴇғᴛ ᴍᴇssᴀɢᴇs ᴀʟʀᴇᴀᴅʏ ᴅɪsᴀʙʟᴇᴅ ɪɴ :-</b>{chat_title}"
 
-    # Edit message and remove buttons
+    
     if callback_query.message.text != new_text:
         await callback_query.message.edit_text(new_text, parse_mode=enums.ParseMode.HTML)
 
