@@ -85,31 +85,44 @@ async def callback_toggle(client, callback_query: CallbackQuery):
     if not await is_admin(client, chat_id, user.id):
         return await callback_query.answer("This is not for you baby 🥺", show_alert=True)
 
-    # Welcome toggle
+    # Admin taps: update DB + edit message
+    new_status_text = ""
     if "welcome_enable" in data:
         if is_welcome_enabled(chat_id):
-            return await callback_query.answer(f"Already enabled in {chat_title}!", show_alert=True)
-        set_welcome(chat_id, True)
-        await callback_query.answer(f"✅ Welcome enabled in {chat_title}!", show_alert=True)
+            new_status_text = f"⚙ Welcome messages current status in {chat_title}: ENABLED"
+        else:
+            set_welcome(chat_id, True)
+            new_status_text = f"✅ Welcome messages ENABLED in {chat_title}"
     
     elif "welcome_disable" in data:
         if not is_welcome_enabled(chat_id):
-            return await callback_query.answer(f"Already disabled in {chat_title}!", show_alert=True)
-        set_welcome(chat_id, False)
-        await callback_query.answer(f"❌ Welcome disabled in {chat_title}!", show_alert=True)
+            new_status_text = f"⚙ Welcome messages current status in {chat_title}: DISABLED"
+        else:
+            set_welcome(chat_id, False)
+            new_status_text = f"❌ Welcome messages DISABLED in {chat_title}"
 
-    # Left toggle
     elif "left_enable" in data:
         if is_left_enabled(chat_id):
-            return await callback_query.answer(f"Already enabled in {chat_title}!", show_alert=True)
-        set_left(chat_id, True)
-        await callback_query.answer(f"✅ Left enabled in {chat_title}!", show_alert=True)
+            new_status_text = f"⚙ Left messages current status in {chat_title}: ENABLED"
+        else:
+            set_left(chat_id, True)
+            new_status_text = f"✅ Left messages ENABLED in {chat_title}"
 
     elif "left_disable" in data:
         if not is_left_enabled(chat_id):
-            return await callback_query.answer(f"Already disabled in {chat_title}!", show_alert=True)
-        set_left(chat_id, False)
-        await callback_query.answer(f"❌ Left disabled in {chat_title}!", show_alert=True)
+            new_status_text = f"⚙ Left messages current status in {chat_title}: DISABLED"
+        else:
+            set_left(chat_id, False)
+            new_status_text = f"❌ Left messages DISABLED in {chat_title}"
+
+    # Edit original message
+    keyboard = InlineKeyboardMarkup([
+        [
+            InlineKeyboardButton("Enable", callback_data=f"{data.split('_')[0]}_enable_{chat_id}"),
+            InlineKeyboardButton("Disable", callback_data=f"{data.split('_')[0]}_disable_{chat_id}")
+        ]
+    ])
+    await callback_query.message.edit_text(new_status_text, reply_markup=keyboard)
 
 # --- Welcome new members ---
 @app.on_message(filters.new_chat_members)
