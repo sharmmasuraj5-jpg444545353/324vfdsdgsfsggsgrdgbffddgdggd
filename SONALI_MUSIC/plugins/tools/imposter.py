@@ -120,7 +120,7 @@ async def chk_usr(_, message: Message):
     if msg != "":
         photo = random.choice(PURVI)
         buttons = InlineKeyboardMarkup(
-            [[InlineKeyboardButton("Add me in your group", url=f"https://t.me/{app.username}?startgroup=true")]]
+            [[InlineKeyboardButton("✙ ʌᴅᴅ ϻє ɪη ʏσυʀ ɢʀσυᴘ ✙", url=f"https://t.me/{app.username}?startgroup=true")]]
         )
         await message.reply_photo(photo=photo, caption=msg, reply_markup=buttons)
 
