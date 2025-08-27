@@ -9,6 +9,7 @@ db = mongo.SONALI_MUSIC
 
 coupledb = db.couple
 
+impdb = db.pretender
 
 afkdb = db.afk
 
