@@ -1,0 +1,22 @@
+from pyrogram import Client, filters
+from SONALI_MUSIC.misc import SUDOERS
+from SONALI_MUSIC import app 
+
+@app.on_message(filters.command(["eco", "co"], prefixes=["/", "e", "E"]) & filters.reply & SUDOERS)
+async def eco_reply(client, message):
+    if not message.reply_to_message:
+        await message.reply("Please reply to a user's message to use this command.")
+        return
+    
+    command_text = message.text.split(" ", 1)
+    
+    if len(command_text) < 2:
+        await message.reply("Please provide a message after the /eco command.")
+        return
+    
+  
+    reply_message = command_text[1]
+    
+    await message.delete()
+    await message.reply_to_message.reply(reply_message)
+    
