@@ -3,6 +3,7 @@ import asyncio
 from SONALI_MUSIC import app
 from pyrogram import filters
 from pyrogram.types import Message
+from pyrogram.enums import ChatType
 from pymongo import MongoClient
 from config import MONGO_DB_URI 
 
@@ -33,7 +34,6 @@ PURVI_WEL_MSG = [
     "❖ {user}, ᴡᴇʟᴄᴏᴍᴇ! ʟᴇᴛ's ʜᴀᴠᴇ ꜰᴜɴ!"
 ]
 
-
 PURVI_LEFT_MSG = [
     "❖ ʙʏᴇ ʙʏᴇ {user}! sᴇᴇ ʏᴏᴜ sᴏᴏɴ.",
     "❖ {user} ʟᴇꜰᴛ... ᴛʜᴇ ɢʀᴏᴜᴘ ꜰᴇᴇʟs ᴇᴍᴘᴛʏ.",
@@ -57,7 +57,6 @@ PURVI_LEFT_MSG = [
     "❖ sᴇᴇ ʏᴏᴜ ʟᴀᴛᴇʀ {user}!"
 ]
 
-
 last_welcome = {}
 
 def is_welcome_enabled(chat_id):
@@ -75,7 +74,7 @@ def set_left(chat_id, value: bool):
     chat_settings.update_one({"chat_id": chat_id}, {"$set": {"left": value}}, upsert=True)
 
 
-@app.on_message(filters.command(["welcome"]) & filters.group)
+@app.on_message(filters.command(["welcome"]) & filters.chat_type.ChatType.GROUP)
 async def welcome_cmd(client, message: Message):
     if len(message.command) < 2:
         return await message.reply_text("❖ usage: /welcome on or /welcome off")
@@ -90,7 +89,7 @@ async def welcome_cmd(client, message: Message):
         await message.reply_text("❖ usage: /welcome on or /welcome off")
 
 
-@app.on_message(filters.command(["left"]) & filters.group)
+@app.on_message(filters.command(["left"]) & filters.chat_type.ChatType.GROUP)
 async def left_cmd(client, message: Message):
     if len(message.command) < 2:
         return await message.reply_text("❖ usage: /left on or /left off")
@@ -122,7 +121,8 @@ async def welcome(client, message: Message):
     for new_member in message.new_chat_members:
         text = random.choice(PURVI_WEL_MSG).format(user=new_member.mention)
         sent = await message.reply_text(text)
-        last_welcome[chat_id] = sent.message_id
+        last_welcome[chat_id] = sent.id  # Changed from message_id to id
+
 
 @app.on_message(filters.left_chat_member)
 async def left(client, message: Message):
@@ -136,6 +136,6 @@ async def left(client, message: Message):
     # Auto delete after 10 seconds
     await asyncio.sleep(10)
     try:
-        await client.delete_messages(message.chat.id, sent.message_id)
+        await client.delete_messages(message.chat.id, sent.id)  # Changed from message_id to id
     except:
         pass
