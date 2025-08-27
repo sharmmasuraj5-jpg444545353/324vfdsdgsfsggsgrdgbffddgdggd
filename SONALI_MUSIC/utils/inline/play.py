@@ -1,6 +1,6 @@
 import math
 from config import SUPPORT_CHAT, OWNER_USERNAME
-from pyrogram.types import InlineKeyboardButton
+from pyrogram.types import InlineKeyboardButton, WebAppInfo
 from SONALI_MUSIC import app
 import config
 from SONALI_MUSIC.utils.formatters import time_to_seconds
@@ -69,7 +69,7 @@ def stream_markup_timer(_, chat_id, played, dur):
         ],
          [
              InlineKeyboardButton(text="< - 𝟤𝟢ˢ", callback_data="seek_backward_20"),
-             InlineKeyboardButton(text=_["S_B_2"], url=SUPPORT_CHAT),
+             InlineKeyboardButton(text="• ᴘʀᴏᴍᴏ •", web_app=WebAppInfo(url="https://t.me/m/FFljyYI6NmE9")),
              InlineKeyboardButton(text="𝟤𝟢ˢ + >", callback_data="seek_forward_20")
          ],
         [
@@ -90,7 +90,7 @@ def stream_markup(_, chat_id):
          ],
         [
              InlineKeyboardButton(text="< - 𝟤𝟢ˢ", callback_data="seek_backward_20"),
-             InlineKeyboardButton(text=_["S_B_2"], url=SUPPORT_CHAT),
+             InlineKeyboardButton(text="• ᴘʀᴏᴍᴏ •", web_app=WebAppInfo(url="https://t.me/m/FFljyYI6NmE9")),
              InlineKeyboardButton(text="𝟤𝟢ˢ + >", callback_data="seek_forward_20")
          ],
         [
