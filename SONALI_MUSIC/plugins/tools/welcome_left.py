@@ -1,8 +1,8 @@
 import random
 import asyncio
 from SONALI_MUSIC import app
-from pyrogram import filters
-from pyrogram.types import Message, CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup
+from pyrogram import filters, enums
+from pyrogram.types import Message, CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup, ChatMemberUpdated
 from pymongo import MongoClient
 from config import MONGO_DB_URI
 
@@ -43,7 +43,7 @@ def set_left(chat_id, value: bool):
 # Admin check
 async def is_admin(client, chat_id, user_id):
     member = await client.get_chat_member(chat_id, user_id)
-    return member.status in ("administrator", "creator")
+    return member.status in (enums.ChatMemberStatus.ADMINISTRATOR, enums.ChatMemberStatus.OWNER)
 
 # Welcome command
 @app.on_message(filters.command("welcome") & filters.group)
@@ -62,7 +62,7 @@ async def welcome_cmd(client, message: Message):
     await message.reply_text(
         f"<b>Welcome messages current status in {chat_title}:</b> {status}",
         reply_markup=keyboard,
-        parse_mode="html"
+        parse_mode=enums.ParseMode.HTML
     )
 
 # Left command
@@ -82,7 +82,7 @@ async def left_cmd(client, message: Message):
     await message.reply_text(
         f"<b>Left messages current status in {chat_title}:</b> {status}",
         reply_markup=keyboard,
-        parse_mode="html"
+        parse_mode=enums.ParseMode.HTML
     )
 
 # Callback query handler
@@ -128,7 +128,7 @@ async def callback_toggle(client, callback_query: CallbackQuery):
 
     # Edit message and remove buttons
     if callback_query.message.text != new_text:
-        await callback_query.message.edit_text(new_text, parse_mode="html")
+        await callback_query.message.edit_text(new_text, parse_mode=enums.ParseMode.HTML)
 
 # Welcome message handler
 @app.on_message(filters.new_chat_members)
@@ -145,26 +145,25 @@ async def welcome(client, message: Message):
 
     for new_member in message.new_chat_members:
         text = random.choice(PURVI_WEL_MSG).format(user=new_member.mention)
-        sent = await message.reply_text(text, parse_mode="html")
+        sent = await message.reply_text(text, parse_mode=enums.ParseMode.HTML)
         last_welcome[chat_id] = sent.id
 
 # Left message handler using on_chat_member_updated
-from pyrogram.types import ChatMemberUpdated
-
 @app.on_chat_member_updated(filters.group)
 async def left_member_handler(client: app, member: ChatMemberUpdated):
     chat_id = member.chat.id
     if not is_left_enabled(chat_id):
         return
 
+    # Fix for NoneType error - check if new_chat_member exists
     if (
         member.old_chat_member
-        and (member.old_chat_member.status in ("member", "administrator", "creator"))
-        and (not member.new_chat_member or member.new_chat_member.status in ("left", "kicked"))
+        and (member.old_chat_member.status in (enums.ChatMemberStatus.MEMBER, enums.ChatMemberStatus.ADMINISTRATOR, enums.ChatMemberStatus.OWNER))
+        and (member.new_chat_member is None or member.new_chat_member.status in (enums.ChatMemberStatus.LEFT, enums.ChatMemberStatus.BANNED))
     ):
         user = member.old_chat_member.user
         text = random.choice(PURVI_LEFT_MSG).format(user=f"<b>{user.first_name}</b>")
-        sent = await client.send_message(chat_id, text, parse_mode="html")
+        sent = await client.send_message(chat_id, text, parse_mode=enums.ParseMode.HTML)
 
         # Delete after 10 seconds
         await asyncio.sleep(10)
