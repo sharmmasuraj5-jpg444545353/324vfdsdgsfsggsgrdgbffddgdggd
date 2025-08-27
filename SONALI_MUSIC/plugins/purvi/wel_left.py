@@ -1,120 +1,108 @@
-import random
 import asyncio
-from SONALI_MUSIC import app
-from pyrogram import filters
+import random
+from pyrogram import Client, filters, enums
 from pyrogram.types import Message
-from pyrogram.enums import ChatType
 from pymongo import MongoClient
-from config import MONGO_DB_URI 
+from config import MONGO_DB_URI
 
+from SONALI_MUSIC import app
+
+# MongoDB setup
 mongo_client = MongoClient(MONGO_DB_URI)
 db = mongo_client["welcome_db"]
-chat_settings = db["chat_settings"]
+welc = db["welcome"]
 
+# Welcome messages list
 PURVI_WEL_MSG = [
-    "❖ ʜᴇʏ {user}, ᴡᴇʟᴄᴏᴍᴇ ᴛᴏ ᴛʜᴇ ɢʀᴏᴜᴘ!",
-    "❖ ɢʟᴀᴅ ᴛᴏ sᴇᴇ ʏᴏᴜ ʜᴇʀᴇ, {user}!",
-    "❖ ɢʀᴇᴇᴛɪɴɢs {user}! ᴇɴᴊᴏʏ ʏᴏᴜʀ sᴛᴀʏ.",
-    "❖ ʜᴇʟʟᴏ {user}! ᴍᴀᴋᴇ ʏᴏᴜʀsᴇʟꜰ ᴀᴛ ʜᴏᴍᴇ.",
-    "❖ ᴡᴇʟᴄᴏᴍᴇ {user}! ʜᴏᴘᴇ ʏᴏᴜ ʜᴀᴠᴇ ᴀ ɢʀᴇᴀᴛ ᴛɪᴍᴇ.",
-    "❖ ʜɪ {user}, ʜᴀᴘᴘʏ ᴛᴏ ʜᴀᴠᴇ ʏᴏᴜ ʜᴇʀᴇ!",
-    "❖ ᴄʜᴇᴇʀs {user}, ᴡᴇʟᴄᴏᴍᴇ ᴀʙᴏᴀʀᴅ!",
-    "❖ {user}, ᴇɴᴊᴏʏ ʏᴏᴜʀ sᴛᴀʏ ɪɴ ᴛʜᴇ ɢʀᴏᴜᴘ!",
-    "❖ ʜᴇʏ {user}, ᴍᴀᴋᴇ ʏᴏᴜʀsᴇʟꜰ ᴄᴏᴍꜰᴏʀᴛᴀʙʟᴇ!",
-    "❖ ᴡᴇʟᴄᴏᴍᴇ {user}! ʟᴇᴛ's ʜᴀᴠᴇ ꜰᴜɴ ᴛᴏɢᴇᴛʜᴇʀ!"
+    "❖ ʜᴇʏ {user}, ᴡᴇʟᴄᴏᴍᴇ ᴛᴏ {chat}!",
+    "✿ {user}, ɪ'ᴍ ɢʟᴀᴅ ᴛᴏ sᴇᴇ ʏᴏᴜ ʜᴇʀᴇ ɪɴ {chat}.",
+    "✧ {user} ᴊᴜsᴛ ʟᴀɴᴅᴇᴅ ɪɴ {chat}, ᴡᴇʟᴄᴏᴍᴇ!",
 ]
 
 PURVI_LEFT_MSG = [
-    "❖ ʙʏᴇ ʙʏᴇ {user}! sᴇᴇ ʏᴏᴜ sᴏᴏɴ.",
-    "❖ {user} ʟᴇꜰᴛ... ᴛʜᴇ ɢʀᴏᴜᴘ ꜰᴇᴇʟs ᴇᴍᴘᴛʏ.",
-    "❖ ɢᴏᴏᴅʙʏᴇ {user}! ᴛᴀᴋᴇ ᴄᴀʀᴇ.",
-    "❖ {user} ɪs ɢᴏɴᴇ, ᴡᴇ'ʟʟ ᴍɪss ʏᴏᴜ!",
-    "❖ {user} ʟᴇꜰᴛ ᴛʜᴇ ɢʀᴏᴜᴘ."
+    "✦ {user} ʟᴇғᴛ {chat}, sᴇᴇ ʏᴏᴜ ᴀɢᴀɪɴ!",
+    "❖ {user} ɪs ɴᴏ ʟᴏɴɢᴇʀ ᴡɪᴛʜ ᴜs ɪɴ {chat}.",
+    "✿ ɢᴏᴏᴅʙʏᴇ {user}, ғʀᴏᴍ {chat}!",
 ]
 
-# last welcome ko store karne ke liye
-last_welcome = {}
 
-# ---------------- Mongo Helpers ---------------- #
-def is_welcome_enabled(chat_id: int):
-    setting = chat_settings.find_one({"chat_id": int(chat_id)})
-    return setting.get("welcome", True) if setting else True
-
-def is_left_enabled(chat_id: int):
-    setting = chat_settings.find_one({"chat_id": int(chat_id)})
-    return setting.get("left", True) if setting else True
-
-def set_welcome(chat_id: int, value: bool):
-    chat_settings.update_one({"chat_id": int(chat_id)}, {"$set": {"welcome": value}}, upsert=True)
-
-def set_left(chat_id: int, value: bool):
-    chat_settings.update_one({"chat_id": int(chat_id)}, {"$set": {"left": value}}, upsert=True)
-
-# ---------------- Commands ---------------- #
-@app.on_message(filters.command("welcome") & filters.chat_type([ChatType.GROUP, ChatType.SUPERGROUP]))
-async def welcome_cmd(client, message: Message):
-    if len(message.command) < 2:
-        return await message.reply_text("❖ ᴜsᴀɢᴇ: /welcome on or /welcome off")
-
-    action = message.command[1].lower()
-    if action == "on":
-        set_welcome(message.chat.id, True)
-        await message.reply_text("❖ ᴡᴇʟᴄᴏᴍᴇ ᴍᴇssᴀɢᴇs ᴇɴᴀʙʟᴇᴅ ✅")
-    elif action == "off":
-        set_welcome(message.chat.id, False)
-        await message.reply_text("❖ ᴡᴇʟᴄᴏᴍᴇ ᴍᴇssᴀɢᴇs ᴅɪsᴀʙʟᴇᴅ ❌")
-    else:
-        await message.reply_text("❖ ᴜsᴀɢᴇ: /welcome on or /welcome off")
-
-@app.on_message(filters.command("left") & filters.chat_type([ChatType.GROUP, ChatType.SUPERGROUP]))
-async def left_cmd(client, message: Message):
-    if len(message.command) < 2:
-        return await message.reply_text("❖ ᴜsᴀɢᴇ: /left on or /left off")
-
-    action = message.command[1].lower()
-    if action == "on":
-        set_left(message.chat.id, True)
-        await message.reply_text("❖ ʟᴇꜰᴛ ᴍᴇssᴀɢᴇs ᴇɴᴀʙʟᴇᴅ ✅")
-    elif action == "off":
-        set_left(message.chat.id, False)
-        await message.reply_text("❖ ʟᴇꜰᴛ ᴍᴇssᴀɢᴇs ᴅɪsᴀʙʟᴇᴅ ❌")
-    else:
-        await message.reply_text("❖ ᴜsᴀɢᴇ: /left on or /left off")
-
-# ---------------- Events ---------------- #
-@app.on_message(filters.new_chat_members)
-async def welcome(client, message: Message):
-    if not is_welcome_enabled(message.chat.id):
-        return
-
-    chat_id = message.chat.id
-
-    # purana welcome delete
-    if chat_id in last_welcome:
-        try:
-            await client.delete_messages(chat_id, last_welcome[chat_id])
-        except:
-            pass
-
-    for new_member in message.new_chat_members:
-        text = random.choice(PURVI_WEL_MSG).format(user=new_member.mention)
-        sent = await message.reply_text(text)
-        last_welcome[chat_id] = sent.id  # last id save karna
-
-@app.on_message(filters.chat_type([ChatType.GROUP, ChatType.SUPERGROUP]))
-async def left(client, message: Message):
-    if not message.left_chat_member:
-        return
-    if not is_left_enabled(message.chat.id):
-        return
-
-    left_user = message.left_chat_member
-    text = random.choice(PURVI_LEFT_MSG).format(user=left_user.mention)
-    sent = await message.reply_text(text)
-
-    # 10s baad delete
-    await asyncio.sleep(10)
+# ─────────────── Helper: Admin Check ─────────────── #
+async def is_admin(chat, user_id: int) -> bool:
     try:
-        await client.delete_messages(message.chat.id, sent.id)
+        member = await app.get_chat_member(chat.id, user_id)
+        return member.status in [enums.ChatMemberStatus.ADMINISTRATOR, enums.ChatMemberStatus.OWNER]
     except:
-        pass
+        return False
+
+
+# Enable Welcome
+@app.on_message(filters.command(["welcomeon", "welon"]) & filters.group)
+async def enable_welcome(client: Client, message: Message):
+    if not await is_admin(message.chat, message.from_user.id):
+        return await message.reply_text("❌ **ᴏɴʟʏ ᴀᴅᴍɪɴs ᴄᴀɴ ᴜsᴇ ᴛʜɪs ᴄᴏᴍᴍᴀɴᴅ.**")
+    chat_id = message.chat.id
+    welc.update_one({"chat_id": chat_id}, {"$set": {"welcome": True}}, upsert=True)
+    await message.reply_text("✅ **ᴡᴇʟᴄᴏᴍᴇ sʏsᴛᴇᴍ ᴇɴᴀʙʟᴇᴅ.**")
+
+
+# Disable Welcome
+@app.on_message(filters.command(["welcomeoff", "weloff"]) & filters.group)
+async def disable_welcome(client: Client, message: Message):
+    if not await is_admin(message.chat, message.from_user.id):
+        return await message.reply_text("❌ **ᴏɴʟʏ ᴀᴅᴍɪɴs ᴄᴀɴ ᴜsᴇ ᴛʜɪs ᴄᴏᴍᴍᴀɴᴅ.**")
+    chat_id = message.chat.id
+    welc.update_one({"chat_id": chat_id}, {"$set": {"welcome": False}}, upsert=True)
+    await message.reply_text("❌ **ᴡᴇʟᴄᴏᴍᴇ sʏsᴛᴇᴍ ᴅɪsᴀʙʟᴇᴅ.**")
+
+
+# Enable Left
+@app.on_message(filters.command(["lefton", "lefon"]) & filters.group)
+async def enable_left(client: Client, message: Message):
+    if not await is_admin(message.chat, message.from_user.id):
+        return await message.reply_text("❌ **ᴏɴʟʏ ᴀᴅᴍɪɴs ᴄᴀɴ ᴜsᴇ ᴛʜɪs ᴄᴏᴍᴍᴀɴᴅ.**")
+    chat_id = message.chat.id
+    welc.update_one({"chat_id": chat_id}, {"$set": {"left": True}}, upsert=True)
+    await message.reply_text("✅ **ʟᴇғᴛ sʏsᴛᴇᴍ ᴇɴᴀʙʟᴇᴅ.**")
+
+
+# Disable Left
+@app.on_message(filters.command(["leftoff", "lefoff"]) & filters.group)
+async def disable_left(client: Client, message: Message):
+    if not await is_admin(message.chat, message.from_user.id):
+        return await message.reply_text("❌ **ᴏɴʟʏ ᴀᴅᴍɪɴs ᴄᴀɴ ᴜsᴇ ᴛʜɪs ᴄᴏᴍᴍᴀɴᴅ.**")
+    chat_id = message.chat.id
+    welc.update_one({"chat_id": chat_id}, {"$set": {"left": False}}, upsert=True)
+    await message.reply_text("❌ **ʟᴇғᴛ sʏsᴛᴇᴍ ᴅɪsᴀʙʟᴇᴅ.**")
+
+
+# User Joined
+@app.on_message(filters.new_chat_members, group=2)
+async def welcome_user(client: Client, message: Message):
+    chat_id = message.chat.id
+    data = welc.find_one({"chat_id": chat_id})
+    if not data or not data.get("welcome", False):
+        return
+
+    for member in message.new_chat_members:
+        user_mention = member.mention
+        chat_title = message.chat.title
+        msg = random.choice(PURVI_WEL_MSG).format(user=user_mention, chat=chat_title)
+        m = await message.reply_text(msg)
+        await asyncio.sleep(10)
+        await m.delete()
+
+
+# User Left
+@app.on_message(filters.left_chat_member, group=2)
+async def goodbye_user(client: Client, message: Message):
+    chat_id = message.chat.id
+    data = welc.find_one({"chat_id": chat_id})
+    if not data or not data.get("left", False):
+        return
+
+    user_mention = message.left_chat_member.mention
+    chat_title = message.chat.title
+    msg = random.choice(PURVI_LEFT_MSG).format(user=user_mention, chat=chat_title)
+    m = await message.reply_text(msg)
+    await asyncio.sleep(10)
+    await m.delete()
