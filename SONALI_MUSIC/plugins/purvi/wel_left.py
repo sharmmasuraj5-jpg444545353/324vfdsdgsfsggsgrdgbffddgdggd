@@ -3,6 +3,7 @@ import asyncio
 from SONALI_MUSIC import app
 from pyrogram import filters
 from pyrogram.types import Message
+from pyrogram.enums import ChatType
 from pymongo import MongoClient
 from config import MONGO_DB_URI 
 
@@ -31,58 +32,64 @@ PURVI_LEFT_MSG = [
     "❖ {user} ʟᴇꜰᴛ ᴛʜᴇ ɢʀᴏᴜᴘ."
 ]
 
+# last welcome ko store karne ke liye
 last_welcome = {}
 
-def is_welcome_enabled(chat_id):
-    setting = chat_settings.find_one({"chat_id": chat_id})
+# ---------------- Mongo Helpers ---------------- #
+def is_welcome_enabled(chat_id: int):
+    setting = chat_settings.find_one({"chat_id": int(chat_id)})
     return setting.get("welcome", True) if setting else True
 
-def is_left_enabled(chat_id):
-    setting = chat_settings.find_one({"chat_id": chat_id})
+def is_left_enabled(chat_id: int):
+    setting = chat_settings.find_one({"chat_id": int(chat_id)})
     return setting.get("left", True) if setting else True
 
-def set_welcome(chat_id, value: bool):
-    chat_settings.update_one({"chat_id": chat_id}, {"$set": {"welcome": value}}, upsert=True)
+def set_welcome(chat_id: int, value: bool):
+    chat_settings.update_one({"chat_id": int(chat_id)}, {"$set": {"welcome": value}}, upsert=True)
 
-def set_left(chat_id, value: bool):
-    chat_settings.update_one({"chat_id": chat_id}, {"$set": {"left": value}}, upsert=True)
+def set_left(chat_id: int, value: bool):
+    chat_settings.update_one({"chat_id": int(chat_id)}, {"$set": {"left": value}}, upsert=True)
 
-# ✅ FIXED: filters.chat_type.ChatType.GROUP → filters.group
-@app.on_message(filters.command(["welcome"]) & filters.group)
+# ---------------- Commands ---------------- #
+@app.on_message(filters.command("welcome") & filters.chat_type([ChatType.GROUP, ChatType.SUPERGROUP]))
 async def welcome_cmd(client, message: Message):
     if len(message.command) < 2:
         return await message.reply_text("❖ ᴜsᴀɢᴇ: /welcome on or /welcome off")
+
     action = message.command[1].lower()
     if action == "on":
         set_welcome(message.chat.id, True)
-        await message.reply_text("❖ ᴡᴇʟᴄᴏᴍᴇ ᴍᴇssᴀɢᴇs ᴇɴᴀʙʟᴇᴅ!")
+        await message.reply_text("❖ ᴡᴇʟᴄᴏᴍᴇ ᴍᴇssᴀɢᴇs ᴇɴᴀʙʟᴇᴅ ✅")
     elif action == "off":
         set_welcome(message.chat.id, False)
-        await message.reply_text("❖ ᴡᴇʟᴄᴏᴍᴇ ᴍᴇssᴀɢᴇs ᴅɪsᴀʙʟᴇᴅ!")
+        await message.reply_text("❖ ᴡᴇʟᴄᴏᴍᴇ ᴍᴇssᴀɢᴇs ᴅɪsᴀʙʟᴇᴅ ❌")
     else:
         await message.reply_text("❖ ᴜsᴀɢᴇ: /welcome on or /welcome off")
 
-# ✅ FIXED: filters.chat_type.ChatType.GROUP → filters.group
-@app.on_message(filters.command(["left"]) & filters.group)
+@app.on_message(filters.command("left") & filters.chat_type([ChatType.GROUP, ChatType.SUPERGROUP]))
 async def left_cmd(client, message: Message):
     if len(message.command) < 2:
         return await message.reply_text("❖ ᴜsᴀɢᴇ: /left on or /left off")
+
     action = message.command[1].lower()
     if action == "on":
         set_left(message.chat.id, True)
-        await message.reply_text("❖ ʟᴇꜰᴛ ᴍᴇssᴀɢᴇs ᴇɴᴀʙʟᴇᴅ!")
+        await message.reply_text("❖ ʟᴇꜰᴛ ᴍᴇssᴀɢᴇs ᴇɴᴀʙʟᴇᴅ ✅")
     elif action == "off":
         set_left(message.chat.id, False)
-        await message.reply_text("❖ ʟᴇꜰᴛ ᴍᴇssᴀɢᴇs ᴅɪsᴀʙʟᴇᴅ!")
+        await message.reply_text("❖ ʟᴇꜰᴛ ᴍᴇssᴀɢᴇs ᴅɪsᴀʙʟᴇᴅ ❌")
     else:
         await message.reply_text("❖ ᴜsᴀɢᴇ: /left on or /left off")
 
+# ---------------- Events ---------------- #
 @app.on_message(filters.new_chat_members)
 async def welcome(client, message: Message):
     if not is_welcome_enabled(message.chat.id):
         return
 
     chat_id = message.chat.id
+
+    # purana welcome delete
     if chat_id in last_welcome:
         try:
             await client.delete_messages(chat_id, last_welcome[chat_id])
@@ -92,10 +99,12 @@ async def welcome(client, message: Message):
     for new_member in message.new_chat_members:
         text = random.choice(PURVI_WEL_MSG).format(user=new_member.mention)
         sent = await message.reply_text(text)
-        last_welcome[chat_id] = sent.id
+        last_welcome[chat_id] = sent.id  # last id save karna
 
-@app.on_message(filters.left_chat_member)
+@app.on_message(filters.chat_type([ChatType.GROUP, ChatType.SUPERGROUP]))
 async def left(client, message: Message):
+    if not message.left_chat_member:
+        return
     if not is_left_enabled(message.chat.id):
         return
 
@@ -103,6 +112,7 @@ async def left(client, message: Message):
     text = random.choice(PURVI_LEFT_MSG).format(user=left_user.mention)
     sent = await message.reply_text(text)
 
+    # 10s baad delete
     await asyncio.sleep(10)
     try:
         await client.delete_messages(message.chat.id, sent.id)
