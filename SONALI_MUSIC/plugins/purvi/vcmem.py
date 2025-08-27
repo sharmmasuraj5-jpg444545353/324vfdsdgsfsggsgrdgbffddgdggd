@@ -3,17 +3,24 @@ from pyrogram.enums import ChatType, ChatMemberStatus
 from strings import get_string
 from SONALI_MUSIC import app
 from SONALI_MUSIC.utils import SonaBin
-from SONALI_MUSIC.utils.database import get_assistant
+from SONALI_MUSIC.utils.database import get_assistant, get_lang
 from SONALI_MUSIC.core.call import Sona
+
+
+# Custom admin filter
+async def is_admin(_, __, message):
+    try:
+        chat_member = await message.chat.get_member(message.from_user.id)
+        return chat_member.status in (ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.OWNER)
+    except:
+        return False
 
 
 @app.on_message(
     filters.command(
-        ["vcuser", "vcusers", "vcmember", "vcmembers", "cu", "cm"], 
+        ["vcuser", "vcusers", "vcmember", "vcmembers", "cu", "cm"],
         prefixes=["/", "!", ".", "V", "v"]
-    ) & filters.chat_member_status(
-        status=ChatMemberStatus.ADMINISTRATOR | ChatMemberStatus.OWNER
-    )
+    ) & filters.create(is_admin)
 )
 async def vc_members(client, message):
     try:
