@@ -12,20 +12,19 @@ chat_settings = db["chat_settings"]
 
 # Welcome/Left Messages with HTML formatting
 PURVI_WEL_MSG = [
-    "❖ <b>Hey {user}</b>, <i>welcome to the group!</i>",
-    "❖ <b>Glad to see you {user}</b>! Enjoy your stay.",
-    "❖ <b>Greetings {user}</b>! Have fun here.",
+    "❖ <b>ʜᴇʏ {user}</b>, <ɪ>ᴡᴇʟᴄᴏᴍᴇ ᴛᴏ ᴛʜᴇ ɢʀᴏᴜᴘ!</ɪ>",
+    "❖ <b>ɢʟᴀᴅ ᴛᴏ sᴇᴇ ʏᴏᴜ {user}</b>! ᴇɴᴊᴏʏ ʏᴏᴜʀ sᴛᴀʏ.",
+    "❖ <b>ɢʀᴇᴇᴛɪɴɢs {user}</b>! ʜᴀᴠᴇ ғᴜɴ ʜᴇʀᴇ.",
 ]
 
 PURVI_LEFT_MSG = [
-    "❖ <b>Bye {user}</b>! See you soon.",
-    "❖ <b>{user}</b> left... The group feels empty.",
-    "❖ <b>Goodbye {user}</b>! Take care.",
+    "❖ <b>ʙʏᴇ {user}</b>! sᴇᴇ ʏᴏᴜ sᴏᴏɴ.",
+    "❖ <b>{user}</b> ʟᴇғᴛ... ᴛʜᴇ ɢʀᴏᴜᴘ ғᴇᴇʟs ᴇᴍᴘᴛʏ.",
+    "❖ <b>ɢᴏᴏᴅʙʏᴇ {user}</b>! ᴛᴀᴋᴇ ᴄᴀʀᴇ.",
 ]
 
 last_welcome = {}
 
-# DB helpers
 def is_welcome_enabled(chat_id):
     setting = chat_settings.find_one({"chat_id": chat_id})
     return setting.get("welcome", True) if setting else True
@@ -40,52 +39,52 @@ def set_welcome(chat_id, value: bool):
 def set_left(chat_id, value: bool):
     chat_settings.update_one({"chat_id": chat_id}, {"$set": {"left": value}}, upsert=True)
 
-# Admin check
 async def is_admin(client, chat_id, user_id):
     member = await client.get_chat_member(chat_id, user_id)
     return member.status in (enums.ChatMemberStatus.ADMINISTRATOR, enums.ChatMemberStatus.OWNER)
 
-# Welcome command
 @app.on_message(filters.command("welcome") & filters.group)
 async def welcome_cmd(client, message: Message):
     chat_id = message.chat.id
     chat_title = message.chat.title
-    status = "✅ Enabled" if is_welcome_enabled(chat_id) else "❌ Disabled"
+    status = "ᴇɴᴀʙʟᴇᴅ" if is_welcome_enabled(chat_id) else "ᴅɪsᴀʙʟᴇᴅ"
 
     keyboard = InlineKeyboardMarkup([
         [
-            InlineKeyboardButton("Enable", callback_data=f"welcome_enable_{chat_id}"),
-            InlineKeyboardButton("Disable", callback_data=f"welcome_disable_{chat_id}")
+            InlineKeyboardButton("ᴇɴᴀʙʟᴇ", callback_data=f"welcome_enable_{chat_id}"),
+            InlineKeyboardButton("ᴅɪsᴀʙʟᴇ", callback_data=f"welcome_disable_{chat_id}")
         ]
     ])
 
     await message.reply_text(
-        f"<b>Welcome messages current status in {chat_title}:</b> {status}",
-        reply_markup=keyboard,
-        parse_mode=enums.ParseMode.HTML
-    )
+    f"<b>ɢʀᴏᴜᴘ ɴᴀᴍᴇ :-</b> {chat_title}\n"
+    f"<b>ɢʀᴏᴜᴘ ɪᴅ :-</b> {chat_id}\n"
+    f"<b>ᴄᴜʀʀᴇɴᴛ ᴡᴇʟᴄᴏᴍᴇ sᴛᴀᴛᴜs :-</b> {status}",
+    reply_markup=keyboard,
+    parse_mode=enums.ParseMode.HTML
+)
 
-# Left command
 @app.on_message(filters.command("left") & filters.group)
 async def left_cmd(client, message: Message):
     chat_id = message.chat.id
     chat_title = message.chat.title
-    status = "✅ Enabled" if is_left_enabled(chat_id) else "❌ Disabled"
+    status = "ᴇɴᴀʙʟᴇᴅ" if is_left_enabled(chat_id) else "ᴅɪsᴀʙʟᴇᴅ"
 
     keyboard = InlineKeyboardMarkup([
         [
-            InlineKeyboardButton("Enable", callback_data=f"left_enable_{chat_id}"),
-            InlineKeyboardButton("Disable", callback_data=f"left_disable_{chat_id}")
+            InlineKeyboardButton("ᴇɴᴀʙʟᴇ", callback_data=f"left_enable_{chat_id}"),
+            InlineKeyboardButton("ᴅɪsᴀʙʟᴇ", callback_data=f"left_disable_{chat_id}")
         ]
     ])
 
     await message.reply_text(
-        f"<b>Left messages current status in {chat_title}:</b> {status}",
-        reply_markup=keyboard,
-        parse_mode=enums.ParseMode.HTML
-    )
+    f"<b>ɢʀᴏᴜᴘ ɴᴀᴍᴇ :-</b> {chat_title}\n"
+    f"<b>ɢʀᴏᴜᴘ ɪᴅ :-</b> {chat_id}\n"
+    f"<b>ᴄᴜʀʀᴇɴᴛ ʟᴇғᴛ sᴛᴀᴛᴜs :-</b> {status}",
+    reply_markup=keyboard,
+    parse_mode=enums.ParseMode.HTML
+)
 
-# Callback query handler
 @app.on_callback_query()
 async def callback_toggle(client, callback_query: CallbackQuery):
     user = callback_query.from_user
@@ -94,43 +93,43 @@ async def callback_toggle(client, callback_query: CallbackQuery):
     chat_title = callback_query.message.chat.title
 
     if not await is_admin(client, chat_id, user.id):
-        return await callback_query.answer("This is not for you 🥺", show_alert=True)
+        return await callback_query.answer("ᴛʜɪs ɪs ɴᴏᴛ ғᴏʀ ʏᴏᴜ ʙᴀʙʏ 🥺", show_alert=True)
 
     new_text = callback_query.message.text
 
     if "welcome_enable" in data:
         if not is_welcome_enabled(chat_id):
             set_welcome(chat_id, True)
-            new_text = f"✅ <b>Welcome messages ENABLED in {chat_title}</b>"
+            new_text = f"<b>⋟ ᴡᴇʟᴄᴏᴍᴇ ᴍᴇssᴀɢᴇs ᴇɴᴀʙʟᴇᴅ ɪɴ :- </b>{chat_title}"
         else:
-            new_text = f"⚙ <b>Welcome messages already ENABLED in {chat_title}</b>"
+            new_text = f"<b>⋟ ᴡᴇʟᴄᴏᴍᴇ ᴍᴇssᴀɢᴇs ᴀʟʀᴇᴀᴅʏ ᴇɴᴀʙʟᴇᴅ ɪɴ :- </b>{chat_title}"
 
     elif "welcome_disable" in data:
         if is_welcome_enabled(chat_id):
             set_welcome(chat_id, False)
-            new_text = f"❌ <b>Welcome messages DISABLED in {chat_title}</b>"
+            new_text = f"<b>⋟ ᴡᴇʟᴄᴏᴍᴇ ᴍᴇssᴀɢᴇs ᴅɪsᴀʙʟᴇᴅ ɪɴ :- </b>{chat_title}"
         else:
-            new_text = f"⚙ <b>Welcome messages already DISABLED in {chat_title}</b>"
+            new_text = f"<b>⋟ ᴡᴇʟᴄᴏᴍᴇ ᴍᴇssᴀɢᴇs ᴀʟʀᴇᴀᴅʏ ᴅɪsᴀʙʟᴇᴅ ɪɴ :- </b>{chat_title}"
 
     elif "left_enable" in data:
         if not is_left_enabled(chat_id):
             set_left(chat_id, True)
-            new_text = f"✅ <b>Left messages ENABLED in {chat_title}</b>"
+            new_text = f"<b>⋟ ʟᴇғᴛ ᴍᴇssᴀɢᴇs ᴇɴᴀʙʟᴇᴅ ɪɴ :- </b>{chat_title}"
         else:
-            new_text = f"⚙ <b>Left messages already ENABLED in {chat_title}</b>"
+            new_text = f"<b>⋟ ʟᴇғᴛ ᴍᴇssᴀɢᴇs ᴀʟʀᴇᴀᴅʏ ᴇɴᴀʙʟᴇᴅ ɪɴ :- </b>{chat_title}"
 
     elif "left_disable" in data:
         if is_left_enabled(chat_id):
             set_left(chat_id, False)
-            new_text = f"❌ <b>Left messages DISABLED in {chat_title}</b>"
+            new_text = f"<b>⋟ ʟᴇғᴛ ᴍᴇssᴀɢᴇs ᴅɪsᴀʙʟᴇᴅ ɪɴ :- </b>{chat_title}"
         else:
-            new_text = f"⚙ <b>Left messages already DISABLED in {chat_title}</b>"
+            new_text = f"<b>⋟ ʟᴇғᴛ ᴍᴇssᴀɢᴇs ᴀʟʀᴇᴀᴅʏ ᴅɪsᴀʙʟᴇᴅ ɪɴ :-</b>{chat_title}"
 
     # Edit message and remove buttons
     if callback_query.message.text != new_text:
         await callback_query.message.edit_text(new_text, parse_mode=enums.ParseMode.HTML)
 
-# Welcome message handler
+
 @app.on_message(filters.new_chat_members)
 async def welcome(client, message: Message):
     if not is_welcome_enabled(message.chat.id):
@@ -148,14 +147,14 @@ async def welcome(client, message: Message):
         sent = await message.reply_text(text, parse_mode=enums.ParseMode.HTML)
         last_welcome[chat_id] = sent.id
 
-# Left message handler using on_chat_member_updated
+
 @app.on_chat_member_updated(filters.group)
 async def left_member_handler(client: app, member: ChatMemberUpdated):
     chat_id = member.chat.id
     if not is_left_enabled(chat_id):
         return
 
-    # Fix for NoneType error - check if new_chat_member exists
+    
     if (
         member.old_chat_member
         and (member.old_chat_member.status in (enums.ChatMemberStatus.MEMBER, enums.ChatMemberStatus.ADMINISTRATOR, enums.ChatMemberStatus.OWNER))
@@ -165,8 +164,7 @@ async def left_member_handler(client: app, member: ChatMemberUpdated):
         text = random.choice(PURVI_LEFT_MSG).format(user=f"<b>{user.first_name}</b>")
         sent = await client.send_message(chat_id, text, parse_mode=enums.ParseMode.HTML)
 
-        # Delete after 10 seconds
-        await asyncio.sleep(10)
+        await asyncio.sleep(30)
         try:
             await client.delete_messages(chat_id, sent.id)
         except:
