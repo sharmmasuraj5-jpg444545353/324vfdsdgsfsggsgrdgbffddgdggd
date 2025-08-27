@@ -1,6 +1,6 @@
 from pyrogram.types import Message
 from pyrogram.enums import ChatType, ChatMemberStatus
-
+from pyrogram.types import CallbackQuery
 
 async def admin_check(message: Message) -> bool:
     if not message.from_user:
