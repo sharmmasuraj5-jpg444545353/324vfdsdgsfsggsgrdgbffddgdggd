@@ -2,14 +2,16 @@ import random
 import asyncio
 from SONALI_MUSIC import app
 from pyrogram import filters
-from pyrogram.types import Message, CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup
+from pyrogram.types import Message, CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup, ChatMemberUpdated
 from pymongo import MongoClient
 from config import MONGO_DB_URI
 
+# MongoDB setup
 mongo_client = MongoClient(MONGO_DB_URI)
 db = mongo_client["welcome_db"]
 chat_settings = db["chat_settings"]
 
+# Welcome and left messages
 PURVI_WEL_MSG = [
     "❖ ʜᴇʏ {user}, ᴡᴇʟᴄᴏᴍᴇ ᴛᴏ ᴛʜᴇ ɢʀᴏᴜᴘ!",
     "❖ ɢʟᴀᴅ ᴛᴏ sᴇᴇ ʏᴏᴜ ʜᴇʀᴇ, {user}!",
@@ -24,7 +26,7 @@ PURVI_LEFT_MSG = [
 
 last_welcome = {}
 
-# DB helpers
+# --- DB Helpers ---
 def is_welcome_enabled(chat_id):
     setting = chat_settings.find_one({"chat_id": chat_id})
     return setting.get("welcome", True) if setting else True
@@ -39,12 +41,12 @@ def set_welcome(chat_id, value: bool):
 def set_left(chat_id, value: bool):
     chat_settings.update_one({"chat_id": chat_id}, {"$set": {"left": value}}, upsert=True)
 
-# Admin check
+# --- Admin check ---
 async def is_admin(client, chat_id, user_id):
     member = await client.get_chat_member(chat_id, user_id)
     return member.status in ("administrator", "creator")
 
-# Welcome command
+# --- Welcome command ---
 @app.on_message(filters.command("welcome") & filters.group)
 async def welcome_cmd(client, message: Message):
     chat_id = message.chat.id
@@ -64,7 +66,7 @@ async def welcome_cmd(client, message: Message):
         parse_mode="markdown"
     )
 
-# Left command
+# --- Left command ---
 @app.on_message(filters.command("left") & filters.group)
 async def left_cmd(client, message: Message):
     chat_id = message.chat.id
@@ -84,7 +86,7 @@ async def left_cmd(client, message: Message):
         parse_mode="markdown"
     )
 
-# Callback query handler
+# --- Callback query handler for toggle buttons ---
 @app.on_callback_query()
 async def callback_toggle(client, callback_query: CallbackQuery):
     user = callback_query.from_user
@@ -93,7 +95,7 @@ async def callback_toggle(client, callback_query: CallbackQuery):
     chat_title = callback_query.message.chat.title
 
     if not await is_admin(client, chat_id, user.id):
-        return await callback_query.answer("This is not for you baby 🥺", show_alert=True)
+        return await callback_query.answer("This is not for you 🥺", show_alert=True)
 
     new_text = callback_query.message.text
 
@@ -125,11 +127,10 @@ async def callback_toggle(client, callback_query: CallbackQuery):
         else:
             new_text = f"⚙ Left messages already DISABLED in {chat_title}"
 
-    # Edit message and remove buttons
     if callback_query.message.text != new_text:
         await callback_query.message.edit_text(new_text)
 
-# Welcome message handler
+# --- Welcome message handler ---
 @app.on_message(filters.new_chat_members)
 async def welcome(client, message: Message):
     if not is_welcome_enabled(message.chat.id):
@@ -147,19 +148,27 @@ async def welcome(client, message: Message):
         sent = await message.reply_text(text)
         last_welcome[chat_id] = sent.id
 
-# Left message handler
-@app.on_message(filters.left_chat_member)
-async def left(client, message: Message):
-    if not is_left_enabled(message.chat.id):
+# --- Left message handler using on_chat_member_updated ---
+@app.on_chat_member_updated(filters.group)
+async def left_member_handler(client, member: ChatMemberUpdated):
+    chat_id = member.chat.id
+
+    if not is_left_enabled(chat_id):
         return
 
-    left_user = message.left_chat_member
-    text = random.choice(PURVI_LEFT_MSG).format(user=left_user.mention)
-    sent = await message.reply_text(text)
+    # Check if user actually left or was kicked
+    if (
+        member.old_chat_member
+        and member.new_chat_member.status in ("left", "kicked")
+        and member.old_chat_member.status not in ("left", "kicked", "banned")
+    ):
+        left_user = member.old_chat_member.user
+        text = random.choice(PURVI_LEFT_MSG).format(user=left_user.mention)
+        sent = await client.send_message(chat_id, text)
 
-    # Delete after 10 seconds
-    await asyncio.sleep(10)
-    try:
-        await client.delete_messages(message.chat.id, sent.id)
-    except:
-        pass
+        # Delete after 10 seconds
+        await asyncio.sleep(10)
+        try:
+            await client.delete_messages(chat_id, sent.id)
+        except:
+            pass
