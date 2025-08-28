@@ -92,7 +92,7 @@ async def welcome_cmd(client, message: Message):
     await message.reply_text(
     f"<b>⊚ ɢʀᴏᴜᴘ ɴᴀᴍᴇ :-</b> {chat_title}\n"
     f"<b>⋟ ɢʀᴏᴜᴘ ɪᴅ :-</b> {chat_id}\n"
-    f"<b>⋟ ᴄᴜʀʀᴇɴᴛ ᴡᴇʟᴄᴏᴍᴇ sᴛᴀᴛᴜs :-</b> {status}",
+    f"<b>⋟ ᴡᴇʟᴄᴏᴍᴇ sᴛᴀᴛᴜs :-</b> {status}",
     reply_markup=keyboard,
     parse_mode=enums.ParseMode.HTML
 )
@@ -113,7 +113,7 @@ async def left_cmd(client, message: Message):
     await message.reply_text(
     f"<b>⊚ ɢʀᴏᴜᴘ ɴᴀᴍᴇ :-</b> {chat_title}\n"
     f"<b>⋟ ɢʀᴏᴜᴘ ɪᴅ :-</b> {chat_id}\n"
-    f"<b>⋟ ᴄᴜʀʀᴇɴᴛ ʟᴇғᴛ sᴛᴀᴛᴜs :-</b> {status}",
+    f"<b>⋟ ʟᴇғᴛ sᴛᴀᴛᴜs :-</b> {status}",
     reply_markup=keyboard,
     parse_mode=enums.ParseMode.HTML
 )
