@@ -4,14 +4,13 @@ import traceback
 import io
 import sys
 import requests
+import aiohttp
+import json
 from SONALI_MUSIC import app
-
 
 BUTTON_ADD = InlineKeyboardMarkup(
     [[InlineKeyboardButton("✙ ʌᴅᴅ ϻє ɪη ʏσυʀ ɢʀσυᴘ ✙", url=f"https://t.me/{app.username}?startgroup=true")]]
 )
-
-
 
 @app.on_message(filters.command("python"))
 async def execute_python_code(client: Client, message: Message):
@@ -36,7 +35,6 @@ async def execute_python_code(client: Client, message: Message):
         else:
             output = f"**✅ ᴄᴏᴅᴇ ᴇxᴇᴄᴜᴛᴇᴅ sᴜᴄᴄᴇssғᴜʟʟʏ :-**\n\n```\n{output}\n```"
 
-        # ✅ Button now only with result
         await message.reply(output, reply_markup=BUTTON_ADD)
 
     except Exception:
@@ -46,7 +44,6 @@ async def execute_python_code(client: Client, message: Message):
             f"**❌ ᴄᴏᴅᴇ ᴇxᴇᴄᴜᴛɪᴏɴ ᴇʀʀᴏʀ :-**\n\n```\n{traceback_str}\n```",
             reply_markup=BUTTON_ADD
         )
-
 
 @app.on_message(filters.command("print"))
 async def print_code(client, message: Message):
@@ -61,20 +58,23 @@ async def print_code(client, message: Message):
     response_text = f"**⋟ ꜱᴜᴄᴄᴇssꜰᴜʟʟʏ ᴘʀɪɴᴛᴇᴅ :-**\n\n```\n{code_text}\n```"
     await message.reply_text(response_text, reply_markup=BUTTON_ADD)
 
-
-def get_pypi_info(package_name):
+# Fixed async version of get_pypi_info
+async def get_pypi_info(package_name):
     try:
-        
         api_url = f"https://pypi.org/pypi/{package_name}/json"
-        response = requests.get(api_url)
-        pypi_info = response.json()
         
-        return pypi_info
+        async with aiohttp.ClientSession() as session:
+            async with session.get(api_url) as response:
+                if response.status == 200:
+                    pypi_info = await response.json()
+                    return pypi_info
+                else:
+                    print(f"**⋟ ᴇʀʀᴏʀ ғᴇᴛᴄʜɪɴɢ ᴘʏᴘɪ ɪɴғᴏʀᴍᴀᴛɪᴏɴ :-** HTTP {response.status}")
+                    return None
     
     except Exception as e:
         print(f"**⋟ ᴇʀʀᴏʀ ғᴇᴛᴄʜɪɴɢ ᴘʏᴘɪ ɪɴғᴏʀᴍᴀᴛɪᴏɴ :-** {e}")
         return None
-
 
 @app.on_message(filters.command("pypi", prefixes="/"))
 async def pypi_info_command(client: Client, message):
@@ -104,4 +104,4 @@ async def pypi_info_command(client: Client, message):
         response_text = "⚠️ **ғᴀɪʟᴇᴅ ᴛᴏ ꜰᴇᴛᴄʜ ɪɴꜰᴏʀᴍᴀᴛɪᴏɴ ғʀᴏᴍ ᴘʏᴘɪ.**"
 
     await temp_msg.delete()
-    await message.reply_text(response_text, reply_markup=BUTTON_ADD, disable_web_page_preview=True),
+    await message.reply_text(response_text, reply_markup=BUTTON_ADD, disable_web_page_preview=True)
