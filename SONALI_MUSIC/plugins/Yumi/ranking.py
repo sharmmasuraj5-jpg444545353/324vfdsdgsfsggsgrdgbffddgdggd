@@ -230,7 +230,7 @@ async def show_leaderboard_buttons(_, query):
         
         [
          InlineKeyboardButton("🏅 ᴏᴠᴇʀᴀʟʟ", callback_data="rank_panel_overall"),
-         InlineKeyboardButton("🔙 ʙᴀᴄᴋ", callback_data="rank_back_to_panel")
+         InlineKeyboardButton("🔙 ʙᴀᴄᴋ", callback_data="rank_back_to_main")
         ]
     ])
 
@@ -360,12 +360,14 @@ async def regular_callback_handler(_, query):
         
         [
          InlineKeyboardButton("🏅 ᴏᴠᴇʀᴀʟʟ", callback_data="rank_panel_overall"),
-         InlineKeyboardButton("🔙 ʙᴀᴄᴋ", callback_data="rank_back_to_panel")
+         InlineKeyboardButton("🔙 ʙᴀᴄᴋ", callback_data="rank_back_to_main")
         ]
     ])
 
-        await query.message.edit_text(caption, reply_markup=buttons, parse_mode=enums.ParseMode.MARKDOWN)
-
+        try:
+            await query.message.edit_text(caption, reply_markup=buttons, parse_mode=enums.ParseMode.MARKDOWN)
+        except:
+            await query.answer()  
 
 
 @app.on_callback_query(filters.regex("^rank_back_to_main$"))
