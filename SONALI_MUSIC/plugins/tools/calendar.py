@@ -19,7 +19,7 @@ async def make_carbon(code):
     bright_image = enhancer.enhance(1.7)
 
     output_image = BytesIO()
-    bright_image.save(output_image, format='PNG', quality=95)
+    bright_image.save(output_image, format="PNG", quality=95)
     output_image.name = "carbon.png"
     return output_image
 
@@ -31,16 +31,20 @@ async def send_calendar(_, message):
         try:
             year = int(command_parts[1])
         except ValueError:
-            await message.reply("**ɪɴᴠᴀʟɪᴅ ʏᴇᴀʀ ꜰᴏʀᴍᴀᴛ.**\n\n**ᴜꜱᴇ** `/calendar <year>`")
+            await message.reply("**⋟ ɪɴᴠᴀʟɪᴅ ʏᴇᴀʀ ꜰᴏʀᴍᴀᴛ.**\n\n**⋟ ᴜꜱᴇ :-** `/calendar <year>`")
             return
     else:
-        await message.reply("**⋟ ᴘʀᴏᴠɪᴅᴇ ᴀ ᴠᴀʟɪᴅ ʏᴇᴀʀ ᴀꜰᴛᴇʀ ᴄᴏᴍᴍᴀɴᴅ.**\n\n**⋟ ᴜsᴀɢᴇ :-** `/calender 2025`")
+        await message.reply("**⋟ ᴘʀᴏᴠɪᴅᴇ ᴀ ᴠᴀʟɪᴅ ʏᴇᴀʀ ᴀꜰᴛᴇʀ ᴄᴏᴍᴍᴀɴᴅ.**\n\n**⋟ ᴜsᴀɢᴇ :-** `/calendar 2025`")
         return
+
+    temp_msg = await message.reply(f"**⋟ ɢᴇɴᴇʀᴀᴛɪɴɢ ᴄᴀʟᴇɴᴅᴀʀ ᴏғ :-** `{year}`")
 
     cal = calendar.TextCalendar()
     full_year_calendar = cal.formatyear(year, 2, 1, 1, 3)
 
     carbon_image = await make_carbon(full_year_calendar)
+
+    await temp_msg.delete()
 
     caption = f"**⋟ ᴄᴀʟᴇɴᴅᴀʀ ᴏғ ʏᴇᴀʀ :-** `{year}`\n\n**⋟ ʙʏ :- {app.mention}**"
 
@@ -48,9 +52,10 @@ async def send_calendar(_, message):
         [[InlineKeyboardButton("✙ ʌᴅᴅ ϻє ɪη ʏσυʀ ɢʀσυᴘ ✙", url=f"https://t.me/{app.username}?startgroup=true")]]
     )
 
+    # Send the photo with caption and button
     await app.send_photo(
         message.chat.id,
         carbon_image,
         caption=caption,
-        reply_markup=keyboard
+        reply_markup=keyboard,
     )
