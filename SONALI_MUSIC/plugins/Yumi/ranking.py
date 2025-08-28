@@ -12,6 +12,7 @@ mongo_client = MongoClient(MONGO_DB_URI)
 db = mongo_client["purvi_rankings"]
 collection = db["ranking"]
 weekly_collection = db["weekly_ranking"]
+today_collection = db["today_ranking"]  # Today's data के लिए नई collection
 
 user_data = {}
 today_stats = {}
@@ -29,6 +30,23 @@ MISHI = [
     "https://graph.org/file/37248e7bdff70c662a702.jpg",
     "https://graph.org/file/0bfe29d15e918917d1305.jpg",
 ]
+
+# Daily data reset function (हर day को midnight को reset)
+def reset_daily_data():
+    global today_stats
+    today_stats = {}
+    today_collection.delete_many({})  # Database से daily data delete करें
+    print("Daily data has been reset!")
+
+# Reset daily data every day at midnight
+async def daily_reset_scheduler():
+    while True:
+        now = datetime.now()
+        # अगले day के midnight तक wait करें
+        next_midnight = now.replace(hour=0, minute=0, second=0, microsecond=0) + timedelta(days=1)
+        wait_seconds = (next_midnight - now).total_seconds()
+        await asyncio.sleep(wait_seconds)
+        reset_daily_data()
 
 # Weekly data reset function
 def reset_weekly_data():
@@ -52,17 +70,29 @@ async def weekly_reset_scheduler():
 async def today_watcher(_, message):
     chat_id = message.chat.id
     user_id = message.from_user.id
+    
+    # Memory में update
     if chat_id not in today_stats:
         today_stats[chat_id] = {}
     today_stats[chat_id].setdefault(user_id, {"total_messages": 0})
     today_stats[chat_id][user_id]["total_messages"] += 1
+    
+    # Database में update
+    today_collection.update_one(
+        {"chat_id": chat_id, "user_id": user_id},
+        {"$inc": {"total_messages": 1}},
+        upsert=True
+    )
 
 @app.on_message(filters.group, group=11)
 async def _watcher(_, message):
     user_id = message.from_user.id
+    
+    # Memory में update
     user_data.setdefault(user_id, {}).setdefault("total_messages", 0)
     user_data[user_id]["total_messages"] += 1
     
+    # Database में update
     collection.update_one({"_id": user_id}, {"$inc": {"total_messages": 1}}, upsert=True)
     weekly_collection.update_one({"_id": user_id}, {"$inc": {"total_messages": 1}}, upsert=True)
     
@@ -99,26 +129,29 @@ async def leaderboard_panel(_, message):
 @app.on_message(filters.command("today"))
 async def today_command(_, message):
     chat_id = message.chat.id
-    if chat_id in today_stats:
-        users_data = [(uid, info["total_messages"]) for uid, info in today_stats[chat_id].items()]
-        sorted_users = sorted(users_data, key=lambda x: x[1], reverse=True)[:10]
+    
+    # Database से today's data fetch करें
+    today_members = today_collection.find({"chat_id": chat_id}).sort("total_messages", -1).limit(10)
 
-        if sorted_users:
-            response = "**✦ 📈 ᴛᴏᴅᴀʏ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ**\n\n"
-            for idx, (uid, total) in enumerate(sorted_users, start=1):
-                try:
-                    user = await app.get_users(uid)
-                    user_mention = f"[{user.first_name}](tg://user?id={uid})"
-                except:
-                    user_mention = f"`{uid}`"
-                response += f"**{idx}**. {user_mention} ➠ {total} messages\n"
+    response = "**✦ 📈 ᴛᴏᴅᴀʏ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ**\n\n"
+    count = 0
+    
+    for idx, member in enumerate(today_members, start=1):
+        uid = member["user_id"]
+        total = member["total_messages"]
+        try:
+            user = await app.get_users(uid)
+            user_mention = f"[{user.first_name}](tg://user?id={uid})"
+        except:
+            user_mention = f"`{uid}`"
+        response += f"**{idx}**. {user_mention} ➠ {total} messages\n"
+        count += 1
 
-            button = InlineKeyboardMarkup([
-                [InlineKeyboardButton("✙ ᴀᴅᴅ ᴍᴇ ɪɴ ʏᴏᴜʀ ɢʀᴏᴜᴘ ✙", url=f"https://t.me/{app.username}?startgroup=true")]
-            ])
-            await message.reply_photo(random.choice(MISHI), caption=response, reply_markup=button, parse_mode=enums.ParseMode.MARKDOWN)
-        else:
-            await message.reply_text("**❅ ɴᴏ ᴅᴀᴛᴀ ᴀᴠᴀɪʟᴀʙʟᴇ ғᴏʀ ᴛᴏᴅᴀʏ.**")
+    if count > 0:
+        button = InlineKeyboardMarkup([
+            [InlineKeyboardButton("✙ ᴀᴅᴅ ᴍᴇ ɪɴ ʏᴏᴜʀ ɢʀᴏᴜᴘ ✙", url=f"https://t.me/{app.username}?startgroup=true")]
+        ])
+        await message.reply_photo(random.choice(MISHI), caption=response, reply_markup=button, parse_mode=enums.ParseMode.MARKDOWN)
     else:
         await message.reply_text("**❅ ɴᴏ ᴅᴀᴛᴀ ᴀᴠᴀɪʟᴀʙʟᴇ ғᴏʀ ᴛᴏᴅᴀʏ.**")
 
@@ -201,26 +234,29 @@ async def panel_callback_handler(_, query):
 
 async def show_today_leaderboard(query):
     chat_id = query.message.chat.id
-    if chat_id in today_stats:
-        users_data = [(uid, info["total_messages"]) for uid, info in today_stats[chat_id].items()]
-        sorted_users = sorted(users_data, key=lambda x: x[1], reverse=True)[:10]
+    
+    # Database से today's data fetch करें
+    today_members = today_collection.find({"chat_id": chat_id}).sort("total_messages", -1).limit(10)
 
-        if sorted_users:
-            response = "**✦ 📊 ᴛᴏᴅᴀʏ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ**\n\n"
-            for idx, (uid, total) in enumerate(sorted_users, start=1):
-                try:
-                    user = await app.get_users(uid)
-                    user_mention = f"[{user.first_name}](tg://user?id={uid})"
-                except:
-                    user_mention = f"`{uid}`"
-                response += f"**{idx}**. {user_mention} ➠ {total} messages\n"
+    response = "**✦ 📊 ᴛᴏᴅᴀʏ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ**\n\n"
+    count = 0
+    
+    for idx, member in enumerate(today_members, start=1):
+        uid = member["user_id"]
+        total = member["total_messages"]
+        try:
+            user = await app.get_users(uid)
+            user_mention = f"[{user.first_name}](tg://user?id={uid})"
+        except:
+            user_mention = f"`{uid}`"
+        response += f"**{idx}**. {user_mention} ➠ {total} messages\n"
+        count += 1
 
-            button = InlineKeyboardMarkup([
-                [InlineKeyboardButton("🔙 ʙᴀᴄᴋ ᴛᴏ ᴘᴀɴᴇʟ", callback_data="back_to_panel")]
-            ])
-            await query.message.edit_text(response, reply_markup=button, parse_mode=enums.ParseMode.MARKDOWN)
-        else:
-            await query.answer("❅ ɴᴏ ᴅᴀᴛᴀ ᴀᴠᴀɪʟᴀʙʟᴇ ғᴏʀ ᴛᴏᴅᴀʏ.", show_alert=True)
+    if count > 0:
+        button = InlineKeyboardMarkup([
+            [InlineKeyboardButton("🔙 ʙᴀᴄᴋ ᴛᴏ ᴘᴀɴᴇʟ", callback_data="back_to_panel")]
+        ])
+        await query.message.edit_text(response, reply_markup=button, parse_mode=enums.ParseMode.MARKDOWN)
     else:
         await query.answer("❅ ɴᴏ ᴅᴀᴛᴀ ᴀᴠᴀɪʟᴀʙʟᴇ ғᴏʀ ᴛᴏᴅᴀʏ.", show_alert=True)
 
@@ -294,7 +330,7 @@ async def back_to_main_handler(_, query):
 
 **ɢʀᴏᴜᴘ:** {group_name}
 
-**ᴄʜᴇᴄᴋ ɢʀᴏᴜᴘ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ ʙʢ ᴛᴀᴘᴘɪɴɢ ʙᴜᴛᴛᴏɴ ʙᴇʟᴏᴡ ↓**
+**ᴄʜᴇᴄᴋ ɢʀᴏᴜᴘ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ ʙʏ ᴛᴀᴘᴘɪɴɢ ʙᴜᴛᴛᴏɴ ʙᴇʟᴏᴡ ↓**
 
 **ʙʏ :- {app.mention}**
     """
@@ -305,5 +341,6 @@ async def back_to_main_handler(_, query):
 
     await query.message.edit_text(caption, reply_markup=buttons, parse_mode=enums.ParseMode.MARKDOWN)
 
-# Start weekly reset scheduler
+# Start schedulers
+asyncio.create_task(daily_reset_scheduler())
 asyncio.create_task(weekly_reset_scheduler())
