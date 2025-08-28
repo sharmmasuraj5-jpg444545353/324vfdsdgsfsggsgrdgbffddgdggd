@@ -12,13 +12,13 @@ mongo_client = MongoClient(MONGO_DB_URI)
 db = mongo_client["purvi_rankings"]
 collection = db["ranking"]
 weekly_collection = db["weekly_ranking"]
-today_collection = db["today_ranking"]  # Today's data के लिए नई collection
+today_collection = db["today_ranking"]
 
 user_data = {}
 today_stats = {}
 weekly_stats = {}
 
-MISHI = [
+PURVI = [
     "https://graph.org/file/f86b71018196c5cfe7344.jpg",
     "https://graph.org/file/a3db9af88f25bb1b99325.jpg",
     "https://graph.org/file/5b344a55f3d5199b63fa5.jpg",
@@ -31,18 +31,21 @@ MISHI = [
     "https://graph.org/file/0bfe29d15e918917d1305.jpg",
 ]
 
-# Daily data reset function (हर day को midnight को reset)
+# Bot mention format
+def get_bot_mention():
+    return f"[{app.me.first_name}](tg://user?id={app.me.id})"
+
+# Daily data reset function
 def reset_daily_data():
     global today_stats
     today_stats = {}
-    today_collection.delete_many({})  # Database से daily data delete करें
+    today_collection.delete_many({})
     print("Daily data has been reset!")
 
 # Reset daily data every day at midnight
 async def daily_reset_scheduler():
     while True:
         now = datetime.now()
-        # अगले day के midnight तक wait करें
         next_midnight = now.replace(hour=0, minute=0, second=0, microsecond=0) + timedelta(days=1)
         wait_seconds = (next_midnight - now).total_seconds()
         await asyncio.sleep(wait_seconds)
@@ -71,13 +74,11 @@ async def today_watcher(_, message):
     chat_id = message.chat.id
     user_id = message.from_user.id
     
-    # Memory में update
     if chat_id not in today_stats:
         today_stats[chat_id] = {}
     today_stats[chat_id].setdefault(user_id, {"total_messages": 0})
     today_stats[chat_id][user_id]["total_messages"] += 1
     
-    # Database में update
     today_collection.update_one(
         {"chat_id": chat_id, "user_id": user_id},
         {"$inc": {"total_messages": 1}},
@@ -88,11 +89,9 @@ async def today_watcher(_, message):
 async def _watcher(_, message):
     user_id = message.from_user.id
     
-    # Memory में update
     user_data.setdefault(user_id, {}).setdefault("total_messages", 0)
     user_data[user_id]["total_messages"] += 1
     
-    # Database में update
     collection.update_one({"_id": user_id}, {"$inc": {"total_messages": 1}}, upsert=True)
     weekly_collection.update_one({"_id": user_id}, {"$inc": {"total_messages": 1}}, upsert=True)
     
@@ -104,6 +103,7 @@ async def _watcher(_, message):
 @app.on_message(filters.command(["ranking", "leaderboard", "rank"]))
 async def leaderboard_panel(_, message):
     group_name = message.chat.title
+    bot_mention = get_bot_mention()
     caption = f"""
 **✦ 🏆 ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ ᴘᴀɴᴇʟ ✦**
 
@@ -111,7 +111,7 @@ async def leaderboard_panel(_, message):
 
 **ᴄʜᴇᴄᴋ ɢʀᴏᴜᴘ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ ʙʏ ᴛᴀᴘᴘɪɴɢ ʙᴜᴛᴛᴏɴ ʙᴇʟᴏᴡ ↓**
 
-**ʙʏ :- {app.mention}**
+**ʙʏ :- {bot_mention}**
     """
 
     buttons = InlineKeyboardMarkup([
@@ -119,7 +119,7 @@ async def leaderboard_panel(_, message):
     ])
 
     await message.reply_photo(
-        random.choice(MISHI),
+        random.choice(PURVI),
         caption=caption,
         reply_markup=buttons,
         parse_mode=enums.ParseMode.MARKDOWN
@@ -130,7 +130,6 @@ async def leaderboard_panel(_, message):
 async def today_command(_, message):
     chat_id = message.chat.id
     
-    # Database से today's data fetch करें
     today_members = today_collection.find({"chat_id": chat_id}).sort("total_messages", -1).limit(10)
 
     response = "**✦ 📈 ᴛᴏᴅᴀʏ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ**\n\n"
@@ -149,9 +148,9 @@ async def today_command(_, message):
 
     if count > 0:
         button = InlineKeyboardMarkup([
-            [InlineKeyboardButton("✙ ᴀᴅᴅ ᴍᴇ ɪɴ ʏᴏᴜʀ ɢʀᴏᴜᴘ ✙", url=f"https://t.me/{app.username}?startgroup=true")]
+            [InlineKeyboardButton("✙ ᴀᴅᴅ ᴍᴇ ɪɴ ʏᴏᴜʀ ɢʀᴏᴜᴘ ✙", url=f"https://t.me/{app.me.username}?startgroup=true")]
         ])
-        await message.reply_photo(random.choice(MISHI), caption=response, reply_markup=button, parse_mode=enums.ParseMode.MARKDOWN)
+        await message.reply_photo(random.choice(PURVI), caption=response, reply_markup=button, parse_mode=enums.ParseMode.MARKDOWN)
     else:
         await message.reply_text("**❅ ɴᴏ ᴅᴀᴛᴀ ᴀᴠᴀɪʟᴀʙʟᴇ ғᴏʀ ᴛᴏᴅᴀʏ.**")
 
@@ -172,9 +171,9 @@ async def weekly_command(_, message):
         response += f"**{idx}**. {user_mention} ➠ {total} messages\n"
 
     button = InlineKeyboardMarkup([
-        [InlineKeyboardButton("✙ ᴀᴅᴅ ᴍᴇ ɪɴ ʏᴏᴜʀ ɢʀᴏᴜᴘ ✙", url=f"https://t.me/{app.username}?startgroup=true")]
+        [InlineKeyboardButton("✙ ᴀᴅᴅ ᴍᴇ ɪɴ ʏᴏᴜʀ ɢʀᴏᴜᴘ ✙", url=f"https://t.me/{app.me.username}?startgroup=true")]
     ])
-    await message.reply_photo(random.choice(MISHI), caption=response, reply_markup=button, parse_mode=enums.ParseMode.MARKDOWN)
+    await message.reply_photo(random.choice(PURVI), caption=response, reply_markup=button, parse_mode=enums.ParseMode.MARKDOWN)
 
 # ---------------- overall ranking ---------------- #
 @app.on_message(filters.command("overall"))
@@ -193,14 +192,15 @@ async def overall_command(_, message):
         response += f"**{idx}**. {user_mention} ➠ {total} messages\n"
 
     button = InlineKeyboardMarkup([
-        [InlineKeyboardButton("✙ ᴀᴅᴅ ᴍᴇ ɪɴ ʏᴏᴜʀ ɢʀᴏᴜᴘ ✙", url=f"https://t.me/{app.username}?startgroup=true")]
+        [InlineKeyboardButton("✙ ᴀᴅᴅ ᴍᴇ ɪɴ ʏᴏᴜʀ ɢʀᴏᴜᴘ ✙", url=f"https://t.me/{app.me.username}?startgroup=true")]
     ])
-    await message.reply_photo(random.choice(MISHI), caption=response, reply_markup=button, parse_mode=enums.ParseMode.MARKDOWN)
+    await message.reply_photo(random.choice(PURVI), caption=response, reply_markup=button, parse_mode=enums.ParseMode.MARKDOWN)
 
 # ---------------- Show Leaderboard Buttons ---------------- #
 @app.on_callback_query(filters.regex("^show_leaderboard_buttons$"))
 async def show_leaderboard_buttons(_, query):
     group_name = query.message.chat.title
+    bot_mention = get_bot_mention()
     caption = f"""
 **✦ 🏆 ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ ᴘᴀɴᴇʟ ✦**
 
@@ -208,7 +208,7 @@ async def show_leaderboard_buttons(_, query):
 
 **ᴄʜᴏᴏsᴇ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ ᴛʏᴘᴇ ↓**
 
-**ʙʏ :- {app.mention}**
+**ʙʏ :- {bot_mention}**
     """
 
     buttons = InlineKeyboardMarkup([
@@ -235,7 +235,6 @@ async def panel_callback_handler(_, query):
 async def show_today_leaderboard(query):
     chat_id = query.message.chat.id
     
-    # Database से today's data fetch करें
     today_members = today_collection.find({"chat_id": chat_id}).sort("total_messages", -1).limit(10)
 
     response = "**✦ 📊 ᴛᴏᴅᴀʏ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ**\n\n"
@@ -254,6 +253,8 @@ async def show_today_leaderboard(query):
 
     if count > 0:
         button = InlineKeyboardMarkup([
+            [InlineKeyboardButton("📈 ᴡᴇᴇᴋʟʏ", callback_data="weekly"),
+             InlineKeyboardButton("🏅 ᴏᴠᴇʀᴀʟʟ", callback_data="overall")],
             [InlineKeyboardButton("🔙 ʙᴀᴄᴋ ᴛᴏ ᴘᴀɴᴇʟ", callback_data="back_to_panel")]
         ])
         await query.message.edit_text(response, reply_markup=button, parse_mode=enums.ParseMode.MARKDOWN)
@@ -275,6 +276,8 @@ async def show_weekly_leaderboard(query):
         response += f"**{idx}**. {user_mention} ➠ {total} messages\n"
 
     button = InlineKeyboardMarkup([
+        [InlineKeyboardButton("📊 ᴛᴏᴅᴀʏ", callback_data="today"),
+         InlineKeyboardButton("🏅 ᴏᴠᴇʀᴀʟʟ", callback_data="overall")],
         [InlineKeyboardButton("🔙 ʙᴀᴄᴋ ᴛᴏ ᴘᴀɴᴇʟ", callback_data="back_to_panel")]
     ])
     await query.message.edit_text(response, reply_markup=button, parse_mode=enums.ParseMode.MARKDOWN)
@@ -294,6 +297,8 @@ async def show_overall_leaderboard(query):
         response += f"**{idx}**. {user_mention} ➠ {total} messages\n"
 
     button = InlineKeyboardMarkup([
+        [InlineKeyboardButton("📊 ᴛᴏᴅᴀʏ", callback_data="today"),
+         InlineKeyboardButton("📈 ᴡᴇᴇᴋʟʏ", callback_data="weekly")],
         [InlineKeyboardButton("🔙 ʙᴀᴄᴋ ᴛᴏ ᴘᴀɴᴇʟ", callback_data="back_to_panel")]
     ])
     await query.message.edit_text(response, reply_markup=button, parse_mode=enums.ParseMode.MARKDOWN)
@@ -302,6 +307,7 @@ async def show_overall_leaderboard(query):
 @app.on_callback_query(filters.regex("^back_to_panel$"))
 async def back_to_panel_handler(_, query):
     group_name = query.message.chat.title
+    bot_mention = get_bot_mention()
     caption = f"""
 **✦ 🏆 ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ ᴘᴀɴᴇʟ ✦**
 
@@ -309,7 +315,7 @@ async def back_to_panel_handler(_, query):
 
 **ᴄʜᴏᴏsᴇ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ ᴛʏᴘᴇ ↓**
 
-**ʙʏ :- {app.mention}**
+**ʙʏ :- {bot_mention}**
     """
 
     buttons = InlineKeyboardMarkup([
@@ -325,6 +331,7 @@ async def back_to_panel_handler(_, query):
 @app.on_callback_query(filters.regex("^back_to_main$"))
 async def back_to_main_handler(_, query):
     group_name = query.message.chat.title
+    bot_mention = get_bot_mention()
     caption = f"""
 **✦ 🏆 ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ ᴘᴀɴᴇʟ ✦**
 
@@ -332,7 +339,7 @@ async def back_to_main_handler(_, query):
 
 **ᴄʜᴇᴄᴋ ɢʀᴏᴜᴘ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ ʙʏ ᴛᴀᴘᴘɪɴɢ ʙᴜᴛᴛᴏɴ ʙᴇʟᴏᴡ ↓**
 
-**ʙʏ :- {app.mention}**
+**ʙʏ :- {bot_mention}**
     """
 
     buttons = InlineKeyboardMarkup([
