@@ -82,22 +82,29 @@
   <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif"/>
 </p>
 
-h1 align="center">─「 ᴄᴏɴᴛᴀᴄᴛ ᴍᴇ 」─</h1>  <p align="center">  
+<h1 align="center">─「 ᴄᴏɴᴛᴀᴄᴛ ᴍᴇ 」─</h1>  
 
+<p align="center">  
   <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif"/>  
-</p>  <p align="center">  
+</p>  
 
+<p align="center">  
   <!-- Dev -->  
   <a href="https://t.me/TheSigmaCoder">  
     <img src="https://img.shields.io/badge/ᴅᴇᴠ-ᴀʟᴘʜᴀ-ff9800?style=for-the-badge&logo=telegram&logoColor=white"/> 
-
-  </a>    <!-- Purvi Bots -->    <a href="https://t.me/purvi_bots">  
-    <img src="https://img.shields.io/badge/ᴘᴜʀᴠ𝙸-%20ʙᴏᴛs-2196f3?style=for-the-badge&logo=telegram&logoColor=white"/> 
-
-  </a>    <!-- Instagram -->    <a href="https://instagram.com/careless__02">  
-    <img src="https://img.shields.io/badge/𝙸ɴѕᴛᴀɢʀᴀᴍ-d62976?style=for-the-badge&logo=instagram&logoColor=white"/>  
   </a>  
 
-</p>  <p align="center">  
-  <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif"/>  
+  <!-- Purvi Bots -->    
+  <a href="https://t.me/purvi_bots">  
+    <img src="https://img.shields.io/badge/ᴘᴜʀᴠ𝙸-%20ʙᴏᴛs-2196f3?style=for-the-badge&logo=telegram&logoColor=white"/> 
+  </a>  
+
+  <!-- Instagram -->    
+  <a href="https://instagram.com/careless__02">  
+    <img src="https://img.shields.io/badge/𝙸ɴѕᴛᴀɢʀᴀᴍ-d62976?style=for-the-badge&logo=instagram&logoColor=white"/>  
+  </a>  
 </p>  
+
+<p align="center">  
+  <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif"/>  
+</p>
