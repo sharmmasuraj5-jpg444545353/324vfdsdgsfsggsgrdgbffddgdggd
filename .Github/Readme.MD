@@ -94,14 +94,11 @@
     <img src="https://img.shields.io/badge/ᴅᴇᴠ-ᴀʟᴘʜᴀ-555555?style=for-the-badge&logo=telegram&logoColor=white"/>
   </a>
 
-  &nbsp;&nbsp;&nbsp; <!-- space -->
 
   <!-- Purvi Bots -->
   <a href="https://t.me/purvi_bots">
     <img src="https://img.shields.io/badge/ᴘᴜʀᴠ𝙸-%20ʙᴏᴛs-00bfff?style=for-the-badge&logo=telegram&logoColor=white"/>
   </a>
-
-  &nbsp;&nbsp;&nbsp; <!-- space -->
 
   <!-- Instagram -->
   <a href="https://instagram.com/careless__02">
