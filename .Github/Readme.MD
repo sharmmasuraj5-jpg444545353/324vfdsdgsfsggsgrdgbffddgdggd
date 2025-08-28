@@ -96,12 +96,12 @@
 
   <!-- Purvi Bots -->
   <a href="https://t.me/purvi_bots">
-    <img src="https://img.shields.io/badge/ᴘᴜʀᴠɪ-%20ʙᴏᴛs-2196f3?style=for-the-badge&logo=telegram&logoColor=white"/>
+    <img src="https://img.shields.io/badge/ᴘᴜʀᴠ𝙸-%20ʙᴏᴛs-2196f3?style=for-the-badge&logo=telegram&logoColor=white"/>
   </a>
 
   <!-- Instagram -->
   <a href="https://instagram.com/careless__02">
-    <img src="https://img.shields.io/badge/𝙸ɴsᴛᴀɢʀᴀᴍ-d62976?style=for-the-badge&logo=instagram&logoColor=white"/>
+    <img src="https://img.shields.io/badge/𝙸ɴѕᴛᴀɢʀᴀᴍ-d62976?style=for-the-badge&logo=instagram&logoColor=white"/>
   </a>
 </p>
 
