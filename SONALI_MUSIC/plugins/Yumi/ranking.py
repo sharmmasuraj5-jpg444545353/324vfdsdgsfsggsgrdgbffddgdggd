@@ -6,7 +6,7 @@ from SONALI_MUSIC import app
 from config import MONGO_DB_URI
 
 mongo_client = MongoClient(MONGO_DB_URI)
-db = mongo_client["natu_rankings"]
+db = mongo_client["purvi_rankings"]
 collection = db["ranking"]
 
 user_data = {}
