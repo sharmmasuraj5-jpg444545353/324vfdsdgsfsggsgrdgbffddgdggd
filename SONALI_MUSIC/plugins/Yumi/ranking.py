@@ -115,7 +115,7 @@ async def leaderboard_panel(_, message):
     """
 
     buttons = InlineKeyboardMarkup([
-        [InlineKeyboardButton("🔍 ᴄʜᴇᴄᴋ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ", callback_data="show_leaderboard_buttons")]
+        [InlineKeyboardButton("🔍 ᴄʜᴇᴄᴋ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ", callback_data="rank_show_leaderboard_buttons")]
     ])
 
     await message.reply_photo(
@@ -197,7 +197,7 @@ async def overall_command(_, message):
     await message.reply_photo(random.choice(PURVI), caption=response, reply_markup=button, parse_mode=enums.ParseMode.MARKDOWN)
 
 # ---------------- Show Leaderboard Buttons ---------------- #
-@app.on_callback_query(filters.regex("^show_leaderboard_buttons$"))
+@app.on_callback_query(filters.regex("^rank_show_leaderboard_buttons$"))
 async def show_leaderboard_buttons(_, query):
     group_name = query.message.chat.title
     bot_mention = get_bot_mention()
@@ -212,24 +212,24 @@ async def show_leaderboard_buttons(_, query):
     """
 
     buttons = InlineKeyboardMarkup([
-        [InlineKeyboardButton("📊 ᴛᴏᴅᴀʏ", callback_data="panel_today"),
-         InlineKeyboardButton("📈 ᴡᴇᴇᴋʟʏ", callback_data="panel_weekly")],
-        [InlineKeyboardButton("🏅 ᴏᴠᴇʀᴀʟʟ", callback_data="panel_overall")],
-        [InlineKeyboardButton("🔙 ʙᴀᴄᴋ", callback_data="back_to_panel")]
+        [InlineKeyboardButton("📊 ᴛᴏᴅᴀʏ", callback_data="rank_panel_today"),
+         InlineKeyboardButton("📈 ᴡᴇᴇᴋʟʏ", callback_data="rank_panel_weekly")],
+        [InlineKeyboardButton("🏅 ᴏᴠᴇʀᴀʟʟ", callback_data="rank_panel_overall")],
+        [InlineKeyboardButton("🔙 ʙᴀᴄᴋ", callback_data="rank_back_to_panel")]
     ])
 
     await query.message.edit_text(caption, reply_markup=buttons, parse_mode=enums.ParseMode.MARKDOWN)
 
 # ---------------- callback queries for panel ---------------- #
-@app.on_callback_query(filters.regex("^panel_"))
+@app.on_callback_query(filters.regex("^rank_panel_"))
 async def panel_callback_handler(_, query):
     data = query.data
     
-    if data == "panel_today":
+    if data == "rank_panel_today":
         await show_today_leaderboard(query)
-    elif data == "panel_weekly":
+    elif data == "rank_panel_weekly":
         await show_weekly_leaderboard(query)
-    elif data == "panel_overall":
+    elif data == "rank_panel_overall":
         await show_overall_leaderboard(query)
 
 async def show_today_leaderboard(query):
@@ -253,9 +253,9 @@ async def show_today_leaderboard(query):
 
     if count > 0:
         button = InlineKeyboardMarkup([
-            [InlineKeyboardButton("📈 ᴡᴇᴇᴋʟʏ", callback_data="weekly"),
-             InlineKeyboardButton("🏅 ᴏᴠᴇʀᴀʟʟ", callback_data="overall")],
-            [InlineKeyboardButton("🔙 ʙᴀᴄᴋ ᴛᴏ ᴘᴀɴᴇʟ", callback_data="back_to_panel")]
+            [InlineKeyboardButton("📈 ᴡᴇᴇᴋʟʏ", callback_data="rank_weekly"),
+             InlineKeyboardButton("🏅 ᴏᴠᴇʀᴀʟʟ", callback_data="rank_overall")],
+            [InlineKeyboardButton("🔙 ʙᴀᴄᴋ ᴛᴏ ᴘᴀɴᴇʟ", callback_data="rank_back_to_panel")]
         ])
         await query.message.edit_text(response, reply_markup=button, parse_mode=enums.ParseMode.MARKDOWN)
     else:
@@ -276,9 +276,9 @@ async def show_weekly_leaderboard(query):
         response += f"**{idx}**. {user_mention} ➠ {total} messages\n"
 
     button = InlineKeyboardMarkup([
-        [InlineKeyboardButton("📊 ᴛᴏᴅᴀʏ", callback_data="today"),
-         InlineKeyboardButton("🏅 ᴏᴠᴇʀᴀʟʟ", callback_data="overall")],
-        [InlineKeyboardButton("🔙 ʙᴀᴄᴋ ᴛᴏ ᴘᴀɴᴇʟ", callback_data="back_to_panel")]
+        [InlineKeyboardButton("📊 ᴛᴏᴅᴀʏ", callback_data="rank_today"),
+         InlineKeyboardButton("🏅 ᴏᴠᴇʀᴀʟʟ", callback_data="rank_overall")],
+        [InlineKeyboardButton("🔙 ʙᴀᴄᴋ ᴛᴏ ᴘᴀɴᴇʟ", callback_data="rank_back_to_panel")]
     ])
     await query.message.edit_text(response, reply_markup=button, parse_mode=enums.ParseMode.MARKDOWN)
 
@@ -297,18 +297,27 @@ async def show_overall_leaderboard(query):
         response += f"**{idx}**. {user_mention} ➠ {total} messages\n"
 
     button = InlineKeyboardMarkup([
-        [InlineKeyboardButton("📊 ᴛᴏᴅᴀʏ", callback_data="today"),
-         InlineKeyboardButton("📈 ᴡᴇᴇᴋʟʏ", callback_data="weekly")],
-        [InlineKeyboardButton("🔙 ʙᴀᴄᴋ ᴛᴏ ᴘᴀɴᴇʟ", callback_data="back_to_panel")]
+        [InlineKeyboardButton("📊 ᴛᴏᴅᴀʏ", callback_data="rank_today"),
+         InlineKeyboardButton("📈 ᴡᴇᴇᴋʟʏ", callback_data="rank_weekly")],
+        [InlineKeyboardButton("🔙 ʙᴀᴄᴋ ᴛᴏ ᴘᴀɴᴇʟ", callback_data="rank_back_to_panel")]
     ])
     await query.message.edit_text(response, reply_markup=button, parse_mode=enums.ParseMode.MARKDOWN)
 
-# ---------------- Back to Panel ---------------- #
-@app.on_callback_query(filters.regex("^back_to_panel$"))
-async def back_to_panel_handler(_, query):
-    group_name = query.message.chat.title
-    bot_mention = get_bot_mention()
-    caption = f"""
+# ---------------- regular callback queries ---------------- #
+@app.on_callback_query(filters.regex("^rank_(today|weekly|overall|back_to_panel)$"))
+async def regular_callback_handler(_, query):
+    data = query.data.replace("rank_", "")
+    
+    if data == "today":
+        await show_today_leaderboard(query)
+    elif data == "weekly":
+        await show_weekly_leaderboard(query)
+    elif data == "overall":
+        await show_overall_leaderboard(query)
+    elif data == "back_to_panel":
+        group_name = query.message.chat.title
+        bot_mention = get_bot_mention()
+        caption = f"""
 **✦ 🏆 ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ ᴘᴀɴᴇʟ ✦**
 
 **ɢʀᴏᴜᴘ:** {group_name}
@@ -316,19 +325,19 @@ async def back_to_panel_handler(_, query):
 **ᴄʜᴏᴏsᴇ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ ᴛʏᴘᴇ ↓**
 
 **ʙʏ :- {bot_mention}**
-    """
+        """
 
-    buttons = InlineKeyboardMarkup([
-        [InlineKeyboardButton("📊 ᴛᴏᴅᴀʏ", callback_data="panel_today"),
-         InlineKeyboardButton("📈 ᴡᴇᴇᴋʟʏ", callback_data="panel_weekly")],
-        [InlineKeyboardButton("🏅 ᴏᴠᴇʀᴀʟʟ", callback_data="panel_overall")],
-        [InlineKeyboardButton("🔙 ʙᴀᴄᴋ", callback_data="back_to_main")]
-    ])
+        buttons = InlineKeyboardMarkup([
+            [InlineKeyboardButton("📊 ᴛᴏᴅᴀʏ", callback_data="rank_panel_today"),
+             InlineKeyboardButton("📈 ᴡᴇᴇᴋʟʏ", callback_data="rank_panel_weekly")],
+            [InlineKeyboardButton("🏅 ᴏᴠᴇʀᴀʟʟ", callback_data="rank_panel_overall")],
+            [InlineKeyboardButton("🔙 ʙᴀᴄᴋ", callback_data="rank_back_to_main")]
+        ])
 
-    await query.message.edit_text(caption, reply_markup=buttons, parse_mode=enums.ParseMode.MARKDOWN)
+        await query.message.edit_text(caption, reply_markup=buttons, parse_mode=enums.ParseMode.MARKDOWN)
 
 # ---------------- Back to Main ---------------- #
-@app.on_callback_query(filters.regex("^back_to_main$"))
+@app.on_callback_query(filters.regex("^rank_back_to_main$"))
 async def back_to_main_handler(_, query):
     group_name = query.message.chat.title
     bot_mention = get_bot_mention()
@@ -343,7 +352,7 @@ async def back_to_main_handler(_, query):
     """
 
     buttons = InlineKeyboardMarkup([
-        [InlineKeyboardButton("🔍 ᴄʜᴇᴄᴋ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ", callback_data="show_leaderboard_buttons")]
+        [InlineKeyboardButton("🔍 ᴄʜᴇᴄᴋ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ", callback_data="rank_show_leaderboard_buttons")]
     ])
 
     await query.message.edit_text(caption, reply_markup=buttons, parse_mode=enums.ParseMode.MARKDOWN)
