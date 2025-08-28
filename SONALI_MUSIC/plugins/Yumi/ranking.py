@@ -6,9 +6,10 @@ import time
 from datetime import datetime, timedelta
 from SONALI_MUSIC import app
 from config import MONGO_DB_URI
+import asyncio
 
 mongo_client = MongoClient(MONGO_DB_URI)
-db = mongo_client["natu_rankings"]
+db = mongo_client["purvi_rankings"]
 collection = db["ranking"]
 weekly_collection = db["weekly_ranking"]
 
@@ -42,7 +43,6 @@ async def weekly_reset_scheduler():
         now = datetime.now()
         next_sunday = now + timedelta(days=(6 - now.weekday() + 7) % 7)
         next_sunday = next_sunday.replace(hour=0, minute=0, second=0, microsecond=0)
-        
         wait_seconds = (next_sunday - now).total_seconds()
         await asyncio.sleep(wait_seconds)
         reset_weekly_data()
@@ -81,15 +81,15 @@ async def leaderboard_panel(_, message):
 
 **ᴄʜᴇᴄᴋ ɢʀᴏᴜᴘ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ ʙʏ ᴛᴀᴘᴘɪɴɢ ʙᴜᴛᴛᴏɴs ʙᴇʟᴏᴡ ↓**
 
-**ʙʏ :- {app.mention}
+**ʙʏ :- {app.mention}**
     """
 
     buttons = InlineKeyboardMarkup([
-            [InlineKeyboardButton("📊 ᴛᴏᴅᴀʏ", callback_data="panel_today"),
-             InlineKeyboardButton("📈 ᴡᴇᴇᴋʟʏ", callback_data="panel_weekly")],
-            [InlineKeyboardButton("🏅 ᴏᴠᴇʀᴀʟʟ", callback_data="panel_overall"),
-            InlineKeyboardButton("🔙 ʙᴀᴄᴋ", callback_data="back_to_panel"),
-        ])
+        [InlineKeyboardButton("📊 ᴛᴏᴅᴀʏ", callback_data="panel_today"),
+         InlineKeyboardButton("📈 ᴡᴇᴇᴋʟʏ", callback_data="panel_weekly")],
+        [InlineKeyboardButton("🏅 ᴏᴠᴇʀᴀʟʟ", callback_data="panel_overall"),
+         InlineKeyboardButton("🔙 ʙᴀᴄᴋ", callback_data="back_to_panel")]
+    ])
 
     await message.reply_photo(
         random.choice(MISHI),
@@ -118,8 +118,7 @@ async def today_command(_, message):
 
             button = InlineKeyboardMarkup([
                 [InlineKeyboardButton("📈 ᴡᴇᴇᴋʟʏ", callback_data="weekly"),
-                InlineKeyboardButton("🏅 ᴏᴠᴇʀᴀʟʟ", callback_data="overall")],
-               # [InlineKeyboardButton("🔙 ʙᴀᴄᴋ ᴛᴏ ᴘᴀɴᴇʟ", callback_data="back_to_panel")]
+                 InlineKeyboardButton("🏅 ᴏᴠᴇʀᴀʟʟ", callback_data="overall")]
             ])
             await message.reply_photo(random.choice(MISHI), caption=response, reply_markup=button, parse_mode=enums.ParseMode.MARKDOWN)
         else:
@@ -145,8 +144,7 @@ async def weekly_command(_, message):
 
     button = InlineKeyboardMarkup([
         [InlineKeyboardButton("📊 ᴛᴏᴅᴀʏ", callback_data="today"),
-         InlineKeyboardButton("🏅 ᴏᴠᴇʀᴀʟʟ", callback_data="overall")],
-        #[InlineKeyboardButton("🔙 ʙᴀᴄᴋ ᴛᴏ ᴘᴀɴᴇʟ", callback_data="back_to_panel")]
+         InlineKeyboardButton("🏅 ᴏᴠᴇʀᴀʟʟ", callback_data="overall")]
     ])
     await message.reply_photo(random.choice(MISHI), caption=response, reply_markup=button, parse_mode=enums.ParseMode.MARKDOWN)
 
@@ -168,8 +166,7 @@ async def overall_command(_, message):
 
     button = InlineKeyboardMarkup([
         [InlineKeyboardButton("📊 ᴛᴏᴅᴀʏ", callback_data="today"),
-         InlineKeyboardButton("📈 ᴡᴇᴇᴋʟʏ", callback_data="weekly")],
-       # [InlineKeyboardButton("🔙 ʙᴀᴄᴋ ᴛᴏ ᴘᴀɴᴇʟ", callback_data="back_to_panel")]
+         InlineKeyboardButton("📈 ᴡᴇᴇᴋʟʏ", callback_data="weekly")]
     ])
     await message.reply_photo(random.choice(MISHI), caption=response, reply_markup=button, parse_mode=enums.ParseMode.MARKDOWN)
 
@@ -203,8 +200,7 @@ async def show_today_leaderboard(query):
 
             button = InlineKeyboardMarkup([
                 [InlineKeyboardButton("📈 ᴡᴇᴇᴋʟʏ", callback_data="weekly"),
-                 InlineKeyboardButton("🏅 ᴏᴠᴇʀᴀʟʟ", callback_data="overall")],
-               # [InlineKeyboardButton("🔙 ʙᴀᴄᴋ ᴛᴏ ᴘᴀɴᴇʟ", callback_data="back_to_panel")]
+                 InlineKeyboardButton("🏅 ᴏᴠᴇʀᴀʟʟ", callback_data="overall")]
             ])
             await query.message.edit_text(response, reply_markup=button, parse_mode=enums.ParseMode.MARKDOWN)
         else:
@@ -228,8 +224,7 @@ async def show_weekly_leaderboard(query):
 
     button = InlineKeyboardMarkup([
         [InlineKeyboardButton("📊 ᴛᴏᴅᴀʏ", callback_data="today"),
-         InlineKeyboardButton("🏅 ᴏᴠᴇʀᴀʟʟ", callback_data="overall")],
-        #[InlineKeyboardButton("🔙 ʙᴀᴄᴋ ᴛᴏ ᴘᴀɴᴇʟ", callback_data="back_to_panel")]
+         InlineKeyboardButton("🏅 ᴏᴠᴇʀᴀʟʟ", callback_data="overall")]
     ])
     await query.message.edit_text(response, reply_markup=button, parse_mode=enums.ParseMode.MARKDOWN)
 
@@ -249,8 +244,7 @@ async def show_overall_leaderboard(query):
 
     button = InlineKeyboardMarkup([
         [InlineKeyboardButton("📊 ᴛᴏᴅᴀʏ", callback_data="today"),
-         InlineKeyboardButton("📈 ᴡᴇᴇᴋʟʏ", callback_data="weekly")],
-       # [InlineKeyboardButton("🔙 ʙᴀᴄᴋ ᴛᴏ ᴘᴀɴᴇʟ", callback_data="back_to_panel")]
+         InlineKeyboardButton("📈 ᴡᴇᴇᴋʟʏ", callback_data="weekly")]
     ])
     await query.message.edit_text(response, reply_markup=button, parse_mode=enums.ParseMode.MARKDOWN)
 
@@ -281,10 +275,10 @@ async def regular_callback_handler(_, query):
             [InlineKeyboardButton("📊 ᴛᴏᴅᴀʏ", callback_data="panel_today"),
              InlineKeyboardButton("📈 ᴡᴇᴇᴋʟʏ", callback_data="panel_weekly")],
             [InlineKeyboardButton("🏅 ᴏᴠᴇʀᴀʟʟ", callback_data="panel_overall"),
-            InlineKeyboardButton("🔙 ʙᴀᴄᴋ", callback_data="back_to_panel"),
+             InlineKeyboardButton("🔙 ʙᴀᴄᴋ", callback_data="back_to_panel")]
         ])
 
         await query.message.edit_text(caption, reply_markup=buttons, parse_mode=enums.ParseMode.MARKDOWN)
 
-import asyncio
+# Start weekly reset scheduler
 asyncio.create_task(weekly_reset_scheduler())
