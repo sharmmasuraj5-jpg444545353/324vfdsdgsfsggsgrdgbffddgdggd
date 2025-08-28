@@ -22,17 +22,17 @@ async def execute_python_code(client: Client, message: Message):
         sys.stdout = str_io
         local_vars = {}
         exec(python_code, {}, local_vars)
-        sys.stdout = sys.__stdout__  # Reset stdout
+        sys.stdout = sys.__stdout__  
 
         output = str_io.getvalue()
         if not output.strip():
-            output = "✅ ᴄᴏᴅᴇ ᴇxᴇᴄᴜᴛᴇᴅ sᴜᴄᴄᴇssғᴜʟʟʏ. (ɴᴏ ᴏᴜᴛᴘᴜᴛ)"
+            output = "**✅ ᴄᴏᴅᴇ ᴇxᴇᴄᴜᴛᴇᴅ sᴜᴄᴄᴇssғᴜʟʟʏ. (ɴᴏ ᴏᴜᴛᴘᴜᴛ)**"
         else:
-            output = f"✅ ᴄᴏᴅᴇ ᴇxᴇᴄᴜᴛᴇᴅ sᴜᴄᴄᴇssғᴜʟʟʏ:\n```\n{output}\n```"
+            output = f"**✅ ᴄᴏᴅᴇ ᴇxᴇᴄᴜᴛᴇᴅ sᴜᴄᴄᴇssғᴜʟʟʏ :-**\n\n```\n{output}\n```"
 
         await message.reply(output)
 
     except Exception:
-        sys.stdout = sys.__stdout__  # Reset stdout in case of error
+        sys.stdout = sys.__stdout__ 
         traceback_str = traceback.format_exc()
-        await message.reply(f"❌ ᴄᴏᴅᴇ ᴇxᴇᴄᴜᴛɪᴏɴ ᴇʀʀᴏʀ:\n```\n{traceback_str}\n```")
+        await message.reply(f"**❌ ᴄᴏᴅᴇ ᴇxᴇᴄᴜᴛɪᴏɴ ᴇʀʀᴏʀ :-**\n\n```\n{traceback_str}\n```")
