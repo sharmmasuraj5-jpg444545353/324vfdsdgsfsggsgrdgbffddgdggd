@@ -89,17 +89,17 @@
 </p>
 
 <p align="center">
-  <!-- Dev -->
+  <!-- Dev (Brown → Dark Gray) -->
   <a href="https://t.me/TheSigmaCoder">
-    <img src="https://img.shields.io/badge/ᴅᴇᴠ-ᴀʟᴘʜᴀ-%23A52A2A?style=for-the-badge&logo=telegram&logoColor=%2336454F"/>
+    <img src="https://img.shields.io/badge/ᴅᴇᴠ-ᴀʟᴘʜᴀ?style=for-the-badge&logo=telegram&logoColor=white&labelColor=A52A2A&color=36454F"/>
   </a>
 
-  <!-- Purvi Bots -->
+  <!-- Purvi Bots (Violet → Blue) -->
   <a href="https://t.me/purvi_bots">
-    <img src="https://img.shields.io/badge/ᴘᴜʀᴠ𝙸-%20ʙᴏᴛs-%238F00FF?style=for-the-badge&logo=telegram&logoColor=%230000FF"/>
+    <img src="https://img.shields.io/badge/ᴘᴜʀᴠ𝙸-%20ʙᴏᴛs?style=for-the-badge&logo=telegram&logoColor=white&labelColor=8F00FF&color=0000FF"/>
   </a>
 
-  <!-- Instagram -->
+  <!-- Instagram (unchanged) -->
   <a href="https://instagram.com/careless__02">
     <img src="https://img.shields.io/badge/𝙸ɴѕᴛᴀɢʀᴀᴍ-d62976?style=for-the-badge&logo=instagram&logoColor=white"/>
   </a>
