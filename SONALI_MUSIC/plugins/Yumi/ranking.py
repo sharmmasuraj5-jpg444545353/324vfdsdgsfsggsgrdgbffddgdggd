@@ -1,4 +1,4 @@
-from pyrogram import Client, filters
+from pyrogram import Client, filters, enums
 from pymongo import MongoClient
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 import random
@@ -10,7 +10,7 @@ db = mongo_client["natu_rankings"]
 collection = db["ranking"]
 
 user_data = {}
-today = {}
+today_stats = {}  # Renamed from 'today' to avoid conflict
 
 MISHI = [
     "https://graph.org/file/f86b71018196c5cfe7344.jpg",
@@ -30,10 +30,10 @@ MISHI = [
 def today_watcher(_, message):
     chat_id = message.chat.id
     user_id = message.from_user.id  # integer ID
-    if chat_id not in today:
-        today[chat_id] = {}
-    today[chat_id].setdefault(user_id, {"total_messages": 0})
-    today[chat_id][user_id]["total_messages"] += 1
+    if chat_id not in today_stats:  # Changed from 'today' to 'today_stats'
+        today_stats[chat_id] = {}  # Changed from 'today' to 'today_stats'
+    today_stats[chat_id].setdefault(user_id, {"total_messages": 0})  # Changed from 'today' to 'today_stats'
+    today_stats[chat_id][user_id]["total_messages"] += 1  # Changed from 'today' to 'today_stats'
 
 @app.on_message(filters.group, group=11)
 def _watcher(_, message):
@@ -44,10 +44,10 @@ def _watcher(_, message):
 
 # ---------------- today leaderboard ---------------- #
 @app.on_message(filters.command("today"))
-async def today(_, message):
+async def today_command(_, message):  # Renamed function from 'today' to 'today_command'
     chat_id = message.chat.id
-    if chat_id in today:
-        users_data = [(uid, info["total_messages"]) for uid, info in today[chat_id].items()]
+    if chat_id in today_stats:  # Changed from 'today' to 'today_stats'
+        users_data = [(uid, info["total_messages"]) for uid, info in today_stats[chat_id].items()]  # Changed from 'today' to 'today_stats'
         sorted_users = sorted(users_data, key=lambda x: x[1], reverse=True)[:10]
 
         if sorted_users:
@@ -63,7 +63,7 @@ async def today(_, message):
             button = InlineKeyboardMarkup(
                 [[InlineKeyboardButton("ᴏᴠᴇʀᴀʟʟ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ", callback_data="overall")]]
             )
-            await message.reply_photo(random.choice(MISHI), caption=response, reply_markup=button, parse_mode="Markdown")
+            await message.reply_photo(random.choice(MISHI), caption=response, reply_markup=button, parse_mode=enums.ParseMode.MARKDOWN)  # Fixed parse mode
         else:
             await message.reply_text("**❅ ɴᴏ ᴅᴀᴛᴀ ᴀᴠᴀɪʟᴀʙʟᴇ ғᴏʀ ᴛᴏᴅᴀʏ.**")
     else:
@@ -88,14 +88,14 @@ async def ranking(_, message):
     button = InlineKeyboardMarkup(
         [[InlineKeyboardButton("ᴛᴏᴅᴀʏ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ", callback_data="today")]]
     )
-    await message.reply_photo(random.choice(MISHI), caption=response, reply_markup=button, parse_mode="Markdown")
+    await message.reply_photo(random.choice(MISHI), caption=response, reply_markup=button, parse_mode=enums.ParseMode.MARKDOWN)  # Fixed parse mode
 
 # ---------------- callback queries ---------------- #
 @app.on_callback_query(filters.regex("today"))
 async def today_rank(_, query):
     chat_id = query.message.chat.id
-    if chat_id in today:
-        users_data = [(uid, info["total_messages"]) for uid, info in today[chat_id].items()]
+    if chat_id in today_stats:  # Changed from 'today' to 'today_stats'
+        users_data = [(uid, info["total_messages"]) for uid, info in today_stats[chat_id].items()]  # Changed from 'today' to 'today_stats'
         sorted_users = sorted(users_data, key=lambda x: x[1], reverse=True)[:10]
 
         if sorted_users:
@@ -111,11 +111,11 @@ async def today_rank(_, query):
             button = InlineKeyboardMarkup(
                 [[InlineKeyboardButton("ᴏᴠᴇʀᴀʟʟ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ", callback_data="overall")]]
             )
-            await query.message.edit_text(response, reply_markup=button, parse_mode="Markdown")
+            await query.message.edit_text(response, reply_markup=button, parse_mode=enums.ParseMode.MARKDOWN)  # Fixed parse mode
         else:
-            await query.answer("**❅ ɴᴏ ᴅᴀᴛᴀ ᴀᴠᴀɪʟᴀʙʟᴇ ғᴏʀ ᴛᴏᴅᴀʏ.**")
+            await query.answer("**❅ ɴᴏ ᴅᴀᴛᴀ ᴀᴠᴀɪʟᴀʙʟᴇ ғᴏʀ ᴛᴏᴅᴀʏ.**", show_alert=True)
     else:
-        await query.answer("**❅ ɴᴏ ᴅᴀᴛᴀ ᴀᴠᴀɪʟᴀʙʟᴇ ғᴏʀ ᴛᴏᴅᴀʏ.**")
+        await query.answer("**❅ ɴᴏ ᴅᴀᴛᴀ ᴀᴠᴀɪʟᴀʙʟᴇ ғᴏʀ ᴛᴏᴅᴀʏ.**", show_alert=True)
 
 @app.on_callback_query(filters.regex("overall"))
 async def overall_rank(_, query):
@@ -135,4 +135,4 @@ async def overall_rank(_, query):
     button = InlineKeyboardMarkup(
         [[InlineKeyboardButton("ᴛᴏᴅᴀʏ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ", callback_data="today")]]
     )
-    await query.message.edit_text(response, reply_markup=button, parse_mode="Markdown")
+    await query.message.edit_text(response, reply_markup=button, parse_mode=enums.ParseMode.MARKDOWN)  # Fixed parse mode
