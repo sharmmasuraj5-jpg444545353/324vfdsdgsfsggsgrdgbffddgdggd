@@ -79,16 +79,13 @@ async def leaderboard_panel(_, message):
 
 **ɢʀᴏᴜᴘ:** {group_name}
 
-**ᴄʜᴇᴄᴋ ɢʀᴏᴜᴘ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ ʙʏ ᴛᴀᴘᴘɪɴɢ ʙᴜᴛᴛᴏɴs ʙᴇʟᴏᴡ ↓**
+**ᴄʜᴇᴄᴋ ɢʀᴏᴜᴘ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ ʙʏ ᴛᴀᴘᴘɪɴɢ ʙᴜᴛᴛᴏɴ ʙᴇʟᴏᴡ ↓**
 
 **ʙʏ :- {app.mention}**
     """
 
     buttons = InlineKeyboardMarkup([
-        [InlineKeyboardButton("📊 ᴛᴏᴅᴀʏ", callback_data="panel_today"),
-         InlineKeyboardButton("📈 ᴡᴇᴇᴋʟʏ", callback_data="panel_weekly")],
-        [InlineKeyboardButton("🏅 ᴏᴠᴇʀᴀʟʟ", callback_data="panel_overall"),
-         InlineKeyboardButton("🔙 ʙᴀᴄᴋ", callback_data="back_to_panel")]
+        [InlineKeyboardButton("🔍 ᴄʜᴇᴄᴋ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ", callback_data="show_leaderboard_buttons")]
     ])
 
     await message.reply_photo(
@@ -117,8 +114,7 @@ async def today_command(_, message):
                 response += f"**{idx}**. {user_mention} ➠ {total} messages\n"
 
             button = InlineKeyboardMarkup([
-                [InlineKeyboardButton("📈 ᴡᴇᴇᴋʟʏ", callback_data="weekly"),
-                 InlineKeyboardButton("🏅 ᴏᴠᴇʀᴀʟʟ", callback_data="overall")]
+                [InlineKeyboardButton("✙ ᴀᴅᴅ ᴍᴇ ɪɴ ʏᴏᴜʀ ɢʀᴏᴜᴘ ✙", url=f"https://t.me/{app.username}?startgroup=true")]
             ])
             await message.reply_photo(random.choice(MISHI), caption=response, reply_markup=button, parse_mode=enums.ParseMode.MARKDOWN)
         else:
@@ -143,8 +139,7 @@ async def weekly_command(_, message):
         response += f"**{idx}**. {user_mention} ➠ {total} messages\n"
 
     button = InlineKeyboardMarkup([
-        [InlineKeyboardButton("📊 ᴛᴏᴅᴀʏ", callback_data="today"),
-         InlineKeyboardButton("🏅 ᴏᴠᴇʀᴀʟʟ", callback_data="overall")]
+        [InlineKeyboardButton("✙ ᴀᴅᴅ ᴍᴇ ɪɴ ʏᴏᴜʀ ɢʀᴏᴜᴘ ✙", url=f"https://t.me/{app.username}?startgroup=true")]
     ])
     await message.reply_photo(random.choice(MISHI), caption=response, reply_markup=button, parse_mode=enums.ParseMode.MARKDOWN)
 
@@ -165,10 +160,32 @@ async def overall_command(_, message):
         response += f"**{idx}**. {user_mention} ➠ {total} messages\n"
 
     button = InlineKeyboardMarkup([
-        [InlineKeyboardButton("📊 ᴛᴏᴅᴀʏ", callback_data="today"),
-         InlineKeyboardButton("📈 ᴡᴇᴇᴋʟʏ", callback_data="weekly")]
+        [InlineKeyboardButton("✙ ᴀᴅᴅ ᴍᴇ ɪɴ ʏᴏᴜʀ ɢʀᴏᴜᴘ ✙", url=f"https://t.me/{app.username}?startgroup=true")]
     ])
     await message.reply_photo(random.choice(MISHI), caption=response, reply_markup=button, parse_mode=enums.ParseMode.MARKDOWN)
+
+# ---------------- Show Leaderboard Buttons ---------------- #
+@app.on_callback_query(filters.regex("^show_leaderboard_buttons$"))
+async def show_leaderboard_buttons(_, query):
+    group_name = query.message.chat.title
+    caption = f"""
+**✦ 🏆 ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ ᴘᴀɴᴇʟ ✦**
+
+**ɢʀᴏᴜᴘ:** {group_name}
+
+**ᴄʜᴏᴏsᴇ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ ᴛʏᴘᴇ ↓**
+
+**ʙʏ :- {app.mention}**
+    """
+
+    buttons = InlineKeyboardMarkup([
+        [InlineKeyboardButton("📊 ᴛᴏᴅᴀʏ", callback_data="panel_today"),
+         InlineKeyboardButton("📈 ᴡᴇᴇᴋʟʏ", callback_data="panel_weekly")],
+        [InlineKeyboardButton("🏅 ᴏᴠᴇʀᴀʟʟ", callback_data="panel_overall")],
+        [InlineKeyboardButton("🔙 ʙᴀᴄᴋ", callback_data="back_to_panel")]
+    ])
+
+    await query.message.edit_text(caption, reply_markup=buttons, parse_mode=enums.ParseMode.MARKDOWN)
 
 # ---------------- callback queries for panel ---------------- #
 @app.on_callback_query(filters.regex("^panel_"))
@@ -199,8 +216,7 @@ async def show_today_leaderboard(query):
                 response += f"**{idx}**. {user_mention} ➠ {total} messages\n"
 
             button = InlineKeyboardMarkup([
-                [InlineKeyboardButton("📈 ᴡᴇᴇᴋʟʏ", callback_data="weekly"),
-                 InlineKeyboardButton("🏅 ᴏᴠᴇʀᴀʟʟ", callback_data="overall")]
+                [InlineKeyboardButton("🔙 ʙᴀᴄᴋ ᴛᴏ ᴘᴀɴᴇʟ", callback_data="back_to_panel")]
             ])
             await query.message.edit_text(response, reply_markup=button, parse_mode=enums.ParseMode.MARKDOWN)
         else:
@@ -223,8 +239,7 @@ async def show_weekly_leaderboard(query):
         response += f"**{idx}**. {user_mention} ➠ {total} messages\n"
 
     button = InlineKeyboardMarkup([
-        [InlineKeyboardButton("📊 ᴛᴏᴅᴀʏ", callback_data="today"),
-         InlineKeyboardButton("🏅 ᴏᴠᴇʀᴀʟʟ", callback_data="overall")]
+        [InlineKeyboardButton("🔙 ʙᴀᴄᴋ ᴛᴏ ᴘᴀɴᴇʟ", callback_data="back_to_panel")]
     ])
     await query.message.edit_text(response, reply_markup=button, parse_mode=enums.ParseMode.MARKDOWN)
 
@@ -243,42 +258,52 @@ async def show_overall_leaderboard(query):
         response += f"**{idx}**. {user_mention} ➠ {total} messages\n"
 
     button = InlineKeyboardMarkup([
-        [InlineKeyboardButton("📊 ᴛᴏᴅᴀʏ", callback_data="today"),
-         InlineKeyboardButton("📈 ᴡᴇᴇᴋʟʏ", callback_data="weekly")]
+        [InlineKeyboardButton("🔙 ʙᴀᴄᴋ ᴛᴏ ᴘᴀɴᴇʟ", callback_data="back_to_panel")]
     ])
     await query.message.edit_text(response, reply_markup=button, parse_mode=enums.ParseMode.MARKDOWN)
 
-# ---------------- regular callback queries ---------------- #
-@app.on_callback_query(filters.regex("^(today|weekly|overall|back_to_panel)$"))
-async def regular_callback_handler(_, query):
-    data = query.data
-    
-    if data == "today":
-        await show_today_leaderboard(query)
-    elif data == "weekly":
-        await show_weekly_leaderboard(query)
-    elif data == "overall":
-        await show_overall_leaderboard(query)
-    elif data == "back_to_panel":
-        group_name = query.message.chat.title
-        caption = f"""
+# ---------------- Back to Panel ---------------- #
+@app.on_callback_query(filters.regex("^back_to_panel$"))
+async def back_to_panel_handler(_, query):
+    group_name = query.message.chat.title
+    caption = f"""
 **✦ 🏆 ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ ᴘᴀɴᴇʟ ✦**
 
-**ɢʀᴏᴜᴘ :-** {group_name}
+**ɢʀᴏᴜᴘ:** {group_name}
 
-**ᴄʜᴇᴄᴋ ɢʀᴏᴜᴘ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ ʙʏ ᴛᴀᴘᴘɪɴɢ ʙᴜᴛᴛᴏɴs ʙᴇʟᴏᴡ ↓**
+**ᴄʜᴏᴏsᴇ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ ᴛʏᴘᴇ ↓**
 
-**ʙʏ :-{app.mention}**
-        """
+**ʙʏ :- {app.mention}**
+    """
 
-        buttons = InlineKeyboardMarkup([
-            [InlineKeyboardButton("📊 ᴛᴏᴅᴀʏ", callback_data="panel_today"),
-             InlineKeyboardButton("📈 ᴡᴇᴇᴋʟʏ", callback_data="panel_weekly")],
-            [InlineKeyboardButton("🏅 ᴏᴠᴇʀᴀʟʟ", callback_data="panel_overall"),
-             InlineKeyboardButton("🔙 ʙᴀᴄᴋ", callback_data="back_to_panel")]
-        ])
+    buttons = InlineKeyboardMarkup([
+        [InlineKeyboardButton("📊 ᴛᴏᴅᴀʏ", callback_data="panel_today"),
+         InlineKeyboardButton("📈 ᴡᴇᴇᴋʟʏ", callback_data="panel_weekly")],
+        [InlineKeyboardButton("🏅 ᴏᴠᴇʀᴀʟʟ", callback_data="panel_overall")],
+        [InlineKeyboardButton("🔙 ʙᴀᴄᴋ", callback_data="back_to_main")]
+    ])
 
-        await query.message.edit_text(caption, reply_markup=buttons, parse_mode=enums.ParseMode.MARKDOWN)
+    await query.message.edit_text(caption, reply_markup=buttons, parse_mode=enums.ParseMode.MARKDOWN)
+
+# ---------------- Back to Main ---------------- #
+@app.on_callback_query(filters.regex("^back_to_main$"))
+async def back_to_main_handler(_, query):
+    group_name = query.message.chat.title
+    caption = f"""
+**✦ 🏆 ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ ᴘᴀɴᴇʟ ✦**
+
+**ɢʀᴏᴜᴘ:** {group_name}
+
+**ᴄʜᴇᴄᴋ ɢʀᴏᴜᴘ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ ʙʢ ᴛᴀᴘᴘɪɴɢ ʙᴜᴛᴛᴏɴ ʙᴇʟᴏᴡ ↓**
+
+**ʙʏ :- {app.mention}**
+    """
+
+    buttons = InlineKeyboardMarkup([
+        [InlineKeyboardButton("🔍 ᴄʜᴇᴄᴋ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ", callback_data="show_leaderboard_buttons")]
+    ])
+
+    await query.message.edit_text(caption, reply_markup=buttons, parse_mode=enums.ParseMode.MARKDOWN)
 
 # Start weekly reset scheduler
 asyncio.create_task(weekly_reset_scheduler())
