@@ -101,7 +101,7 @@
 
   <!-- Instagram -->
   <a href="https://instagram.com/careless__02">
-    <img src="https://img.shields.io/badge/ɪɴsᴛᴀɢʀᴀᴍ-d62976?style=for-the-badge&logo=instagram&logoColor=white"/>
+    <img src="https://img.shields.io/badge/𝙸ɴsᴛᴀɢʀᴀᴍ-d62976?style=for-the-badge&logo=instagram&logoColor=white"/>
   </a>
 </p>
 
