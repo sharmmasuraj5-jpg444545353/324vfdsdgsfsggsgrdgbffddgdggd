@@ -202,20 +202,25 @@ async def show_leaderboard_buttons(_, query):
     group_name = query.message.chat.title
     bot_mention = get_bot_mention()
     caption = f"""
-**✦ 🏆 ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ ᴘᴀɴᴇʟ ✦**
+**✦ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ ᴘᴀɴᴇʟ 🏆**
 
-**ɢʀᴏᴜᴘ:** {group_name}
+**⊚ ɢʀᴏᴜᴘ:** {group_name}
 
-**ᴄʜᴏᴏsᴇ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ ᴛʏᴘᴇ ↓**
+**⊚ ᴄʜᴇᴄᴋ ɢʀᴏᴜᴘ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ ʙʏ ᴛᴀᴘ ʙᴜᴛᴛᴏɴ ʙᴇʟᴏᴡ ↓**
 
-**ʙʏ :- {bot_mention}**
+**➻ ʙʏ :- {bot_mention}**
     """
 
     buttons = InlineKeyboardMarkup([
-        [InlineKeyboardButton("📊 ᴛᴏᴅᴀʏ", callback_data="rank_panel_today"),
-         InlineKeyboardButton("📈 ᴡᴇᴇᴋʟʏ", callback_data="rank_panel_weekly")],
-        [InlineKeyboardButton("🏅 ᴏᴠᴇʀᴀʟʟ", callback_data="rank_panel_overall")],
-        [InlineKeyboardButton("🔙 ʙᴀᴄᴋ", callback_data="rank_back_to_panel")]
+        [
+         InlineKeyboardButton("📊 ᴛᴏᴅᴀʏ", callback_data="rank_panel_today"),
+         InlineKeyboardButton("📈 ᴡᴇᴇᴋʟʏ", callback_data="rank_panel_weekly")
+        ],
+        
+        [
+         InlineKeyboardButton("🏅 ᴏᴠᴇʀᴀʟʟ", callback_data="rank_panel_overall"),
+         InlineKeyboardButton("🔙 ʙᴀᴄᴋ", callback_data="rank_back_to_panel")
+        ]
     ])
 
     await query.message.edit_text(caption, reply_markup=buttons, parse_mode=enums.ParseMode.MARKDOWN)
@@ -342,13 +347,13 @@ async def back_to_main_handler(_, query):
     group_name = query.message.chat.title
     bot_mention = get_bot_mention()
     caption = f"""
-**✦ 🏆 ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ ᴘᴀɴᴇʟ ✦**
+**✦ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ ᴘᴀɴᴇʟ 🏆**
 
-**ɢʀᴏᴜᴘ:** {group_name}
+**⊚ ɢʀᴏᴜᴘ:** {group_name}
 
-**ᴄʜᴇᴄᴋ ɢʀᴏᴜᴘ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ ʙʏ ᴛᴀᴘᴘɪɴɢ ʙᴜᴛᴛᴏɴ ʙᴇʟᴏᴡ ↓**
+**⊚ ᴄʜᴇᴄᴋ ɢʀᴏᴜᴘ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ ʙʏ ᴛᴀᴘ ʙᴜᴛᴛᴏɴ ʙᴇʟᴏᴡ ↓**
 
-**ʙʏ :- {bot_mention}**
+**➻ ʙʏ :- {bot_mention}**
     """
 
     buttons = InlineKeyboardMarkup([
