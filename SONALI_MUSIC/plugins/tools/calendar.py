@@ -42,7 +42,7 @@ async def send_calendar(_, message):
 
     carbon_image = await make_carbon(full_year_calendar)
 
-    caption = f"**⋟ ᴄᴀʟᴇɴᴅᴀʀ ᴏғ ʏᴇᴀʀ :-** `{year}`\n\n**⋟ ʙʏ :-** <u>{app.mention}</u>"
+    caption = f"**⋟ ᴄᴀʟᴇɴᴅᴀʀ ᴏғ ʏᴇᴀʀ :-** `{year}`\n\n**⋟ ʙʏ :- {app.mention}**"
 
     keyboard = InlineKeyboardMarkup(
         [[InlineKeyboardButton("✙ ʌᴅᴅ ϻє ɪη ʏσυʀ ɢʀσυᴘ ✙", url=f"https://t.me/{app.username}?startgroup=true")]]
