@@ -3,16 +3,14 @@ from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 import requests
 from SONALI_MUSIC import app
 
-
 def code_to_flag(country_code: str) -> str:
     return "".join([chr(127397 + ord(c)) for c in country_code.upper()])
 
-
-@app.on_message(filters.command("population"))
+@app.on_message(filters.command("country"))
 async def country_command_handler(client: Client, message: Message):
     if len(message.command) < 2:
         await message.reply_text(
-            "**⋟ ᴘʀᴏᴠɪᴅᴇ ᴀ ᴠᴀʟɪᴅ ᴄᴏᴜɴᴛʀʏ ᴄᴏᴅᴇ.**\n\n**⋟ ᴜsᴀɢᴇ :-** `/population IN`"
+            "**⋟ ᴘʀᴏᴠɪᴅᴇ ᴀ ᴠᴀʟɪᴅ ᴄᴏᴜɴᴛʀʏ ᴄᴏᴅᴇ.**\n\n**⋟ ᴜsᴀɢᴇ :-** `/country IN`"
         )
         return
 
@@ -32,26 +30,33 @@ async def country_command_handler(client: Client, message: Message):
 
             country_name = info.get("name", {}).get("common", "N/A")
             capital = info.get("capital", ["N/A"])[0]
-            population = f"{info.get('population', 'N/A'):,}"
-            region = info.get("region", "N/A")
-            subregion = info.get("subregion", "N/A")
             area = f"{info.get('area', 'N/A'):,} km²"
+            region = info.get("region", "N/A")
+            states = len(info.get("subdivisions", [])) if "subdivisions" in info else "N/A"
+            population = f"{info.get('population', 'N/A'):,}"
             timezone = ", ".join(info.get("timezones", ["N/A"]))
             languages = ", ".join(info.get("languages", {}).values()) if "languages" in info else "N/A"
             calling_codes = ", ".join(info.get("idd", {}).get("root", "") + x for x in info.get("idd", {}).get("suffixes", [])) if "idd" in info else "N/A"
+            
+            currencies = []
+            if "currencies" in info:
+                for cur_code, cur_data in info["currencies"].items():
+                    currencies.append(f"{cur_data.get('name')} ({cur_code})")
+            currency_str = ", ".join(currencies) if currencies else "N/A"
 
             flag = code_to_flag(country_code)
 
             response_text = (
-                f"**⋟ ᴄᴏᴜɴᴛʀʏ ɪɴꜰᴏʀᴍᴀᴛɪᴏɴ :-** {flag}\n\n"
+                f"{flag} **⋟ ᴄᴏᴜɴᴛʀʏ ɪɴꜰᴏʀᴍᴀᴛɪᴏɴ :-** {flag}\n\n"
                 f"**➤ ɴᴀᴍᴇ :-** `{country_name}`\n"
                 f"**➤ ᴄᴀᴘɪᴛᴀʟ :-** `{capital}`\n"
-                f"**➤ ᴘᴏᴘᴜʟᴀᴛɪᴏɴ :-** `{population}`\n"
-                f"**➤ ʀᴇɢɪᴏɴ :-** `{region}`\n"
-                f"**➤ sᴜʙʀᴇɢɪᴏɴ :-** `{subregion}`\n"
                 f"**➤ ᴀʀᴇᴀ :-** `{area}`\n"
+                f"**➤ ʀᴇɢɪᴏɴ :-** `{region}`\n"
+                f"**➤ sᴛᴀᴛᴇs :-** `{states}`\n"
                 f"**➤ ᴛɪᴍᴇᴢᴏɴᴇ :-** `{timezone}`\n"
+                f"**➤ ᴄᴜʀʀᴇɴᴄʏ :-** `{currency_str}`\n\n"
                 f"**➤ ʟᴀɴɢᴜᴀɢᴇs :-** `{languages}`\n"
+                f"**➤ ᴘᴏᴘᴜʟᴀᴛɪᴏɴ :-** `{population}`\n"
                 f"**➤ ᴄᴀʟʟɪɴɢ ᴄᴏᴅᴇ :-** `{calling_codes}`\n\n"
                 f"**⋟ ʙʏ :- {app.mention}**"
             )
