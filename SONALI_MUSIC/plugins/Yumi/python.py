@@ -6,7 +6,7 @@ import sys
 import requests
 from SONALI_MUSIC import app
 
-# ---------------------- Inline Button ----------------------
+
 BUTTON_ADD = InlineKeyboardMarkup(
     [[InlineKeyboardButton("✙ ʌᴅᴅ ϻє ɪη ʏσυʀ ɢʀσυᴘ ✙", url=f"https://t.me/{app.username}?startgroup=true")]]
 )
@@ -52,16 +52,28 @@ async def execute_python_code(client: Client, message: Message):
 async def print_code(client, message: Message):
     if len(message.command) < 2 and not message.reply_to_message:
         usage_text = (
-            "⚠️ **ᴜsᴀɢᴇ :** `/print <code>`\n"
-            "**ᴏʀ ʀᴇᴘʟʏ ᴛᴏ ᴀ ᴍᴇssᴀɢᴇ ᴡɪᴛʜ `/print`**"
+            "⚠️ **ᴜsᴀɢᴇ :** `/print <code>` **ᴏʀ ʀᴇᴘʟʏ ᴛᴏ ᴀ ᴍᴇssᴀɢᴇ ᴡɪᴛʜ `/print`**"
         )
         await message.reply_text(usage_text)
         return
 
     code_text = message.reply_to_message.text if message.reply_to_message else " ".join(message.command[1:])
-    response_text = f"**⋟ ꜱᴜᴄᴄᴇssꜰᴜʟʟʏ ᴘʀɪɴᴛᴇᴅ :-**\n```\n{code_text}\n```"
+    response_text = f"**⋟ ꜱᴜᴄᴄᴇssꜰᴜʟʟʏ ᴘʀɪɴᴛᴇᴅ :-**\n\n```\n{code_text}\n```"
     await message.reply_text(response_text, reply_markup=BUTTON_ADD)
 
+
+def get_pypi_info(package_name):
+    try:
+        
+        api_url = f"https://pypi.org/pypi/{package_name}/json"
+        response = requests.get(api_url)
+        pypi_info = response.json()
+        
+        return pypi_info
+    
+    except Exception as e:
+        print(f"**⋟ ᴇʀʀᴏʀ ғᴇᴛᴄʜɪɴɢ ᴘʏᴘɪ ɪɴғᴏʀᴍᴀᴛɪᴏɴ :-** {e}")
+        return None
 
 
 @app.on_message(filters.command("pypi", prefixes="/"))
