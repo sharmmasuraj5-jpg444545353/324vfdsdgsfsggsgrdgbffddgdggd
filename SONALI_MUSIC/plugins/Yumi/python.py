@@ -92,4 +92,4 @@ async def pypi_info_command(client: Client, message):
         response_text = "⚠️ **ғᴀɪʟᴇᴅ ᴛᴏ ꜰᴇᴛᴄʜ ɪɴꜰᴏʀᴍᴀᴛɪᴏɴ ғʀᴏᴍ ᴘʏᴘɪ.**"
 
     await temp_msg.delete()
-    await message.reply_text(response_text, reply_markup=BUTTON_ADD, disable_web_page_preview=True), reply_markup=BUTTON_ADD, disable_web_page_preview=True)
+    await message.reply_text(response_text, reply_markup=BUTTON_ADD, disable_web_page_preview=True)
