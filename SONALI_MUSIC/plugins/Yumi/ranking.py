@@ -180,8 +180,6 @@ async def weekly_command(_, message):
         [InlineKeyboardButton("✙ ᴀᴅᴅ ᴍᴇ ɪɴ ʏᴏᴜʀ ɢʀᴏᴜᴘ ✙", url=f"https://t.me/{app.me.username}?startgroup=true")]
     ])
     await message.reply_photo(random.choice(PURVI), caption=response, reply_markup=button, parse_mode=enums.ParseMode.MARKDOWN)
-else:
-    await message.reply_text("**❅ ɴᴏ ᴅᴀᴛᴀ ᴀᴠᴀɪʟᴀʙʟᴇ ғᴏʀ ᴡᴇᴇᴋʟʏ.**")
 
 
 
