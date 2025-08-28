@@ -31,18 +31,18 @@ PURVI = [
     "https://graph.org/file/0bfe29d15e918917d1305.jpg",
 ]
 
-# Bot mention format
+
 def get_bot_mention():
     return f"[{app.me.first_name}](tg://user?id={app.me.id})"
 
-# Daily data reset function
+
 def reset_daily_data():
     global today_stats
     today_stats = {}
     today_collection.delete_many({})
     print("Daily data has been reset!")
 
-# Reset daily data every day at midnight
+
 async def daily_reset_scheduler():
     while True:
         now = datetime.now()
@@ -51,14 +51,15 @@ async def daily_reset_scheduler():
         await asyncio.sleep(wait_seconds)
         reset_daily_data()
 
-# Weekly data reset function
+
 def reset_weekly_data():
     global weekly_stats
     weekly_stats = {}
     weekly_collection.delete_many({})
     print("Weekly data has been reset!")
 
-# Reset weekly data every Sunday
+
+
 async def weekly_reset_scheduler():
     while True:
         now = datetime.now()
@@ -68,7 +69,8 @@ async def weekly_reset_scheduler():
         await asyncio.sleep(wait_seconds)
         reset_weekly_data()
 
-# ---------------- watcher ---------------- #
+
+
 @app.on_message(filters.group, group=6)
 async def today_watcher(_, message):
     chat_id = message.chat.id
@@ -85,6 +87,7 @@ async def today_watcher(_, message):
         upsert=True
     )
 
+
 @app.on_message(filters.group, group=11)
 async def _watcher(_, message):
     user_id = message.from_user.id
@@ -99,15 +102,16 @@ async def _watcher(_, message):
         weekly_stats[user_id] = 0
     weekly_stats[user_id] += 1
 
-# ---------------- Main Leaderboard Panel ---------------- #
+
+
 @app.on_message(filters.command(["ranking", "leaderboard", "rank"]))
 async def leaderboard_panel(_, message):
     group_name = message.chat.title
     bot_mention = get_bot_mention()
     caption = f"""
-**✦ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ ᴘᴀɴᴇʟ 🏆**
+**✦ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ ᴘᴀɴɴᴇʟ 🏆**
 
-**⊚ ɢʀᴏᴜᴘ:** {group_name}
+**⊚ ɢʀᴏᴜᴘ :-** {group_name}
 
 **⊚ ᴄʜᴇᴄᴋ ɢʀᴏᴜᴘ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ ʙʏ ᴛᴀᴘ ʙᴜᴛᴛᴏɴ ʙᴇʟᴏᴡ ↓**
 
@@ -125,7 +129,8 @@ async def leaderboard_panel(_, message):
         parse_mode=enums.ParseMode.MARKDOWN
     )
 
-# ---------------- today leaderboard ---------------- #
+
+
 @app.on_message(filters.command("today"))
 async def today_command(_, message):
     chat_id = message.chat.id
@@ -154,7 +159,8 @@ async def today_command(_, message):
     else:
         await message.reply_text("**❅ ɴᴏ ᴅᴀᴛᴀ ᴀᴠᴀɪʟᴀʙʟᴇ ғᴏʀ ᴛᴏᴅᴀʏ.**")
 
-# ---------------- weekly ranking ---------------- #
+
+
 @app.on_message(filters.command("weekly"))
 async def weekly_command(_, message):
     top_members = weekly_collection.find().sort("total_messages", -1).limit(10)
@@ -174,8 +180,12 @@ async def weekly_command(_, message):
         [InlineKeyboardButton("✙ ᴀᴅᴅ ᴍᴇ ɪɴ ʏᴏᴜʀ ɢʀᴏᴜᴘ ✙", url=f"https://t.me/{app.me.username}?startgroup=true")]
     ])
     await message.reply_photo(random.choice(PURVI), caption=response, reply_markup=button, parse_mode=enums.ParseMode.MARKDOWN)
+else:
+    await message.reply_text("**❅ ɴᴏ ᴅᴀᴛᴀ ᴀᴠᴀɪʟᴀʙʟᴇ ғᴏʀ ᴡᴇᴇᴋʟʏ.**")
 
-# ---------------- overall ranking ---------------- #
+
+
+
 @app.on_message(filters.command("overall"))
 async def overall_command(_, message):
     top_members = collection.find().sort("total_messages", -1).limit(10)
@@ -196,13 +206,14 @@ async def overall_command(_, message):
     ])
     await message.reply_photo(random.choice(PURVI), caption=response, reply_markup=button, parse_mode=enums.ParseMode.MARKDOWN)
 
-# ---------------- Show Leaderboard Buttons ---------------- #
+
+
 @app.on_callback_query(filters.regex("^rank_show_leaderboard_buttons$"))
 async def show_leaderboard_buttons(_, query):
     group_name = query.message.chat.title
     bot_mention = get_bot_mention()
     caption = f"""
-**✦ ᴄʜᴏᴏsᴇ ᴀ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ ᴛʏᴘᴇ**
+**✦ ᴄʜᴏᴏsᴇ ᴀ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ ᴛʏᴘᴇ 🏅**
 
 **⊚ ʏᴏᴜ ᴄᴀɴ ᴀʟsᴏ ᴄʜᴇᴄᴋ ʙʏ :-**
 
@@ -227,7 +238,8 @@ async def show_leaderboard_buttons(_, query):
 
     await query.message.edit_text(caption, reply_markup=buttons, parse_mode=enums.ParseMode.MARKDOWN)
 
-# ---------------- callback queries for panel ---------------- #
+
+
 @app.on_callback_query(filters.regex("^rank_panel_"))
 async def panel_callback_handler(_, query):
     data = query.data
@@ -238,6 +250,8 @@ async def panel_callback_handler(_, query):
         await show_weekly_leaderboard(query)
     elif data == "rank_panel_overall":
         await show_overall_leaderboard(query)
+
+
 
 async def show_today_leaderboard(query):
     chat_id = query.message.chat.id
@@ -267,6 +281,8 @@ async def show_today_leaderboard(query):
         await query.message.edit_text(response, reply_markup=button, parse_mode=enums.ParseMode.MARKDOWN)
     else:
         await query.answer("❅ ɴᴏ ᴅᴀᴛᴀ ᴀᴠᴀɪʟᴀʙʟᴇ ғᴏʀ ᴛᴏᴅᴀʏ.", show_alert=True)
+
+
 
 async def show_weekly_leaderboard(query):
     top_members = weekly_collection.find().sort("total_messages", -1).limit(10)
@@ -310,7 +326,9 @@ async def show_overall_leaderboard(query):
     ])
     await query.message.edit_text(response, reply_markup=button, parse_mode=enums.ParseMode.MARKDOWN)
 
-# ---------------- regular callback queries ---------------- #
+
+
+
 @app.on_callback_query(filters.regex("^rank_(today|weekly|overall|back_to_panel)$"))
 async def regular_callback_handler(_, query):
     data = query.data.replace("rank_", "")
@@ -325,7 +343,7 @@ async def regular_callback_handler(_, query):
         group_name = query.message.chat.title
         bot_mention = get_bot_mention()
         caption = f"""
-**✦ ᴄʜᴏᴏsᴇ ᴀ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ ᴛʏᴘᴇ**
+**✦ ᴄʜᴏᴏsᴇ ᴀ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ ᴛʏᴘᴇ 🏅**
 
 **⊚ ʏᴏᴜ ᴄᴀɴ ᴀʟsᴏ ᴄʜᴇᴄᴋ ʙʏ :-**
 
@@ -350,15 +368,16 @@ async def regular_callback_handler(_, query):
 
         await query.message.edit_text(caption, reply_markup=buttons, parse_mode=enums.ParseMode.MARKDOWN)
 
-# ---------------- Back to Main ---------------- #
+
+
 @app.on_callback_query(filters.regex("^rank_back_to_main$"))
 async def back_to_main_handler(_, query):
     group_name = query.message.chat.title
     bot_mention = get_bot_mention()
     caption = f"""
-**✦ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ ᴘᴀɴᴇʟ 🏆**
+**✦ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ ᴘᴀɴɴᴇʟ 🏆**
 
-**⊚ ɢʀᴏᴜᴘ:** {group_name}
+**⊚ ɢʀᴏᴜᴘ :-** {group_name}
 
 **⊚ ᴄʜᴇᴄᴋ ɢʀᴏᴜᴘ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ ʙʏ ᴛᴀᴘ ʙᴜᴛᴛᴏɴ ʙᴇʟᴏᴡ ↓**
 
@@ -371,6 +390,7 @@ async def back_to_main_handler(_, query):
 
     await query.message.edit_text(caption, reply_markup=buttons, parse_mode=enums.ParseMode.MARKDOWN)
 
-# Start schedulers
+
+
 asyncio.create_task(daily_reset_scheduler())
 asyncio.create_task(weekly_reset_scheduler())
