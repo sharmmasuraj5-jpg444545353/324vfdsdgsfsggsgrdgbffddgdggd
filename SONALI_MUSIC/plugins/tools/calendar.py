@@ -34,7 +34,7 @@ async def send_calendar(_, message):
             await message.reply("**ɪɴᴠᴀʟɪᴅ ʏᴇᴀʀ ꜰᴏʀᴍᴀᴛ.**\n\n**ᴜꜱᴇ** `/calendar <year>`")
             return
     else:
-        await message.reply("**⋟ ᴘʀᴏᴠɪᴅᴇ ᴀ ᴠᴀʟɪᴅ ʏᴇᴀʀ ᴀꜰᴛᴇʀ ᴄᴏᴍᴍᴀɴᴅ.**\n\n**⋟ ᴜsᴀɢᴇ :-** `calender 2025`")
+        await message.reply("**⋟ ᴘʀᴏᴠɪᴅᴇ ᴀ ᴠᴀʟɪᴅ ʏᴇᴀʀ ᴀꜰᴛᴇʀ ᴄᴏᴍᴍᴀɴᴅ.**\n\n**⋟ ᴜsᴀɢᴇ :-** `/calender 2025`")
         return
 
     cal = calendar.TextCalendar()
