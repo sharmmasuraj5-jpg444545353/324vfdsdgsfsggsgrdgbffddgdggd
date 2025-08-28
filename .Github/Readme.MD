@@ -91,13 +91,12 @@
 <p align="center">
   <!-- Dev -->
   <a href="https://t.me/TheSigmaCoder">
-    <img src="https://img.shields.io/badge/ᴅᴇᴠ-ᴀʟᴘʜᴀ-#A52A2A?style=for-the-badge&logo=telegram&logoColor=white"/>
+    <img src="https://img.shields.io/badge/ᴅᴇᴠ-ᴀʟᴘʜᴀ-%23A52A2A?style=for-the-badge&logo=telegram&logoColor=%2336454F"/>
   </a>
-
 
   <!-- Purvi Bots -->
   <a href="https://t.me/purvi_bots">
-    <img src="https://img.shields.io/badge/ᴘᴜʀᴠ𝙸-%20ʙᴏᴛs-00bfff?style=for-the-badge&logo=telegram&logoColor=white"/>
+    <img src="https://img.shields.io/badge/ᴘᴜʀᴠ𝙸-%20ʙᴏᴛs-%238F00FF?style=for-the-badge&logo=telegram&logoColor=%230000FF"/>
   </a>
 
   <!-- Instagram -->
