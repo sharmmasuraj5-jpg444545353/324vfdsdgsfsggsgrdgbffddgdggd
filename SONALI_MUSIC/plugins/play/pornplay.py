@@ -1,12 +1,11 @@
 from pyrogram import filters
-import requests, random
+import requests, random, os, yt_dlp
 from bs4 import BeautifulSoup
 from SONALI_MUSIC import app
-import os, yt_dlp
 from pyrogram.types import CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton, Message
 from SONALI_MUSIC.plugins.play import play
 
-# Video cache
+# Cache
 vdo_link = {}
 
 # -------------------- CALLBACKS --------------------
@@ -20,8 +19,7 @@ async def vplay_callback(_, query: CallbackQuery):
         else:
             return await query.answer("❌ ɪɴᴠᴀʟɪᴅ ᴄᴀʟʟʙᴀᴄᴋ", show_alert=True)
 
-        # call play function
-        await play(chat_id)
+        await play(_, query.message)
         await query.answer("▶️ ᴠɪᴅᴇᴏ ᴘʟᴀʏʙᴀᴄᴋ sᴛᴀʀᴛᴇᴅ!")
 
     except Exception as e:
@@ -67,7 +65,6 @@ def get_video_info(title):
                 random_video = random.choice(video_list)
                 thumbnail = random_video.find('div', class_="thumb").find('img').get("src")
                 if thumbnail:
-                    # Replace the size in the thumbnail URL to get 500x500
                     thumbnail_500 = thumbnail.replace('/h', '/m').replace('/1.jpg', '/3.jpg')
                     link = random_video.find('div', class_="thumb-under").find('a').get("href")
                     if link and 'https://' not in link:
@@ -75,6 +72,28 @@ def get_video_info(title):
     except Exception as e:
         print(f"Error: {e}")
     return None
+
+
+# -------------------- EXTRA INFO SCRAPER --------------------
+
+def get_views_and_ratings(link):
+    try:
+        with requests.Session() as s:
+            r = s.get(link)
+            soup = BeautifulSoup(r.text, "html.parser")
+
+            # Views text (example: "123,456 views")
+            views = soup.find("span", class_="metadata")
+            views = views.text.strip() if views else "N/A"
+
+            # Rating percentage (example: "96%")
+            rating = soup.find("span", class_="rating")
+            rating = rating.text.strip() if rating else "N/A"
+
+            return views, rating
+    except Exception as e:
+        print(f"Error scraping views/ratings: {e}")
+        return "N/A", "N/A"
 
 
 # -------------------- COMMAND HANDLERS --------------------
@@ -121,9 +140,7 @@ async def get_random_video_info_xnxx(client, message: Message):
         video_link = video_info['link']
         video = await get_video_stream(video_link)
 
-        # Dummy values (API function placeholders)
-        views = "N/A"
-        ratings = "N/A"
+        views, ratings = get_views_and_ratings(video_link)
 
         keyboard = InlineKeyboardMarkup([
             [
