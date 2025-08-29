@@ -20,21 +20,36 @@ def check_python_syntax(code: str) -> Tuple[bool, str]:
         compile(code, "<string>", "exec")
         return True, None
     except SyntaxError as e:
-        error_msg = f"❌ {e.msg}\n\n**📍 ʟɪɴᴇ :-** {e.lineno}, **ᴄᴏʟᴜᴍɴ :-** {e.offset}\n\n"
+        error_msg = f"❌ **ᴇʀʀᴏʀ :-** `{e.msg}`\n\n"
+        error_msg += f"**📍 ʟɪɴᴇ :-** `{e.lineno}`, **ᴄᴏʟᴜᴍɴ :-** `{e.offset}`\n\n"
         
         if e.text:
             lines = code.split('\n')
             if e.lineno <= len(lines):
                 error_line = lines[e.lineno - 1]
-                error_msg += f"`{error_line}`\n"
                 
-                if e.offset and e.offset <= len(error_line):
-                    pointer = " " * (e.offset - 1) + "↑"
-                    error_msg += f"`{pointer}`\n"
+                start_line = max(1, e.lineno - 2)
+                end_line = min(len(lines), e.lineno + 2)
+                
+                error_msg += "**ᴄᴏᴅᴇ sɴɪᴘᴘᴇᴛ :-**\n```python\n"
+                
+                for i in range(start_line, end_line + 1):
+                    line_content = lines[i - 1]
+                    if i == e.lineno:
+                    
+                        error_msg += f"{i}: {line_content}\n"
+                    
+                        if e.offset and e.offset <= len(line_content):
+                            pointer = " " * (e.offset + len(str(i)) + 1) + "↑"
+                            error_msg += f"{pointer}\n"
+                    else:
+                        error_msg += f"{i}: {line_content}\n"
+                
+                error_msg += "```"
         
         return False, error_msg
     except Exception as e:
-        return False, f"**❌ ᴜɴᴇxᴘᴇᴄᴛᴇᴅ ᴇʀʀᴏʀ :-** {str(e)}"
+        return False, f"**❌ ᴜɴᴇxᴘᴇᴄᴛᴇᴅ ᴇʀʀᴏʀ :-** `{str(e)}`"
 
 @app.on_message(filters.command("syntax"))
 async def syntax_func(client: Client, message: Message):
