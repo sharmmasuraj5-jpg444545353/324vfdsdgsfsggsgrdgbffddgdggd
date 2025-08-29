@@ -10,7 +10,7 @@ mongo_url_pattern = re.compile(r'mongodb(?:\+srv)?:\/\/[^\s]+')
 async def mongo_command(client, message: Message):
 
     ADD_ME_BUTTON = InlineKeyboardMarkup(
-        [[InlineKeyboardButton(f"✙ ʌᴅᴅ ϻє ɪη ʏσυʀ ɢʀσυᴘ ✙", url=f"https://t.me/{app.username}?startgroup=true")]]
+        [[InlineKeyboardButton(f"✙ ʌᴅᴅ ϻє ɪη ʏσυʀ ɢʀσυᴘ ✙", url=f"https://t.me/{Sona.username}?startgroup=true")]]
     )
 
     if len(message.command) < 2:
@@ -26,16 +26,16 @@ async def mongo_command(client, message: Message):
             mongo_client = MongoClient(mongo_url, serverSelectionTimeoutMS=5000)
             mongo_client.server_info()  # ⋟ ᴡɪʟʟ ᴄᴀᴜꜱᴇ ᴀɴ ᴇxᴄᴇᴘᴛɪᴏɴ ɪꜰ ᴄᴏɴɴᴇᴄᴛɪᴏɴ ꜰᴀɪʟꜱ
             await message.reply(
-                f"**⋟ ᴍᴏɴɢᴏᴅʙ ᴜʀʟ ɪꜱ ᴠᴀʟɪᴅ ᴀɴᴅ ᴄᴏɴɴᴇᴄᴛɪᴏɴ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟ ✅**\n\n**⋟ ᴄʜᴇᴄᴋ ʙʏ :– {app.mention}**",
+                f"**⋟ ᴍᴏɴɢᴏᴅʙ ᴜʀʟ ɪꜱ ᴠᴀʟɪᴅ ᴀɴᴅ ᴄᴏɴɴᴇᴄᴛɪᴏɴ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟ ✅**\n\n**⋟ ᴄʜᴇᴄᴋ ʙʏ :– {Sona.mention}**",
                 reply_markup=ADD_ME_BUTTON
             )
         except Exception as e:
             await message.reply(
-                f"**⋟ ꜰᴀɪʟᴇᴅ ᴛᴏ ᴄᴏɴɴᴇᴄᴛ ᴛᴏ ᴍᴏɴɢᴏᴅʙ :-** {e}\n\n**⋟ ᴄʜᴇᴄᴋ ʙʏ :– {app.mention}",
+                f"**⋟ ꜰᴀɪʟᴇᴅ ᴛᴏ ᴄᴏɴɴᴇᴄᴛ ᴛᴏ ᴍᴏɴɢᴏᴅʙ :-** {e}\n\n**⋟ ᴄʜᴇᴄᴋ ʙʏ :– {Sona.mention}",
                 reply_markup=ADD_ME_BUTTON
             )
     else:
         await message.reply(
-            f"**⋟ ɪɴᴠᴀʟɪᴅ ᴍᴏɴɢᴏᴅʙ ᴜʀʟ ꜰᴏʀᴍᴀᴛ 💔**\n\n**⋟ ᴄʜᴇᴄᴋ ʙʏ :– {app.mention}**",
+            f"**⋟ ɪɴᴠᴀʟɪᴅ ᴍᴏɴɢᴏᴅʙ ᴜʀʟ ꜰᴏʀᴍᴀᴛ 💔**\n\n**⋟ ᴄʜᴇᴄᴋ ʙʏ :– {Sona.mention}**",
             reply_markup=ADD_ME_BUTTON
         )
