@@ -6,45 +6,35 @@ import sys
 import requests
 import aiohttp
 import json
-from typing import Tuple
+from typing import Tuple, Optional
 from SONALI_MUSIC import app
+
 
 BUTTON_ADD = InlineKeyboardMarkup(
     [[InlineKeyboardButton("✙ ʌᴅᴅ ϻє ɪη ʏσυʀ ɢʀσυᴘ ✙", url=f"https://t.me/{app.username}?startgroup=true")]]
 )
+
 
 def check_python_syntax(code: str) -> Tuple[bool, str]:
     try:
         compile(code, "<string>", "exec")
         return True, None
     except SyntaxError as e:
-        err_line = e.text.strip() if e.text else ""
-        return False, f"{e.msg} at line {e.lineno}, column {e.offset}\n{err_line}"
-
-async def safe_reply_message(message: Message, text: str, max_length: int = 4096):
-    """Safely reply with text, splitting long messages into multiple parts"""
-    if len(text) <= max_length:
-        return await message.reply(text, quote=True, reply_markup=BUTTON_ADD)
-    
-    # Split long message into parts
-    parts = []
-    for i in range(0, len(text), max_length):
-        part = text[i:i + max_length]
-        parts.append(part)
-    
-    # Send first part with reply and buttons
-    first_message = await message.reply(
-        parts[0], 
-        quote=True, 
-        reply_markup=BUTTON_ADD
-    )
-    
-    # Send remaining parts as follow-up messages
-    for i, part in enumerate(parts[1:], 2):
-        await message.reply(
-            f"**Part {i}:**\n{part}",
-            quote=False
-        )
+        error_msg = f"❌ {e.msg}\n\n**📍 ʟɪɴᴇ :-** {e.lineno}, **ᴄᴏʟᴜᴍɴ :-** {e.offset}\n\n"
+        
+        if e.text:
+            lines = code.split('\n')
+            if e.lineno <= len(lines):
+                error_line = lines[e.lineno - 1]
+                error_msg += f"`{error_line}`\n"
+                
+                if e.offset and e.offset <= len(error_line):
+                    pointer = " " * (e.offset - 1) + "↑"
+                    error_msg += f"`{pointer}`\n"
+        
+        return False, error_msg
+    except Exception as e:
+        return False, f"**❌ ᴜɴᴇxᴘᴇᴄᴛᴇᴅ ᴇʀʀᴏʀ :-** {str(e)}"
 
 @app.on_message(filters.command("syntax"))
 async def syntax_func(client: Client, message: Message):
@@ -55,35 +45,36 @@ async def syntax_func(client: Client, message: Message):
         elif message.reply_to_message.document:
             doc = message.reply_to_message.document
             if not doc.file_name.endswith((".txt", ".py")):
-                return await message.reply("❌ ᴏɴʟʏ ᴘʏᴛʜᴏɴ/ᴛᴇxᴛ ғɪʟᴇs ᴀʀᴇ sᴜᴘᴘᴏʀᴛᴇᴅ.")  # No button here
+                return await message.reply("**❌ ᴏɴʟʏ ᴘʏᴛʜᴏɴ/ᴛᴇxᴛ ғɪʟᴇs ᴀʀᴇ sᴜᴘᴘᴏʀᴛᴇᴅ.**")
             file_path = await message.reply_to_message.download()
             try:
                 with open(file_path, "r", encoding="utf-8") as f:
                     code_text = f.read()
             except Exception as e:
-                return await message.reply(f"❌ ᴜɴᴀʙʟᴇ ᴛᴏ ʀᴇᴀᴅ ғɪʟᴇ :-\n\n{e}")  # No button here
+                return await message.reply(f"**❌ ᴜɴᴀʙʟᴇ ᴛᴏ ʀᴇᴀᴅ ғɪʟᴇ :-**\n\n{e}")
             finally:
                 if os.path.exists(file_path):
                     os.remove(file_path)
         else:
-            return await message.reply("❌ ʀᴇᴘʟʏ ᴛᴏ ᴀ ᴘʏᴛʜᴏɴ ᴄᴏᴅᴇ ᴏʀ ᴛᴇxᴛ ғɪʟᴇ.")  # No button here
+            return await message.reply("**❌ ʀᴇᴘʟʏ ᴛᴏ ᴀ ᴘʏᴛʜᴏɴ ᴏʀ ᴛᴇxᴛ ғɪʟᴇ.**")
     else:
         if len(message.command) < 2:
             return await message.reply(
-                "⚡ ʀᴇᴘʟʏ ᴛᴏ ᴀ ᴘʏᴛʜᴏɴ ᴄᴏᴅᴇ ᴏʀ ɢɪᴠᴇ ᴄᴏᴅᴇ ᴡɪᴛʜ ᴄᴏᴍᴍᴀɴᴅ :-\n\n`/syntax <code>`"
-            )  # No button here
+                "⚡** ʀᴇᴘʟʏ ᴛᴏ ᴀ ᴘʏᴛʜᴏɴ ᴄᴏᴅᴇ ᴏʀ ɢɪᴠᴇ ᴄᴏᴅᴇ ᴡɪᴛʜ ᴄᴏᴍᴍᴀɴᴅ :-**\n\n`/syntax code`"
+            )
         code_text = message.text.split(None, 1)[1]
 
     # Check syntax
     ok, error = check_python_syntax(code_text)
 
     if ok:
-        response_text = f"✅ ᴄᴏᴅᴇ sʏɴᴛᴀx ʟᴏᴏᴋs ғɪɴᴇ !\n\n```python\n{code_text}\n```"
+        # Agar code sahi hai toh sirf success message (without button)
+        await message.reply("**✅ ᴄᴏᴅᴇ sʏɴᴛᴀx ɪs ᴄᴏʀʀᴇᴄᴛ !!**")
     else:
-        response_text = f"❌ sʏɴᴛᴀx ᴇʀʀᴏʀ :-\n```\n{error}\n```"
+        # Agar error hai toh detailed error bhejen (without button)
+        await message.reply(error)
 
-    # Use safe reply function to handle long messages - THIS WILL HAVE BUTTON
-    await safe_reply_message(message, response_text)
+
                 
 @app.on_message(filters.command("print"))
 async def print_code(client, message: Message):
