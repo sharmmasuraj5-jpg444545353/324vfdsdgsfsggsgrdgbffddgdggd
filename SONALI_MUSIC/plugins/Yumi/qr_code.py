@@ -23,7 +23,7 @@ def generate_qr_code(text: str) -> io.BytesIO:
     return img_bytes
 
 
-@app.on_message(filters.command("qr"))
+@app.on_message(filters.command("qrcode"))
 async def qr_handler(client: Client, message: Message):
     if len(message.command) > 1:
         input_text = " ".join(message.command[1:])
@@ -31,7 +31,7 @@ async def qr_handler(client: Client, message: Message):
         
         # Create caption with bot mention
         caption = (
-            "**⋟ ʜᴇʀᴇ's ʏᴏᴜʀ ǫʀ ᴄᴏᴅᴇ ✦**\n\n"
+            "**⋟ ʜᴇʀᴇ's ʏᴏᴜʀ ǫʀ ᴄᴏᴅᴇ**\n\n"
             f"**⊙ ɢᴇɴ ʙʏ :- {app.mention}**"
         )
         
@@ -44,5 +44,5 @@ async def qr_handler(client: Client, message: Message):
         await message.reply_photo(qr_image, caption=caption, reply_markup=keyboard)
     else:
         await message.reply_text(
-            "**⋟ ᴜsᴀɢᴇ :-** `/qr Your Text`"
+            "**⋟ ᴜsᴀɢᴇ :-** `/qrcode Your Text`"
 )
