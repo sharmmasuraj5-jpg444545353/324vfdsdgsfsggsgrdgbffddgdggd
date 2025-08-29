@@ -6,13 +6,12 @@ import asyncio
 from concurrent.futures import ThreadPoolExecutor
 from SONALI_MUSIC import app
 
-# Create a thread pool executor for blocking operations
 executor = ThreadPoolExecutor(max_workers=3)
 
-@app.on_message(filters.command(["downloadrepo"]))
+@app.on_message(filters.command(["downloadrepo", "dlrepo"]))
 async def download_repo(_, message):
     if len(message.command) != 2:
-        await message.reply_text("**⋟ ᴘʀᴏᴠɪᴅᴇ ɢɪᴛʜᴜʙ ʀᴇᴘᴏ ᴜʀʟ ᴀꜰᴛᴇʀ ᴄᴏᴍᴍᴀɴᴅ.**\n\n**ᴇxᴀᴍᴘʟᴇ :-** `/downloadrepo Repo url`")
+        await message.reply_text("**⋟ ᴘʀᴏᴠɪᴅᴇ ɢɪᴛʜᴜʙ ʀᴇᴘᴏ ᴜʀʟ ᴀꜰᴛᴇʀ ᴄᴏᴍᴍᴀɴᴅ.**\n\n**ᴇxᴀᴍᴘʟᴇ :-** `/dlrepo Repo url`")
         return
 
     repo_url = message.command[1]
@@ -24,7 +23,7 @@ async def download_repo(_, message):
         zip_path = await loop.run_in_executor(executor, download_and_zip_repo, repo_url)
         
         if zip_path and os.path.exists(zip_path):
-            await message.reply_document(zip_path, caption=f"**⋟ ʀᴇᴘᴏꜱɪᴛᴏʀʏ ᴅᴏᴡɴʟᴏᴀᴅᴇᴅ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ!**\n\n**ʀᴇᴘᴏ:** `{repo_url}`")
+            await message.reply_document(zip_path, caption=f"**⋟ ʀᴇᴘᴏꜱɪᴛᴏʀʏ ᴅᴏᴡɴʟᴏᴀᴅᴇᴅ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ!**\n\n**ʟɪɴᴋ :-** `{repo_url}`")
             await status_msg.delete()
         else:
             await message.reply_text("**⋟ ᴜɴᴀʙʟᴇ ᴛᴏ ᴅᴏᴡɴʟᴏᴀᴅ ᴛʜᴇ ꜱᴘᴇᴄɪꜰɪᴇᴅ ɢɪᴛʜᴜʙ ʀᴇᴘᴏꜱɪᴛᴏʀʏ.**")
@@ -46,11 +45,11 @@ def download_and_zip_repo(repo_url):
         
         repo_path = f"temp_{repo_name}"
         
-        # Clone the repository
+        
         print(f"Cloning repository: {repo_url}")
         git.Repo.clone_from(repo_url, repo_path, depth=1)
         
-        # Create a zip archive
+        
         print(f"Creating zip archive for: {repo_path}")
         zip_filename = shutil.make_archive(repo_name, 'zip', repo_path)
         print(f"Zip created: {zip_filename}")
@@ -64,7 +63,7 @@ def download_and_zip_repo(repo_url):
         print(f"Error downloading and zipping GitHub repository: {e}")
         return None
     finally:
-        # Clean up the cloned repository
+
         if repo_path and os.path.exists(repo_path):
             print(f"Cleaning up: {repo_path}")
             shutil.rmtree(repo_path, ignore_errors=True)
