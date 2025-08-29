@@ -1,32 +1,59 @@
 from SONALI_MUSIC import app
-from config import OWNER_ID
 from pyrogram import filters, enums
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from SONALI_MUSIC.utils.Sona_BAN import admin_filter
 
-BOT_ID = "7520092354"
-
 @app.on_message(filters.command("unbanall") & admin_filter)
 async def unban_all(_, msg):
     chat_id = msg.chat.id
-    x = 0
-    bot = await app.get_chat_member(chat_id, BOT_ID)
-    bot_permission = bot.privileges.can_restrict_members == True
-    if bot_permission:
+
+    me = await app.get_me()
+    BOT_ID = me.id
+
+    try:
+        bot = await app.get_chat_member(chat_id, BOT_ID)
+        bot_permission = bot.privileges.can_restrict_members if bot.privileges else False
+
+        if not bot_permission:
+            await msg.reply_text(
+                "**ᴇɪᴛʜᴇʀ ɪ ᴅᴏɴ'ᴛ ʜᴀᴠᴇ ᴛʜᴇ ʀɪɢʜᴛ ᴛᴏ ʀᴇsᴛʀɪᴄᴛ ᴜsᴇʀs ᴏʀ ʏᴏᴜ ᴀʀᴇ ɴᴏᴛ ᴀᴅᴍɪɴ.**",
+                reply_markup=InlineKeyboardMarkup(
+                    [[InlineKeyboardButton("ᴄʟᴏsᴇ", callback_data="stop")]]
+                ),
+            )
+            return
+
         banned_users = []
         async for m in app.get_chat_members(chat_id, filter=enums.ChatMembersFilter.BANNED):
             banned_users.append(m.user.id)
+
+        if not banned_users:
+            await msg.reply_text("**ɴᴏ ʙᴀɴɴᴇᴅ ᴜsᴇʀs ᴛᴏ ᴜɴʙᴀɴ ɪɴ ᴛʜɪs ɢʀᴏᴜᴘ.**")
+            return
+
+        unbanned_count = 0
+        for user_id in banned_users:
             try:
-                await app.unban_chat_member(chat_id, banned_users[x])
-                print(f"ᴜɴʙᴀɴɪɴɢ ᴀʟʟ ᴍᴄ ɪɴ ᴛʜɪs ɢʀᴏᴜᴘ {m.user.mention}")
-                x += 1
+                await app.unban_chat_member(chat_id, user_id)
+                unbanned_count += 1
             except Exception:
                 pass
-    else:
-        await msg.reply_text("ᴇɪᴛʜᴇʀ ɪ ᴅᴏɴ'ᴛ ʜᴀᴠᴇ ᴛʜᴇ ʀɪɢʜᴛ ᴛᴏ ʀᴇsᴛʀɪᴄᴛ ᴜsᴇʀs ᴏʀ ʏᴏᴜ ᴀʀᴇ ɴᴏᴛ ɪɴ sᴜᴅᴏ ᴜsᴇʀs")
+
+        await msg.reply_text(
+            f"**ᴜɴʙᴀɴɴᴇᴅ `{unbanned_count}` ᴜsᴇʀs ɪɴ ᴛʜɪs ɢʀᴏᴜᴘ ✅**",
+            reply_markup=InlineKeyboardMarkup(
+                [[InlineKeyboardButton("ᴄʟᴏsᴇ", callback_data="stop")]]
+            ),
+        )
+
+    except Exception as e:
+        await msg.reply_text(
+            f"**sᴏᴍᴇ ᴇʀʀᴏʀ ᴏᴄᴄᴜʀᴇᴅ :-** `{e}`",
+            reply_markup=InlineKeyboardMarkup(
+                [[InlineKeyboardButton("ᴄʟᴏsᴇ", callback_data="stop")]]
+            ),
+        )
 
 @app.on_callback_query(filters.regex("^stop$"))
 async def stop_callback(_, query):
     await query.message.delete()
-
-###
