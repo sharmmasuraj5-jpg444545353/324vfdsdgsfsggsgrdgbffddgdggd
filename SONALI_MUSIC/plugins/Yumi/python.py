@@ -1,7 +1,7 @@
 from pyrogram import Client, filters
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 import traceback
-import io
+import io, os
 import sys
 import requests
 import aiohttp
@@ -12,36 +12,53 @@ BUTTON_ADD = InlineKeyboardMarkup(
     [[InlineKeyboardButton("✙ ʌᴅᴅ ϻє ɪη ʏσυʀ ɢʀσυᴘ ✙", url=f"https://t.me/{app.username}?startgroup=true")]]
 )
 
-@app.on_message(filters.command("python"))
-async def execute_python_code(client: Client, message: Message):
-    if len(message.command) < 2:
-        await message.reply(
-            "**⋟ ᴘʟᴇᴀsᴇ ᴇɴᴛᴇʀ ʏᴏᴜʀ ᴘʏᴛʜᴏɴ ᴄᴏᴅᴇ ᴀғᴛᴇʀ ᴛʜᴇ ᴄᴏᴍᴍᴀɴᴅ.**\n\n"
-            "**ᴜsᴀɢᴇ :-** `/python print('hello, world!')`"
-        )
-        return
 
-    python_code = " ".join(message.command[1:])
-    str_io = io.StringIO()
+def check_python_syntax(code: str):
     try:
-        sys.stdout = str_io
-        local_vars = {}
-        exec(python_code, {}, local_vars)
-        sys.stdout = sys.__stdout__
+        compile(code, "<string>", "exec")
+        return True, None
+    except SyntaxError as e:
+        err_line = e.text.strip() if e.text else ""
+        return False, f"{e.msg} at line {e.lineno}, column {e.offset}\n{err_line}"
 
-        output = str_io.getvalue()
-        if not output.strip():
-            output = "**✅ ᴄᴏᴅᴇ ᴇxᴇᴄᴜᴛᴇᴅ sᴜᴄᴄᴇssғᴜʟʟʏ. (ɴᴏ ᴏᴜᴛᴘᴜᴛ)**"
+@app.on_message(filters.command("syntax"))
+async def syntax_func(client, message: Message):
+    
+    if message.reply_to_message:
+        if message.reply_to_message.text:
+            code_text = message.reply_to_message.text
+        elif message.reply_to_message.document:
+            doc = message.reply_to_message.document
+            if not doc.file_name.endswith((".txt", ".py")):
+                return await message.reply("**❌ ᴏɴʟʏ ᴘʏᴛʜᴏɴ/ᴛᴇxᴛ ғɪʟᴇs ᴀʀᴇ sᴜᴘᴘᴏʀᴛᴇᴅ.**")
+            file_path = await message.reply_to_message.download()
+            try:
+                with open(file_path, "r", encoding="utf-8") as f:
+                    code_text = f.read()
+            except Exception as e:
+                return await message.reply(f"**❌ ᴜɴᴀʙʟᴇ ᴛᴏ ʀᴇᴀᴅ ғɪʟᴇ :-**\n\n```{e}```")
+            os.remove(file_path)
         else:
-            output = f"**✅ ᴄᴏᴅᴇ ᴇxᴇᴄᴜᴛᴇᴅ sᴜᴄᴄᴇssғᴜʟʟʏ :-**\n\n```\n{output}\n```"
+            return await message.reply("**❌ ʀᴇᴘʟʏ ᴛᴏ ᴀ ᴘʏᴛʜᴏɴ ᴄᴏᴅᴇ ᴏʀ ᴛᴇxᴛ ғɪʟᴇ.**")
+    else:
+        if len(message.command) < 2:
+            return await message.reply(
+                "**⚡ ʀᴇᴘʟʏ ᴛᴏ ᴀ ᴘʏᴛʜᴏɴ ᴄᴏᴅᴇ ᴏʀ ɢɪᴠᴇ ᴄᴏᴅᴇ ᴡɪᴛʜ ᴄᴏᴍᴍᴀɴᴅ :-**\n\n`/syntax <code>`"
+            )
+        code_text = message.text.split(None, 1)[1]
 
-        await message.reply(output, reply_markup=BUTTON_ADD)
+    ok, error = check_python_syntax(code_text)
 
-    except Exception:
-        sys.stdout = sys.__stdout__
-        traceback_str = traceback.format_exc()
-        await message.reply(
-            f"**❌ ᴄᴏᴅᴇ ᴇxᴇᴄᴜᴛɪᴏɴ ᴇʀʀᴏʀ :-**\n\n```\n{traceback_str}\n```",
+    if ok:
+        return await message.reply(
+            f"**✅ ᴄᴏᴅᴇ sʏɴᴛᴀx ʟᴏᴏᴋs ғɪɴᴇ !**\n\n```\n{code_text}\n```", 
+            quote=True,
+            reply_markup=BUTTON_ADD
+        )
+    else:
+        return await message.reply(
+            f"**❌ sʏɴᴛᴀx ᴇʀʀᴏʀ :-**\n```\n{error}\n```", 
+            quote=True,
             reply_markup=BUTTON_ADD
         )
 
