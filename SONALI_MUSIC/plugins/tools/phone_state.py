@@ -41,7 +41,7 @@ async def get_states(client, message):
         final_text = (
             f"**✦ sᴛᴀᴛᴇs ɪɴ :-** {country.name}\n\n"
             f"{states_text}\n\n"
-            f"**⋟ ᴛᴏᴛᴀʟ sᴛᴀᴛᴇs:** `{total}`\n\n"
+            f"**⋟ ᴛᴏᴛᴀʟ sᴛᴀᴛᴇs :-** `{total}`\n\n"
             f"**⋟ ʙʏ :- {app.mention}**"
         )
 
