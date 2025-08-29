@@ -106,7 +106,7 @@ async def unmute_user(user_id, first_name, admin_id, admin_name, chat_id):
             ChatPermissions(
                 can_send_messages=True,
                 can_send_media_messages=True,
-                can_send_other_messages=True,
+                #can_send_other_messages=True,
                 can_send_polls=True,
                 can_add_web_page_previews=True,
                 can_invite_users=True
