@@ -72,7 +72,7 @@ async def check_phone(client, message):
             return await send_message(message, usage_text)
 
         number = message.text.split(None, 1)[1]
-        key = "YOUR_NUMVERIFY_API_KEY"
+        key = "f66950368a61ebad3cba9b5924b4532d"
         api = f"http://apilayer.net/api/validate?access_key={key}&number={number}&country_code=&format=1"
 
         output = requests.get(api)
