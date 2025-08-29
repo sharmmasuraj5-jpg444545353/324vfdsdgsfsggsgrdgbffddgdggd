@@ -103,7 +103,7 @@ async def link_command_handler(client: Client, message: Message):
         f"**✦ ɢʀᴏᴜᴘ ɪɴғᴏʀᴍᴀᴛɪᴏɴ**\n\n"
         f"**✦ ᴛɪᴛʟᴇ :-** {chat.title}\n"
         f"**✦ ᴍᴇᴍʙᴇʀs :-** `{chat.members_count}`\n"
-        f"**✦ ʟɪɴᴋ :-** [ᴄʟɪᴄᴋ ʜᴇʀᴇ]({invite_link})\n"
+        f"**✦ ʟɪɴᴋ :-** [ᴄʟɪᴄᴋ ʜᴇʀᴇ]({invite_link})\n\n"
         f"**✦ ʙʏ :- {app.mention}**"
     ),
     reply_markup=ADD_BUTTON
