@@ -37,7 +37,7 @@ async def qr_handler(client: Client, message: Message):
         
         keyboard = InlineKeyboardMarkup(
             [
-                [InlineKeyboardButton("✨ ᴀᴅᴅ ᴍᴇ ɪɴ ʏᴏᴜʀ ɢʀᴏᴜᴘ", url=f"https://t.me/{app.username}?startgroup=true")]
+                [InlineKeyboardButton("✙ ᴀᴅᴅ ᴍᴇ ɪɴ ʏᴏᴜʀ ɢʀᴏᴜᴘ ✙", url=f"https://t.me/{app.username}?startgroup=true")]
             ]
         )
         
