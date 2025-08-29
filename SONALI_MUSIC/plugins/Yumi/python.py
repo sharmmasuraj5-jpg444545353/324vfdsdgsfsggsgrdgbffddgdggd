@@ -13,7 +13,6 @@ BUTTON_ADD = InlineKeyboardMarkup(
     [[InlineKeyboardButton("✙ ʌᴅᴅ ϻє ɪη ʏσυʀ ɢʀσυᴘ ✙", url=f"https://t.me/{app.username}?startgroup=true")]]
 )
 
-
 def check_python_syntax(code: str) -> Tuple[bool, str]:
     try:
         compile(code, "<string>", "exec")
@@ -27,41 +26,23 @@ async def safe_reply_message(message: Message, text: str, max_length: int = 4096
     if len(text) <= max_length:
         return await message.reply(text, quote=True, reply_markup=BUTTON_ADD)
     
-    # Split long message into parts (4096 characters max per message)
+    # Split long message into parts
     parts = []
-    current_part = ""
-    
-    # Smart splitting to avoid breaking code blocks
-    lines = text.split('\n')
-    for line in lines:
-        if len(current_part) + len(line) + 1 > max_length:
-            if current_part:
-                parts.append(current_part)
-                current_part = line
-            else:
-                # If single line is too long, split it
-                for i in range(0, len(line), max_length - 100):
-                    parts.append(line[i:i + max_length - 100])
-        else:
-            if current_part:
-                current_part += '\n' + line
-            else:
-                current_part = line
-    
-    if current_part:
-        parts.append(current_part)
+    for i in range(0, len(text), max_length):
+        part = text[i:i + max_length]
+        parts.append(part)
     
     # Send first part with reply and buttons
     first_message = await message.reply(
         parts[0], 
         quote=True, 
-        reply_markup=BUTTON_ADD if len(parts) == 1 else None
+        reply_markup=BUTTON_ADD
     )
     
     # Send remaining parts as follow-up messages
     for i, part in enumerate(parts[1:], 2):
         await message.reply(
-            f"**ᴘᴀʀᴛ {i} :-**\n{part}",
+            f"**Part {i}:**\n{part}",
             quote=False
         )
 
@@ -74,35 +55,36 @@ async def syntax_func(client: Client, message: Message):
         elif message.reply_to_message.document:
             doc = message.reply_to_message.document
             if not doc.file_name.endswith((".txt", ".py")):
-                return await message.reply("**❌ ᴏɴʟʏ ᴘʏᴛʜᴏɴ/ᴛᴇxᴛ ғɪʟᴇs ᴀʀᴇ sᴜᴘᴘᴏʀᴛᴇᴅ.**")
+                return await message.reply("❌ ᴏɴʟʏ ᴘʏᴛʜᴏɴ/ᴛᴇxᴛ ғɪʟᴇs ᴀʀᴇ sᴜᴘᴘᴏʀᴛᴇᴅ.")  # No button here
             file_path = await message.reply_to_message.download()
             try:
                 with open(file_path, "r", encoding="utf-8") as f:
                     code_text = f.read()
             except Exception as e:
-                return await message.reply(f"**❌ ᴜɴᴀʙʟᴇ ᴛᴏ ʀᴇᴀᴅ ғɪʟᴇ :-**\n\n```{e}```")
+                return await message.reply(f"❌ ᴜɴᴀʙʟᴇ ᴛᴏ ʀᴇᴀᴅ ғɪʟᴇ :-\n\n{e}")  # No button here
             finally:
                 if os.path.exists(file_path):
                     os.remove(file_path)
         else:
-            return await message.reply("**❌ ʀᴇᴘʟʏ ᴛᴏ ᴀ ᴘʏᴛʜᴏɴ ᴄᴏᴅᴇ ᴏʀ ᴛᴇxᴛ ғɪʟᴇ.**")
+            return await message.reply("❌ ʀᴇᴘʟʏ ᴛᴏ ᴀ ᴘʏᴛʜᴏɴ ᴄᴏᴅᴇ ᴏʀ ᴛᴇxᴛ ғɪʟᴇ.")  # No button here
     else:
         if len(message.command) < 2:
             return await message.reply(
-                "**⚡ ʀᴇᴘʟʏ ᴛᴏ ᴀ ᴘʏᴛʜᴏɴ ᴄᴏᴅᴇ ᴏʀ ɢɪᴠᴇ ᴄᴏᴅᴇ ᴡɪᴛʑ ᴄᴏᴍᴍᴀɴᴅ :-**\n\n`/syntax <code>`"
-            )
+                "⚡ ʀᴇᴘʟʏ ᴛᴏ ᴀ ᴘʏᴛʜᴏɴ ᴄᴏᴅᴇ ᴏʀ ɢɪᴠᴇ ᴄᴏᴅᴇ ᴡɪᴛʜ ᴄᴏᴍᴍᴀɴᴅ :-\n\n`/syntax <code>`"
+            )  # No button here
         code_text = message.text.split(None, 1)[1]
 
     # Check syntax
     ok, error = check_python_syntax(code_text)
 
     if ok:
-        response_text = f"**✅ ᴄᴏᴅᴇ sʏɴᴛᴀx ʟᴏᴏᴋs ғɪɴᴇ !**\n\n```\n{code_text}\n```"
+        response_text = f"✅ ᴄᴏᴅᴇ sʏɴᴛᴀx ʟᴏᴏᴋs ғɪɴᴇ !\n\n```python\n{code_text}\n```"
     else:
-        response_text = f"**❌ sʏɴᴛᴀx ᴇʀʀᴏʀ :-**\n```\n{error}\n```"
+        response_text = f"❌ sʏɴᴛᴀx ᴇʀʀᴏʀ :-\n```\n{error}\n```"
 
-    # Use safe reply function to handle long messages
+    # Use safe reply function to handle long messages - THIS WILL HAVE BUTTON
     await safe_reply_message(message, response_text)
+                
 @app.on_message(filters.command("print"))
 async def print_code(client, message: Message):
     if len(message.command) < 2 and not message.reply_to_message:
