@@ -6,6 +6,7 @@ import sys
 import requests
 import aiohttp
 import json
+from typing import Tuple
 from SONALI_MUSIC import app
 
 BUTTON_ADD = InlineKeyboardMarkup(
@@ -13,7 +14,7 @@ BUTTON_ADD = InlineKeyboardMarkup(
 )
 
 
-def check_python_syntax(code: str):
+def check_python_syntax(code: str) -> Tuple[bool, str]:
     try:
         compile(code, "<string>", "exec")
         return True, None
@@ -21,9 +22,52 @@ def check_python_syntax(code: str):
         err_line = e.text.strip() if e.text else ""
         return False, f"{e.msg} at line {e.lineno}, column {e.offset}\n{err_line}"
 
-@app.on_message(filters.command("syntax"))
-async def syntax_func(client, message: Message):
+async def safe_reply_message(message: Message, text: str, max_length: int = 4096):
+    """Safely reply with text, splitting long messages into multiple parts"""
+    if len(text) <= max_length:
+        return await message.reply(text, quote=True, reply_markup=BUTTON_ADD)
     
+    # Split long message into parts (4096 characters max per message)
+    parts = []
+    current_part = ""
+    
+    # Smart splitting to avoid breaking code blocks
+    lines = text.split('\n')
+    for line in lines:
+        if len(current_part) + len(line) + 1 > max_length:
+            if current_part:
+                parts.append(current_part)
+                current_part = line
+            else:
+                # If single line is too long, split it
+                for i in range(0, len(line), max_length - 100):
+                    parts.append(line[i:i + max_length - 100])
+        else:
+            if current_part:
+                current_part += '\n' + line
+            else:
+                current_part = line
+    
+    if current_part:
+        parts.append(current_part)
+    
+    # Send first part with reply and buttons
+    first_message = await message.reply(
+        parts[0], 
+        quote=True, 
+        reply_markup=BUTTON_ADD if len(parts) == 1 else None
+    )
+    
+    # Send remaining parts as follow-up messages
+    for i, part in enumerate(parts[1:], 2):
+        await message.reply(
+            f"**ᴘᴀʀᴛ {i} :-**\n{part}",
+            quote=False
+        )
+
+@app.on_message(filters.command("syntax"))
+async def syntax_func(client: Client, message: Message):
+    # Extract code text from reply or command
     if message.reply_to_message:
         if message.reply_to_message.text:
             code_text = message.reply_to_message.text
@@ -37,31 +81,28 @@ async def syntax_func(client, message: Message):
                     code_text = f.read()
             except Exception as e:
                 return await message.reply(f"**❌ ᴜɴᴀʙʟᴇ ᴛᴏ ʀᴇᴀᴅ ғɪʟᴇ :-**\n\n```{e}```")
-            os.remove(file_path)
+            finally:
+                if os.path.exists(file_path):
+                    os.remove(file_path)
         else:
             return await message.reply("**❌ ʀᴇᴘʟʏ ᴛᴏ ᴀ ᴘʏᴛʜᴏɴ ᴄᴏᴅᴇ ᴏʀ ᴛᴇxᴛ ғɪʟᴇ.**")
     else:
         if len(message.command) < 2:
             return await message.reply(
-                "**⚡ ʀᴇᴘʟʏ ᴛᴏ ᴀ ᴘʏᴛʜᴏɴ ᴄᴏᴅᴇ ᴏʀ ɢɪᴠᴇ ᴄᴏᴅᴇ ᴡɪᴛʜ ᴄᴏᴍᴍᴀɴᴅ :-**\n\n`/syntax <code>`"
+                "**⚡ ʀᴇᴘʟʏ ᴛᴏ ᴀ ᴘʏᴛʜᴏɴ ᴄᴏᴅᴇ ᴏʀ ɢɪᴠᴇ ᴄᴏᴅᴇ ᴡɪᴛʑ ᴄᴏᴍᴍᴀɴᴅ :-**\n\n`/syntax <code>`"
             )
         code_text = message.text.split(None, 1)[1]
 
+    # Check syntax
     ok, error = check_python_syntax(code_text)
 
     if ok:
-        return await message.reply(
-            f"**✅ ᴄᴏᴅᴇ sʏɴᴛᴀx ʟᴏᴏᴋs ғɪɴᴇ !**\n\n```\n{code_text}\n```", 
-            quote=True,
-            reply_markup=BUTTON_ADD
-        )
+        response_text = f"**✅ ᴄᴏᴅᴇ sʏɴᴛᴀx ʟᴏᴏᴋs ғɪɴᴇ !**\n\n```\n{code_text}\n```"
     else:
-        return await message.reply(
-            f"**❌ sʏɴᴛᴀx ᴇʀʀᴏʀ :-**\n```\n{error}\n```", 
-            quote=True,
-            reply_markup=BUTTON_ADD
-        )
+        response_text = f"**❌ sʏɴᴛᴀx ᴇʀʀᴏʀ :-**\n```\n{error}\n```"
 
+    # Use safe reply function to handle long messages
+    await safe_reply_message(message, response_text)
 @app.on_message(filters.command("print"))
 async def print_code(client, message: Message):
     if len(message.command) < 2 and not message.reply_to_message:
