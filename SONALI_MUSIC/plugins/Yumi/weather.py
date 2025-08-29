@@ -4,9 +4,8 @@ from SONALI_MUSIC import app
 
 
 @app.on_message(filters.command("weather"))
-def weather(client, message):
+async def weather(client, message):
     try:
-      
         user_input = message.command[1]
         location = user_input.strip()
         weather_url = f"https://wttr.in/{location}.png"
@@ -22,7 +21,6 @@ def weather(client, message):
             ]
         )
         
-        message.reply_photo(photo=weather_url, caption=caption, reply_markup=keyboard)
+        await message.reply_photo(photo=weather_url, caption=caption, reply_markup=keyboard)
     except IndexError:
-        # User didn't provide a location
-        message.reply_text("**⋟ ᴘʟᴇᴀsᴇ ᴘʀᴏᴠɪᴅᴇ ᴀ ʟᴏᴄᴀᴛɪᴏɴ.**\n\n➻ ᴜsᴀɢᴇ :-** `/weather india`")
+        await message.reply_text("**⋟ ᴘʟᴇᴀsᴇ ᴘʀᴏᴠɪᴅᴇ ᴀ ʟᴏᴄᴀᴛɪᴏɴ.**\n\n➻ ᴜsᴀɢᴇ :-** `/weather india`")
