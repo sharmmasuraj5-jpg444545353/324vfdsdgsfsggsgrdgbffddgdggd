@@ -2,39 +2,39 @@ from pyrogram import filters
 import requests, random
 from bs4 import BeautifulSoup
 from SONALI_MUSIC import app
-import pytgcalls
-import os, yt_dlp 
+import os, yt_dlp
 from pyrogram.types import CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton, Message
-from pytgcalls.types import AudioVideoPiped
 from SONALI_MUSIC.plugins.play import play
-from SONALI_MUSIC.plugins.play.pornplay import play
 
-#
-#####
-
+# Video cache
 vdo_link = {}
 
-keyboard = InlineKeyboardMarkup([
-        [
-            InlineKeyboardButton("⊝ ᴄʟᴏsᴇ ⊝", callback_data="close_data"), 
-            InlineKeyboardButton("⊝ ᴠᴘʟᴀʏ⊝", callback_data="play"),
-        ]
-])
+# -------------------- CALLBACKS --------------------
 
+@app.on_callback_query(filters.regex("^vplay"))
+async def vplay_callback(_, query: CallbackQuery):
+    try:
+        data = query.data.split("_")
+        if len(data) > 1 and data[1].isdigit():
+            chat_id = int(data[1])
+        else:
+            return await query.answer("❌ ɪɴᴠᴀʟɪᴅ ᴄᴀʟʟʙᴀᴄᴋ", show_alert=True)
 
-# Define your callback function
-@app.on_callback_query(filters.regex("^play"))
-async def play_callback(_, query):
-    # You can add more logic here before initiating playback
-    await play(query.from_user.id)  # Assuming play function accepts user ID
-    await query.answer("Playback started!")
-        
-##########🖕
+        # call play function
+        await play(chat_id)
+        await query.answer("▶️ ᴠɪᴅᴇᴏ ᴘʟᴀʏʙᴀᴄᴋ sᴛᴀʀᴛᴇᴅ!")
+
+    except Exception as e:
+        await query.answer(f"Error: {e}", show_alert=True)
+
 
 @app.on_callback_query(filters.regex("^close_data"))
-async def close_callback(_, query):
-    chat_id = query.message.chat.id
+async def close_callback(_, query: CallbackQuery):
     await query.message.delete()
+    await query.answer("❌ ᴄʟᴏsᴇᴅ")
+
+
+# -------------------- YTDLP VIDEO DOWNLOADER --------------------
 
 async def get_video_stream(link):
     ydl_opts = {
@@ -47,16 +47,14 @@ async def get_video_stream(link):
     }
     x = yt_dlp.YoutubeDL(ydl_opts)
     info = x.extract_info(link, False)
-    video = os.path.join(
-        "downloads", f"{info['id']}.{info['ext']}"
-    )
+    video = os.path.join("downloads", f"{info['id']}.{info['ext']}")
     if os.path.exists(video):
         return video
     x.download([link])
     return video
 
 
-
+# -------------------- VIDEO INFO SCRAPER --------------------
 
 def get_video_info(title):
     url_base = f'https://www.xnxx.com/search/{title}'
@@ -72,63 +70,72 @@ def get_video_info(title):
                     # Replace the size in the thumbnail URL to get 500x500
                     thumbnail_500 = thumbnail.replace('/h', '/m').replace('/1.jpg', '/3.jpg')
                     link = random_video.find('div', class_="thumb-under").find('a').get("href")
-                    if link and 'https://' not in link:  # Check if the link is a valid video link
+                    if link and 'https://' not in link:
                         return {'link': 'https://www.xnxx.com' + link, 'thumbnail': thumbnail_500}
     except Exception as e:
         print(f"Error: {e}")
     return None
 
 
+# -------------------- COMMAND HANDLERS --------------------
 
 @app.on_message(filters.command("porn"))
-async def get_random_video_info(client, message):
+async def get_random_video_info(client, message: Message):
     if len(message.command) == 1:
-        await message.reply("Please provide a title to search.")
-        return
+        return await message.reply("⚠️ ᴘʟᴇᴀsᴇ ᴘʀᴏᴠɪᴅᴇ ᴀ ᴛɪᴛʟᴇ ᴛᴏ sᴇᴀʀᴄʜ.")
 
     title = ' '.join(message.command[1:])
     video_info = get_video_info(title)
-    
+
     if video_info:
         video_link = video_info['link']
         video = await get_video_stream(video_link)
+
         vdo_link[message.chat.id] = {'link': video_link}
+
         keyboard1 = InlineKeyboardMarkup([
             [
-                InlineKeyboardButton("⊝ ᴄʟᴏsᴇ ⊝", callback_data="close_data"), 
-                InlineKeyboardButton("⊝ ᴠᴘʟᴀʏ⊝", callback_data=f"vplay"),
+                InlineKeyboardButton("⊝ ᴄʟᴏsᴇ ⊝", callback_data="close_data"),
+                InlineKeyboardButton("⊝ ᴠᴘʟᴀʏ ⊝", callback_data=f"vplay_{message.chat.id}"),
             ]
-    ])
-        await message.reply_video(video, caption=f"{title}", reply_markup=keyboard1)
-             
-    else:
-        await message.reply(f"No video link found for '{title}'.")
+        ])
+        await message.reply_video(
+            video,
+            caption=f"⧉ ᴛɪᴛʟᴇ: {title}",
+            reply_markup=keyboard1
+        )
 
-######
+    else:
+        await message.reply(f"❌ ɴᴏ ᴠɪᴅᴇᴏ ʟɪɴᴋ ғᴏᴜɴᴅ ғᴏʀ '{title}'.")
 
 
 @app.on_message(filters.command("xnxx"))
-async def get_random_video_info(client, message):
+async def get_random_video_info_xnxx(client, message: Message):
     if len(message.command) == 1:
-        await message.reply("Please provide a title to search.")
-        return
+        return await message.reply("⚠️ ᴘʟᴇᴀsᴇ ᴘʀᴏᴠɪᴅᴇ ᴀ ᴛɪᴛʟᴇ ᴛᴏ sᴇᴀʀᴄʜ.")
 
     title = ' '.join(message.command[1:])
     video_info = get_video_info(title)
-    
+
     if video_info:
         video_link = video_info['link']
         video = await get_video_stream(video_link)
-        
-        # Additional information
-        views = get_views_from_api(video_link)
-        ratings = get_ratings_from_api(video_link) 
+
+        # Dummy values (API function placeholders)
+        views = "N/A"
+        ratings = "N/A"
+
+        keyboard = InlineKeyboardMarkup([
+            [
+                InlineKeyboardButton("⊝ ᴄʟᴏsᴇ ⊝", callback_data="close_data"),
+                InlineKeyboardButton("⊝ ᴠᴘʟᴀʏ ⊝", callback_data=f"vplay_{message.chat.id}"),
+            ]
+        ])
 
         await message.reply_video(
             video,
-            caption=f"Add Title: {title}\nViews: {views}\nRatings: {ratings}",
+            caption=f"⧉ ᴛɪᴛʟᴇ: {title}\n⧉ ᴠɪᴇᴡs: {views}\n⧉ ʀᴀᴛɪɴɢs: {ratings}",
             reply_markup=keyboard
         )
     else:
-        await message.reply(f"No video link found for '{title}'.")
-            
+        await message.reply(f"❌ ɴᴏ ᴠɪᴅᴇᴏ ʟɪɴᴋ ғᴏᴜɴᴅ ғᴏʀ '{title}'.")
