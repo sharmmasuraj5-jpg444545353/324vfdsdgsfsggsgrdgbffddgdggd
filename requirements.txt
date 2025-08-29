@@ -54,3 +54,4 @@ bing-image-urls
 bing_image_downloader
 googlesearch-python
 sympy
+qrcode
