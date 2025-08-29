@@ -84,7 +84,7 @@ async def check_phone(client, message):
             f"**⋟ ʟᴏᴄᴀᴛɪᴏɴ:** `{obj['location']}`\n"
             f"**⋟ ᴄᴀʀʀɪᴇʀ:** `{obj['carrier']}`\n"
             f"**⋟ ᴅᴇᴠɪᴄᴇ ᴛʏᴘᴇ:** `{obj['line_type']}`\n\n"
-            f"**ʙʏ :- {app.me.mention}**"
+            f"**ʙʏ :- {app.mention}**"
         )
 
         keyboard = InlineKeyboardMarkup(
