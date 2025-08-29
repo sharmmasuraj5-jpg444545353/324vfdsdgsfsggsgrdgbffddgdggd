@@ -11,7 +11,7 @@ async def unmute_all(_, msg):
 
     bot = await app.get_chat_member(chat_id, user_id)
     if not (bot.privileges and bot.privileges.can_restrict_members):
-        return await msg.reply_text("⚠️ ɴᴏ ᴘᴇʀᴍɪssɪᴏɴ ᴛᴏ ᴜɴᴍᴜᴛᴇ ᴍᴇᴍʙᴇʀs")
+        return await msg.reply_text("**⚠️ ɴᴏ ᴘᴇʀᴍɪssɪᴏɴ ᴛᴏ ᴜɴᴍᴜᴛᴇ ᴍᴇᴍʙᴇʀs.**")
 
     count = 0
     async for m in app.get_chat_members(chat_id, filter=enums.ChatMembersFilter.RESTRICTED):
@@ -28,11 +28,11 @@ async def unmute_all(_, msg):
                 )
             )
             count += 1
-            print(f"✅ ᴜɴᴍᴜᴛᴇᴅ {m.user.mention}")
+            print(f"**✅ ᴜɴᴍᴜᴛᴇᴅ {m.user.mention}**")
         except Exception as e:
             print(f"❌ {m.user.id} - {e}")
 
     if count == 0:
-        await msg.reply_text("😶 ɴᴏ ᴍᴜᴛᴇᴅ ᴍᴇᴍʙᴇʀs ғᴏᴜɴᴅ.")
+        await msg.reply_text("**😶 ɴᴏ ᴍᴜᴛᴇᴅ ᴍᴇᴍʙᴇʀs ғᴏᴜɴᴅ.**")
     else:
-        await msg.reply_text(f"🔊 ᴜɴᴍᴜᴛᴇᴅ **{count}** ᴍᴇᴍʙᴇʀs ɪɴ ᴛʜɪs ᴄʜᴀᴛ ✅")
+        await msg.reply_text(f"**🔊 ᴜɴᴍᴜᴛᴇᴅ `{count}` ᴍᴇᴍʙᴇʀs ɪɴ ᴛʜɪs ᴄʜᴀᴛ ✅**")
