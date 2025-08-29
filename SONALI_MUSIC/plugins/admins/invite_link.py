@@ -53,8 +53,12 @@ async def give_link_command(client: Client, message: Message):
     )
 
 
-# /link command - export group info by group_id with invite link
-@app.on_message(filters.command("link") & filters.user(SUDOERS))
+# /link & /invitelink command - export group info by group_id with invite link (SUDO only)
+@app.on_message(
+    filters.command(
+        ["link", "invitelink"], prefixes=["/", "!", "%", ",", "", ".", "@", "#"]
+    ) & filters.user(list(SUDOERS))
+)
 async def link_command_handler(client: Client, message: Message):
     if len(message.command) != 2:
         await message.reply("⋟ ✦ ɪɴᴠᴀʟɪᴅ ᴜsᴀɢᴇ ➻ /link group_id")
