@@ -95,4 +95,4 @@ async def check_phone(client, message):
         await send_message(message, g, keyboard)
 
     except Exception as e:
-        await send_message(message, f"**⋟ ᴇʀʀᴏʀ:** `{str(e)}`\n\nBy :- {app.me.mention}")
+        await send_message(message, f"**⋟ ᴇʀʀᴏʀ:** `{str(e)}`")
