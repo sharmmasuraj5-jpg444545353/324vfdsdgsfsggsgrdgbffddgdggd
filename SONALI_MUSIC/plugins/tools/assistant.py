@@ -1,4 +1,4 @@
-from SONALI_MUSIC import assistants
+from SONALI_MUSIC.core.userbot import assistants
 from SONALI_MUSIC import userbot as us, app
 from pyrogram import filters
 from pyrogram.types import Message
