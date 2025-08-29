@@ -2,7 +2,7 @@ from pyrogram import Client, filters
 import git
 import shutil
 import os
-from SHUKLAMUSIC import app
+from SONALI_MUSIC import app
 from threading import Thread
 
 @app.on_message(filters.command(["downloadrepo"]))
