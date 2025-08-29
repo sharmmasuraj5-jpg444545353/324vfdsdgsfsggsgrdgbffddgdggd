@@ -22,12 +22,13 @@ from pyrogram import Client, enums
 from pyrogram import filters
 from pyrogram.types import Message, User, ChatPrivileges
 
-# ---------------------- /addme command ----------------------
+
+
 @app.on_message(filters.command("addme") & filters.user(OWNER_ID))
 async def addme(client: Client, message: Message):
     if len(message.command) < 2:
         await message.reply_text(
-            "**⚠️ ᴘʟᴇᴀsᴇ ᴘʀᴏᴠɪᴅᴇ ɢʀᴏᴜᴘ ɪᴅ.**\n\n**ᴇx :-** `/addme group_id`\n\n**ʙʏ :- {app.mention}**"
+            "**⚠️ ᴘʟᴇᴀsᴇ ᴘʀᴏᴠɪᴅᴇ ɢʀᴏᴜᴘ ɪᴅ.**\n\n**ᴇx :-** `/addme group_id`"
         )
         return
 
@@ -36,15 +37,16 @@ async def addme(client: Client, message: Message):
     mention = f"<a href=tg://user?id={user.id}>{user.first_name}</a>"
 
     status_msg = await message.reply_text(
-        f"**⋟ ʀᴇᴍᴏᴛᴇ_ᴀᴅᴅ**\n**ᴀᴅᴅɪɴɢ ᴜꜱᴇʀ :-** {mention}\n**ɢʀᴏᴜᴘ ɪᴅ :-** `{group_id}`\n\n**ʙʏ :- {app.mention}"
+        f"**⋟ ʀᴇᴍᴏᴛᴇ_ᴀᴅᴅ**\n**ᴀᴅᴅɪɴɢ ᴜꜱᴇʀ :-** {mention}\n**ɢʀᴏᴜᴘ ɪᴅ :-** `{group_id}`\n\n**ʙʏ :- {app.mention}**"
     )
 
-# ---------------------- /demoteme command ----------------------
+
+
 @app.on_message(filters.command("demoteme") & filters.user(OWNER_ID))
 async def demoteme(client, message: Message):
     if len(message.command) < 2:
         await message.reply_text(
-            "**⚠️ ᴘʟᴇᴀsᴇ ᴘʀᴏᴠɪᴅᴇ ɢʀᴏᴜᴘ ɪᴅ.**\n\n**ᴇx :-** `/demoteme group_id`\n\nᴘᴏᴡᴇʀ ʙʏ : {app.mention}"
+            "**⚠️ ᴘʟᴇᴀsᴇ ᴘʀᴏᴠɪᴅᴇ ɢʀᴏᴜᴘ ɪᴅ.**\n\n**ᴇx :-** `/demoteme group_id`"
         )
         return
 
@@ -56,7 +58,8 @@ async def demoteme(client, message: Message):
         f"**⋟ ʀᴇᴍᴏᴛᴇ_ᴅᴇᴍᴏᴛᴇ**\n**ᴅᴇᴍᴏᴛɪɴɢ ᴜꜱᴇʀ :-** {mention}\n**ɢʀᴏᴜᴘ ɪᴅ :-** `{group_id}`\n\n**ʙʏ :- {app.mention}**"
     )
 
-# ---------------------- /rban command ----------------------
+
+
 @app.on_message(filters.command("rban") & filters.user(OWNER_ID))
 async def rban(client: Client, message: Message):
     if len(message.command) < 3:
@@ -77,7 +80,6 @@ async def rban(client: Client, message: Message):
         f"**✅ ʙᴀɴɴᴇᴅ sᴜᴄᴄᴇssғᴜʟʟʏ**\n**ʙᴀɴɴᴇᴅ ᴜꜱᴇʀ :-** {mention}\n**ɢʀᴏᴜᴘ ɪᴅ :-** `{group_id}`\n\n**ʙʏ :- {app.mention}**"
     )
 
-# ---------------------- /runban command ----------------------
 @app.on_message(filters.command("runban") & filters.user(OWNER_ID))
 async def runban(client: Client, message: Message):
     if len(message.command) < 3:
