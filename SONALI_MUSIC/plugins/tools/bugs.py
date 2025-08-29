@@ -70,7 +70,7 @@ async def bugs(_, msg: Message):
             )
             await app.send_photo(
                 -1002274422022,
-                photo="https://telegra.ph/file/f66e5843568d4b7f2a652.jpg",
+                photo="https://files.catbox.moe/1b1wap.jpg",
                 caption=f"{bug_report}",
                 reply_markup=InlineKeyboardMarkup(
                     [
@@ -82,7 +82,7 @@ async def bugs(_, msg: Message):
             )
         else:
             await msg.reply_text(
-                f"<b>» ɴᴏ ʙᴜɢ ᴛᴏ ʀᴇᴩᴏʀᴛ !</b>",
+                f"<b>» ɴᴏ ʙᴜɢ ᴛᴏ ʀᴇᴩᴏʀᴛ. ᴛʀʏ `/bug not work` ɪɴ ᴍsɢ ʀᴇᴘʟʏ</b>",
             )
 
 
