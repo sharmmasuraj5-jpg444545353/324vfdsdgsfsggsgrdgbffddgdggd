@@ -250,7 +250,7 @@ async def unmute_command_handler(client, message):
         return await message.reply_text("**❌ ᴘʟᴇᴀsᴇ sᴘᴇᴄɪғʏ ᴀ ᴠᴀʟɪᴅ ᴜsᴇʀ ᴏʀ ʀᴇᴘʟʏ ᴛᴏ ᴜsᴇʀ's ᴍᴇssᴀɢᴇ**")
 
     text = await unmute_user(user_id, first_name, admin_id, admin_name, chat_id)
-    await message.reply_text(f"**🔊 {text}**")
+    await message.reply_text(f"**{text}**")
 
 
 # ----- TEMPORARY MUTE (TMUTE) -----
