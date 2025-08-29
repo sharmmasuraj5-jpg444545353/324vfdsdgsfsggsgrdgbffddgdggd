@@ -5,11 +5,11 @@ from pyrogram.types import Message
 from SONALI_MUSIC.misc import SUDOERS
 from config import BANNED_USERS, OWNER_ID
 
-# ---------------------- /asspfp or /setpfp ----------------------
+
 @app.on_message(filters.command(["asspfp", "setpfp"]) & filters.user(OWNER_ID))
 async def set_pfp(_, message: Message):
     if message.reply_to_message.photo:
-        fuk = await message.reply_text("**ꜱᴍᴀʟʟᴄᴀᴘꜱ: ɴᴏ ᴄʜᴀɴɢɪɴɢ ᴀꜱꜱɪꜱᴛᴀɴᴛ'ꜱ ᴘʀᴏꜰɪʟᴇ ᴘɪᴄ...**")
+        fuk = await message.reply_text("**ɴᴏ ᴄʜᴀɴɢɪɴɢ ᴀꜱꜱɪꜱᴛᴀɴᴛ'ꜱ ᴘʀᴏꜰɪʟᴇ ᴘɪᴄ...**")
         img = await message.reply_to_message.download()
         if 1 in assistants:
             ubot = us.one
@@ -22,10 +22,11 @@ async def set_pfp(_, message: Message):
             return await fuk.edit_text("**ꜰᴀɪʟᴇᴅ ᴛᴏ ᴄʜᴀɴɢᴇ ᴀꜱꜱɪꜱᴛᴀɴᴛ'ꜱ ᴘʀᴏꜰɪʟᴇ ᴘɪᴄ.**")
     else:
         await message.reply_text(
-            "**ꜱᴍᴀʟʟᴄᴀᴘꜱ: ʀᴇᴘʟʏ ᴛᴏ ᴀ ᴘʜᴏᴛᴏ ꜰᴏʀ ᴄʜᴀɴɢɪɴɢ ᴀꜱꜱɪꜱᴛᴀɴᴛ'ꜱ ᴘʀᴏꜰɪʟᴇ ᴘɪᴄ..**"
+            "**ʀᴇᴘʟʏ ᴛᴏ ᴀ ᴘʜᴏᴛᴏ ꜰᴏʀ ᴄʜᴀɴɢɪɴɢ ᴀꜱꜱɪꜱᴛᴀɴᴛ'ꜱ ᴘʀᴏꜰɪʟᴇ ᴘɪᴄ..**"
         )
 
-# ---------------------- /delpfp or /delasspfp ----------------------
+
+
 @app.on_message(filters.command(["delpfp", "delasspfp"]) & filters.user(OWNER_ID))
 async def del_pfp(_, message: Message):
     try:
@@ -37,7 +38,8 @@ async def del_pfp(_, message: Message):
     except Exception as ex:
         await message.reply_text("**ꜰᴀɪʟᴇᴅ ᴛᴏ ᴅᴇʟᴇᴛᴇ ᴀꜱꜱɪꜱᴛᴀɴᴛ'ꜱ ᴘʀᴏꜰɪʟᴇ ᴘɪᴄ.**")
 
-# ---------------------- /assbio or /setbio ----------------------
+
+
 @app.on_message(filters.command(["assbio", "setbio"]) & filters.user(OWNER_ID))
 async def set_bio(_, message: Message):
     msg = message.reply_to_message
@@ -55,10 +57,11 @@ async def set_bio(_, message: Message):
         return await message.reply_text(f"**» {ubot.me.mention} ʙɪᴏ ᴄʜᴀɴɢᴇᴅ ꜱᴜᴄᴄᴇssꜰᴜʟʟʏ.**")
     else:
         return await message.reply_text(
-            "**ꜱᴍᴀʟʟᴄᴀᴘꜱ: ʀᴇᴘʟʏ ᴛᴏ ᴀ ᴍᴇssᴀɢᴇ ᴏʀ ɢɪᴠᴇ sᴏᴍᴇ ᴛᴇxᴛ ᴛᴏ sᴇᴛ ɪᴛ ᴀꜱ ᴀꜱꜱɪꜱᴛᴀɴᴛ'ꜱ ʙɪᴏ.**"
+            "**ʀᴇᴘʟʏ ᴛᴏ ᴀ ᴍᴇssᴀɢᴇ ᴏʀ ɢɪᴠᴇ sᴏᴍᴇ ᴛᴇxᴛ ᴛᴏ sᴇᴛ ɪᴛ ᴀꜱ ᴀꜱꜱɪꜱᴛᴀɴᴛ'ꜱ ʙɪᴏ.**"
         )
 
-# ---------------------- /assname or /setname ----------------------
+
+
 @app.on_message(filters.command(["assname", "setname"]) & filters.user(OWNER_ID))
 async def set_name(_, message: Message):
     msg = message.reply_to_message
@@ -76,5 +79,5 @@ async def set_name(_, message: Message):
         return await message.reply_text(f"**» {ubot.me.mention} ɴᴀᴍᴇ ᴄʜᴀɴɢᴇᴅ ꜱᴜᴄᴄᴇssꜰᴜʟʟʏ.**")
     else:
         return await message.reply_text(
-            "**ꜱᴍᴀʟʟᴄᴀᴘꜱ: ʀᴇᴘʟʏ ᴛᴏ ᴀ ᴍᴇssᴀɢᴇ ᴏʀ ɢɪᴠᴇ sᴏᴍᴇ ᴛᴇxᴛ ᴛᴏ sᴇᴛ ɪᴛ ᴀꜱ ᴀꜱꜱɪꜱᴛᴀɴᴛ'ꜱ ɴᴇᴡ ɴᴀᴍᴇ.**"
+            "**ʀᴇᴘʟʏ ᴛᴏ ᴀ ᴍᴇssᴀɢᴇ ᴏʀ ɢɪᴠᴇ sᴏᴍᴇ ᴛᴇxᴛ ᴛᴏ sᴇᴛ ɪᴛ ᴀꜱ ᴀꜱꜱɪꜱᴛᴀɴᴛ'ꜱ ɴᴇᴡ ɴᴀᴍᴇ.**"
         )
