@@ -11,7 +11,7 @@ async def weather(client, message):
         weather_url = f"https://wttr.in/{location}.png"
         
         caption = (
-            "**⋟ ʜᴇʀᴇ's ᴛʜᴇ ᴡᴇᴀᴛʜᴇʀ ғᴏʀ ʏᴏᴜʀ ʟᴏᴄᴀᴛɪᴏɴ**\n"
+            "**⋟ ʜᴇʀᴇ's ᴡᴇᴀᴛʜᴇʀ ᴏғ ʏᴏᴜʀ ʟᴏᴄᴀᴛɪᴏɴ**\n"
             f"**⊙ ᴄʜᴇᴄᴋ ʙʏ :- {app.mention}**"
         )
       
@@ -23,4 +23,4 @@ async def weather(client, message):
         
         await message.reply_photo(photo=weather_url, caption=caption, reply_markup=keyboard)
     except IndexError:
-        await message.reply_text("**⋟ ᴘʟᴇᴀsᴇ ᴘʀᴏᴠɪᴅᴇ ᴀ ʟᴏᴄᴀᴛɪᴏɴ.**\n\n➻ ᴜsᴀɢᴇ :-** `/weather india`")
+        await message.reply_text("**⋟ ᴘʟᴇᴀsᴇ ᴘʀᴏᴠɪᴅᴇ ᴀ ʟᴏᴄᴀᴛɪᴏɴ.**\n\n**➻ ᴜsᴀɢᴇ :-** `/weather india`")
