@@ -9,12 +9,6 @@ async def send_message(message, text, reply_markup=None):
     await message.reply_text(text, reply_markup=reply_markup)
 
 
-from pyrogram import Client, filters
-import pycountry
-from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
-from SONALI_MUSIC import app
-
-
 @app.on_message(filters.command("getstate"))
 async def get_states(client, message):
     try:
