@@ -44,17 +44,17 @@ async def ban_user(user_id, first_name, admin_id, admin_name, chat_id, reason=No
     except ChatAdminRequired:
         return "**⚠ ɪ ᴅᴏɴ'ᴛ ʜᴀᴠᴇ ʙᴀɴ ʀɪɢʜᴛs 😡**", False
     except UserAdminInvalid:
-        return "**❌ ɪ ᴄᴀɴ'ᴛ ʙᴀɴ ᴀɴ ᴀᴅᴍɪɴ!**", False
+        return "**❌ ɪ ᴄᴀɴ'ᴛ ʙᴀɴ ᴀɴ ᴀᴅᴍɪɴ !!**", False
     except Exception as e:
-        return f"**⚠ ᴏᴘᴘs!!\n{e}**", False
+        return f"**⚠ ᴏᴘᴘs !! :-** {e}", False
 
     user_mention = mention(user_id, first_name)
     admin_mention = mention(admin_id, admin_name)
     text = f"**🔒 {user_mention} ʜᴀs ʙᴇᴇɴ ʙᴀɴɴᴇᴅ ʙʏ {admin_mention}**"
     if reason:
-        text += f"\n**📝 Reason: `{reason}`**"
+        text += f"\n\n**📝 ʀᴇᴀsᴏɴ :-** `{reason}`**"
     if time:
-        text += f"\n**⏱ Time: `{format_time(time)}`**"
+        text += f"\n\n**⏱ ᴛɪᴍᴇ :-** `{format_time(time)}`"
     return text, True
 
 
@@ -65,7 +65,7 @@ async def unban_user(user_id, first_name, admin_id, admin_name, chat_id):
     except ChatAdminRequired:
         return "**⚠ ɪ ᴅᴏɴ'ᴛ ʜᴀᴠᴇ ʙᴀɴ ʀɪɢʜᴛs 😡**"
     except Exception as e:
-        return f"**⚠ ᴏᴘᴘs!!\n{e}**"
+        return f"**⚠ ᴏᴘᴘs !! -:** {e}"
 
     user_mention = mention(user_id, first_name)
     admin_mention = mention(admin_id, admin_name)
@@ -83,7 +83,7 @@ async def mute_user(user_id, first_name, admin_id, admin_name, chat_id, reason=N
     except ChatAdminRequired:
         return "**⚠ ɪ ᴅᴏɴ'ᴛ ʜᴀᴠᴇ ᴍᴜᴛᴇ ʀɪɢʜᴛs 😡**", False
     except UserAdminInvalid:
-        return "**❌ ɪ ᴄᴀɴ'ᴛ ᴍᴜᴛᴇ ᴀɴ ᴀᴅᴍɪɴ!**", False
+        return "**❌ ɪ ᴄᴀɴ'ᴛ ᴍᴜᴛᴇ ᴀɴ ᴀᴅᴍɪɴ !!**", False
     except Exception as e:
         return f"**⚠ ᴏᴘᴘs!!\n{e}**", False
 
@@ -91,9 +91,9 @@ async def mute_user(user_id, first_name, admin_id, admin_name, chat_id, reason=N
     admin_mention = mention(admin_id, admin_name)
     text = f"**🔇 {user_mention} ʜᴀs ʙᴇᴇɴ ᴍᴜᴛᴇᴅ ʙʏ {admin_mention}**"
     if reason:
-        text += f"\n**📝 Reason: `{reason}`**"
+        text += f"\n\n**📝 ʀᴇᴀsᴏɴ :-** `{reason}`"
     if time:
-        text += f"\n**⏱ Duration: `{format_time(time)}`**"
+        text += f"\n\n**⏱ ᴅᴜʀᴀᴛɪᴏɴ :-** `{format_time(time)}`"
     return text, True
 
 
@@ -115,7 +115,7 @@ async def unmute_user(user_id, first_name, admin_id, admin_name, chat_id):
     except ChatAdminRequired:
         return "**⚠ ɪ ᴅᴏɴ'ᴛ ʜᴀᴠᴇ ᴍᴜᴛᴇ ʀɪɢʜᴛs 😡**"
     except Exception as e:
-        return f"**⚠ ᴏᴘᴘs!!\n{e}**"
+        return f"**⚠ ᴏᴘᴘs !! :-** {e}"
 
     user_mention = mention(user_id, first_name)
     admin_mention = mention(admin_id, admin_name)
@@ -132,7 +132,7 @@ async def ban_command_handler(client, message):
     member = await chat.get_member(admin_id)
 
     if member.status not in [enums.ChatMemberStatus.ADMINISTRATOR, enums.ChatMemberStatus.OWNER] or not member.privileges.can_restrict_members:
-        return await message.reply_text("**❌ ʏᴏᴜ ᴅᴏɴ'ᴛ ʜᴀᴠᴇ ᴘᴇʀᴍɪssɪᴏɴ ᴛᴏ ʙᴀɴ!**")
+        return await message.reply_text("**❌ ʏᴏᴜ ᴅᴏɴ'ᴛ ʜᴀᴠᴇ ᴘᴇʀᴍɪssɪᴏɴ ᴛᴏ ʙᴀɴ !!**")
 
     if message.reply_to_message:
         user_id = message.reply_to_message.from_user.id
@@ -140,14 +140,14 @@ async def ban_command_handler(client, message):
         reason = " ".join(message.command[1:]) if len(message.command) > 1 else None
     else:
         if len(message.command) < 2:
-            return await message.reply_text("**❌ ᴘʟᴇᴀsᴇ ᴘʀᴏᴠɪᴅᴇ ᴀ ᴜsᴇʀ ᴛᴏ ʙᴀɴ!**")
+            return await message.reply_text("**❌ ᴘʟᴇᴀsᴇ ᴘʀᴏᴠɪᴅᴇ ᴀ ᴜsᴇʀ ᴛᴏ ʙᴀɴ !!**")
         try:
             user_id = int(message.command[1])
             first_name = "User"
         except:
             user_obj = await get_userid_from_username(message.command[1])
             if not user_obj:
-                return await message.reply_text("**❌ ᴄᴀɴ'ᴛ ғɪɴᴅ ᴛʜᴀᴛ ᴜsᴇʀ!**")
+                return await message.reply_text("**❌ ᴄᴀɴ'ᴛ ғɪɴᴅ ᴛʜᴀᴛ ᴜsᴇʀ !!**")
             user_id = user_obj[0]
             first_name = user_obj[1]
         reason = " ".join(message.command[2:]) if len(message.command) > 2 else None
@@ -165,7 +165,7 @@ async def unban_command_handler(client, message):
     member = await chat.get_member(admin_id)
 
     if member.status not in [enums.ChatMemberStatus.ADMINISTRATOR, enums.ChatMemberStatus.OWNER] or not member.privileges.can_restrict_members:
-        return await message.reply_text("**❌ ʏᴏᴜ ᴅᴏɴ'ᴛ ʜᴀᴠᴇ ᴘᴇʀᴍɪssɪᴏɴ ᴛᴏ ᴜɴʙᴀɴ!**")
+        return await message.reply_text("**❌ ʏᴏᴜ ᴅᴏɴ'ᴛ ʜᴀᴠᴇ ᴘᴇʀᴍɪssɪᴏɴ ᴛᴏ ᴜɴʙᴀɴ !!**")
 
     if message.reply_to_message:
         user_id = message.reply_to_message.from_user.id
@@ -177,11 +177,11 @@ async def unban_command_handler(client, message):
         except:
             user_obj = await get_userid_from_username(message.command[1])
             if not user_obj:
-                return await message.reply_text("**❌ ᴄᴀɴ'ᴛ ғɪɴᴅ ᴛʜᴀᴛ ᴜsᴇʀ!**")
+                return await message.reply_text("**❌ ᴄᴀɴ'ᴛ ғɪɴᴅ ᴛʜᴀᴛ ᴜsᴇʀ !!**")
             user_id = user_obj[0]
             first_name = user_obj[1]
     else:
-        return await message.reply_text("**❌ ᴘʟᴇᴀsᴇ ᴘʀᴏᴠɪᴅᴇ ᴀ ᴜsᴇʀ ᴛᴏ ᴜɴʙᴀɴ!**")
+        return await message.reply_text("**❌ ᴘʟᴇᴀsᴇ ᴘʀᴏᴠɪᴅᴇ ᴀ ᴜsᴇʀ ᴛᴏ ᴜɴʙᴀɴ !!**")
 
     text = await unban_user(user_id, first_name, admin_id, admin_name, chat_id)
     await message.reply_text(text)
@@ -196,7 +196,7 @@ async def mute_command_handler(client, message):
     member = await chat.get_member(admin_id)
 
     if member.status not in [enums.ChatMemberStatus.ADMINISTRATOR, enums.ChatMemberStatus.OWNER] or not member.privileges.can_restrict_members:
-        return await message.reply_text("**❌ ʏᴏᴜ ᴅᴏɴ'ᴛ ʜᴀᴠᴇ ᴘᴇʀᴍɪssɪᴏɴ ᴛᴏ ᴍᴜᴛᴇ!**")
+        return await message.reply_text("**❌ ʏᴏᴜ ᴅᴏɴ'ᴛ ʜᴀᴠᴇ ᴘᴇʀᴍɪssɪᴏɴ ᴛᴏ ᴍᴜᴛᴇ !!**")
 
     if message.reply_to_message:
         user_id = message.reply_to_message.from_user.id
@@ -209,12 +209,12 @@ async def mute_command_handler(client, message):
         except:
             user_obj = await get_userid_from_username(message.command[1])
             if not user_obj:
-                return await message.reply_text("**❌ ᴄᴀɴ'ᴛ ғɪɴᴅ ᴛʜᴀᴛ ᴜsᴇʀ!**")
+                return await message.reply_text("**❌ ᴄᴀɴ'ᴛ ғɪɴᴅ ᴛʜᴀᴛ ᴜsᴇʀ !!**")
             user_id = user_obj[0]
             first_name = user_obj[1]
         reason = " ".join(message.command[2:]) if len(message.command) > 2 else None
     else:
-        return await message.reply_text("**❌ ᴘʟᴇᴀsᴇ ᴘʀᴏᴠɪᴅᴇ ᴀ ᴜsᴇʀ ᴛᴏ ᴍᴜᴛᴇ!**")
+        return await message.reply_text("**❌ ᴘʟᴇᴀsᴇ ᴘʀᴏᴠɪᴅᴇ ᴀ ᴜsᴇʀ ᴛᴏ ᴍᴜᴛᴇ !!**")
 
     text, result = await mute_user(user_id, first_name, admin_id, admin_name, chat_id, reason)
     await message.reply_text(text)
@@ -230,7 +230,7 @@ async def unmute_command_handler(client, message):
     member = await chat.get_member(admin_id)
 
     if member.status not in [enums.ChatMemberStatus.ADMINISTRATOR, enums.ChatMemberStatus.OWNER] or not member.privileges.can_restrict_members:
-        return await message.reply_text("**❌ ʏᴏᴜ ᴅᴏɴ'ᴛ ʜᴀᴠᴇ ᴘᴇʀᴍɪssɪᴏɴ ᴛᴏ ᴜɴᴍᴜᴛᴇ!**")
+        return await message.reply_text("**❌ ʏᴏᴜ ᴅᴏɴ'ᴛ ʜᴀᴠᴇ ᴘᴇʀᴍɪssɪᴏɴ ᴛᴏ ᴜɴᴍᴜᴛᴇ !!**")
 
     # Get target user
     if len(message.command) > 1:
@@ -240,7 +240,7 @@ async def unmute_command_handler(client, message):
         except:
             user_obj = await get_userid_from_username(message.command[1])
             if not user_obj:
-                return await message.reply_text("**❌ ᴄᴀɴ'ᴛ ғɪɴᴅ ᴛʜᴀᴛ ᴜsᴇʀ!**")
+                return await message.reply_text("**❌ ᴄᴀɴ'ᴛ ғɪɴᴅ ᴛʜᴀᴛ ᴜsᴇʀ !!**")
             user_id = user_obj[0]
             first_name = user_obj[1]
     elif message.reply_to_message:
@@ -263,14 +263,14 @@ async def tmute_command_handler(client, message):
     member = await chat.get_member(admin_id)
 
     if member.status not in [enums.ChatMemberStatus.ADMINISTRATOR, enums.ChatMemberStatus.OWNER] or not member.privileges.can_restrict_members:
-        return await message.reply_text("**❌ ʏᴏᴜ ᴅᴏɴ'ᴛ ʜᴀᴠᴇ ᴘᴇʀᴍɪssɪᴏɴ ᴛᴏ ᴍᴜᴛᴇ!**")
+        return await message.reply_text("**❌ ʏᴏᴜ ᴅᴏɴ'ᴛ ʜᴀᴠᴇ ᴘᴇʀᴍɪssɪᴏɴ ᴛᴏ ᴍᴜᴛᴇ !!**")
 
     # Get user and time
     if message.reply_to_message:
         user_id = message.reply_to_message.from_user.id
         first_name = message.reply_to_message.from_user.first_name
         if len(message.command) < 2:
-            return await message.reply_text("**❌ ᴘʟᴇᴀsᴇ sᴘᴇᴄɪғʏ ᴛɪᴍᴇ ᴅᴜʀᴀᴛɪᴏɴ! ᴇx: /tmute 2m**")
+            return await message.reply_text("**❌ ᴘʟᴇᴀsᴇ sᴘᴇᴄɪғʏ ᴛɪᴍᴇ ᴅᴜʀᴀᴛɪᴏɴ !!**\n\n**ᴇx :-** `/tmute 2m`")
         time_text = message.command[1]
     elif len(message.command) >= 3:
         user_text = message.command[1]
@@ -280,12 +280,12 @@ async def tmute_command_handler(client, message):
         except:
             user_obj = await get_userid_from_username(user_text)
             if not user_obj:
-                return await message.reply_text("**❌ ᴄᴀɴ'ᴛ ғɪɴᴅ ᴛʜᴀᴛ ᴜsᴇʀ!**")
+                return await message.reply_text("**❌ ᴄᴀɴ'ᴛ ғɪɴᴅ ᴛʜᴀᴛ ᴜsᴇʀ !!**")
             user_id = user_obj[0]
             first_name = user_obj[1]
         time_text = message.command[2]
     else:
-        return await message.reply_text("**❌ ᴘʟᴇᴀsᴇ sᴘᴇᴄɪғʏ ᴜsᴇʀ ᴀɴᴅ ᴛɪᴍᴇ! ᴇx: /tmute @user 2m**")
+        return await message.reply_text("**❌ ᴘʟᴇᴀsᴇ sᴘᴇᴄɪғʏ ᴜsᴇʀ ᴀɴᴅ ᴛɪᴍᴇ !!**\n\n**ᴇx :-** `/tmute @user 2m`")
 
     # Parse time
     try:
@@ -298,9 +298,9 @@ async def tmute_command_handler(client, message):
         elif unit == "d":
             mute_duration = datetime.timedelta(days=amount)
         else:
-            return await message.reply_text("**❌ ᴡʀᴏɴɢ ᴛɪᴍᴇ ᴜɴɪᴛ! Use m/h/d**")
+            return await message.reply_text("**❌ ᴡʀᴏɴɢ ᴛɪᴍᴇ ᴜɴɪᴛ !!. Use m/h/d**")
     except:
-        return await message.reply_text("**❌ ᴡʀᴏɴɢ ᴛɪᴍᴇ ғᴏʀᴍᴀᴛ! ᴇx: 2m, 3h, 1d**")
+        return await message.reply_text("**❌ ᴡʀᴏɴɢ ᴛɪᴍᴇ ғᴏʀᴍᴀᴛ !!. ᴇx :- 2m, 3h, 1d**")
 
     text, result = await mute_user(user_id, first_name, admin_id, admin_name, chat_id, reason=None, time=mute_duration)
     await message.reply_text(text)
