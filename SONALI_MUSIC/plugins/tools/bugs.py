@@ -4,8 +4,6 @@ from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message, 
 from config import OWNER_ID as owner_id
 from SONALI_MUSIC import app
 
-
-
 def content(msg: Message) -> [None, str]:
     text_to_return = msg.text
 
@@ -28,25 +26,26 @@ async def bugs(_, msg: Message):
         chat_username = f"ᴩʀɪᴠᴀᴛᴇ ɢʀᴏᴜᴩ/`{msg.chat.id}`"
 
     bugs = content(msg)
+    
     user_id = msg.from_user.id
-    mention = (
-        "[" + msg.from_user.first_name + "](tg://user?id=" + str(msg.from_user.id) + ")"
-    )
+    mention = f"[{msg.from_user.first_name}](tg://user?id={msg.from_user.id})"
+  
     datetimes_fmt = "%d-%m-%Y"
     datetimes = datetime.utcnow().strftime(datetimes_fmt)
 
-    
+    owner_user = await app.get_users(owner_id)
+    owner_mention = f"[{owner_user.first_name}](tg://user?id={OWNER_ID})"
 
     bug_report = f"""
-**#ʙᴜɢ : ** **tg://user?id={owner_id}**
+**#ʙᴜɢ ʀᴇᴘᴏʀᴛ {owner_mention}**
 
-**ʀᴇᴩᴏʀᴛᴇᴅ ʙʏ : ** **{mention}**
-**ᴜsᴇʀ ɪᴅ : ** **{user_id}**
-**ᴄʜᴀᴛ : ** **{chat_username}**
+**ʀᴇᴩᴏʀᴛᴇᴅ ʙʏ :-** {mention}
+**ᴜsᴇʀ ɪᴅ :-** `{user_id}`
+**ᴄʜᴀᴛ :-** {chat_username}
 
-**ʙᴜɢ : ** **{bugs}**
+**ʙᴜɢ :-** `{bugs}`
 
-**ᴇᴠᴇɴᴛ sᴛᴀᴍᴩ : ** **{datetimes}**"""
+**ᴇᴠᴇɴᴛ sᴛᴀᴍᴩ :-** {datetimes}"""
 
     if msg.chat.type == "private":
         await msg.reply_text("<b>» ᴛʜɪs ᴄᴏᴍᴍᴀɴᴅ ɪs ᴏɴʟʏ ғᴏʀ ɢʀᴏᴜᴩs.</b>")
@@ -75,12 +74,9 @@ async def bugs(_, msg: Message):
                 caption=f"{bug_report}",
                 reply_markup=InlineKeyboardMarkup(
                     [
-                        [InlineKeyboardButton("⌯ ᴠɪᴇᴡ ʙᴜɢ ⌯", url=f"{msg.link}")],
-                        [
-                            InlineKeyboardButton(
-                                "⌯ ᴄʟᴏsᴇ ⌯", callback_data="close_send_photo"
-                            )
-                        ],
+                        [InlineKeyboardButton("⌯ ᴠɪᴇᴡ ʙᴜɢ ⌯", url=f"{msg.link}"),
+                        InlineKeyboardButton("⌯ ᴄʟᴏsᴇ ⌯", callback_data="close_send_photo")
+                    ]
                     ]
                 ),
             )
