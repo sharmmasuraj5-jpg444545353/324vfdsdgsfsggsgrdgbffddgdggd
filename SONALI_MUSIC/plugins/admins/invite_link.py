@@ -41,17 +41,16 @@ async def user_command(client: Client, message: Message):
         os.remove(file_name)
 
 
-# /givelink command - generate chat invite link
 @app.on_message(filters.command("givelink"))
 async def give_link_command(client: Client, message: Message):
     link = await client.export_chat_invite_link(message.chat.id)
     await message.reply_text(
         f"**⋟ ᴄʜᴀᴛ ɪɴᴠɪᴛᴇ ʟɪɴᴋ :- [ʟɪɴᴋ]({link})**\n\n**⋟ ʙʏ :- {app.mention}**",
-        reply_markup=ADD_BUTTON
+        reply_markup=ADD_BUTTON,
+        disable_web_page_preview=True 
     )
 
 
-# /link & /invitelink command - export group info by group_id with invite link (SUDO only)
 @app.on_message(
     filters.command(
         ["link", "invitelink"], prefixes=["/", "!", "%", ",", "", ".", "@", "#"]
@@ -59,7 +58,7 @@ async def give_link_command(client: Client, message: Message):
 )
 async def link_command_handler(client: Client, message: Message):
     if len(message.command) != 2:
-        await message.reply("**⋟ ɪɴᴠᴀʟɪᴅ ᴜsᴀɢᴇ :-** `/link group_id`")
+        await message.reply("**⋟ ɪɴᴠᴀʟɪᴅ ᴜsᴀɢᴇ :-** `/link group_id`", disable_web_page_preview=True)
         return
 
     group_id = message.command[1]
@@ -68,13 +67,13 @@ async def link_command_handler(client: Client, message: Message):
     try:
         chat = await client.get_chat(int(group_id))
         if chat is None:
-            await message.reply("**⋟ ᴜɴᴀʙʟᴇ ᴛᴏ ɢᴇᴛ ɪɴғᴏʀᴍᴀᴛɪᴏɴ.**")
+            await message.reply("**⋟ ᴜɴᴀʙʟᴇ ᴛᴏ ɢᴇᴛ ɪɴғᴏʀᴍᴀᴛɪᴏɴ.**", disable_web_page_preview=True)
             return
 
         try:
             invite_link = await client.export_chat_invite_link(chat.id)
         except FloodWait as e:
-            await message.reply(f"**⋟ ғʟᴏᴏᴅᴡᴀɪᴛ** `{e.x}` **sᴇᴄᴏɴᴅs**")
+            await message.reply(f"**⋟ ғʟᴏᴏᴅᴡᴀɪᴛ** `{e.x}` **sᴇᴄᴏɴᴅs**", disable_web_page_preview=True)
             return
 
         group_data = {
@@ -107,11 +106,12 @@ async def link_command_handler(client: Client, message: Message):
                 f"**✦ ʟɪɴᴋ :-** [ᴄʟɪᴄᴋ ʜᴇʀᴇ]({invite_link})\n"
                 f"**✦ ʙʏ :- {app.mention}**"
             ),
-            reply_markup=ADD_BUTTON
+            reply_markup=ADD_BUTTON,
+            disable_web_page_preview=True 
         )
 
     except Exception as e:
-        await message.reply(f"**⋟ ᴇʀʀᴏʀ :-** {str(e)}")
+        await message.reply(f"**⋟ ᴇʀʀᴏʀ :-** {str(e)}", disable_web_page_preview=True)
 
     finally:
         if os.path.exists(file_name):
