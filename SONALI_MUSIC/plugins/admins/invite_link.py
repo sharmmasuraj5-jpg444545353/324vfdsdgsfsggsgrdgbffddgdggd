@@ -9,14 +9,12 @@ from SONALI_MUSIC.misc import SUDOERS
 from SONALI_MUSIC.utils.Sona_BAN import admin_filter
 
 
-# Button for "Add me in your group"
 ADD_BUTTON = InlineKeyboardMarkup(
-    [[InlineKeyboardButton("✙ Add me in your group", url=f"https://t.me/{app.username}?startgroup=true")]]
+    [[InlineKeyboardButton("✙ ʌᴅᴅ ϻє ɪη ʏσυʀ ɢʀσυᴘ ✙", url=f"https://t.me/{app.username}?startgroup=true")]]
 )
 
 
-# /user command - export chat members
-@app.on_message(filters.command("user") & admin_filter)
+@app.on_message(filters.command("users") & admin_filter)
 async def user_command(client: Client, message: Message):
     members_list = []
     async for member in client.get_chat_members(message.chat.id):
@@ -35,7 +33,7 @@ async def user_command(client: Client, message: Message):
     await client.send_document(
         message.chat.id,
         file_name,
-        caption=f"⋟ ✦ ᴍᴇᴍʙᴇʀs ᴇxᴘᴏʀᴛᴇᴅ ➻ {app.mention}",
+        caption=f"**⋟ ᴇxᴘᴏʀᴛᴇᴅ ʙʏ :- {app.mention}**",
         reply_markup=ADD_BUTTON
     )
 
@@ -48,7 +46,7 @@ async def user_command(client: Client, message: Message):
 async def give_link_command(client: Client, message: Message):
     link = await client.export_chat_invite_link(message.chat.id)
     await message.reply_text(
-        f"⋟ ✦ ᴄʜᴀᴛ ɪɴᴠɪᴛᴇ ʟɪɴᴋ ➻ {link}\n⋟ ✦ ʙʏ :- {app.mention}",
+        f"**⋟ ᴄʜᴀᴛ ɪɴᴠɪᴛᴇ ʟɪɴᴋ :- [ʟɪɴᴋ]({link})**\n\n**⋟ ʙʏ :- {app.mention}**",
         reply_markup=ADD_BUTTON
     )
 
@@ -61,7 +59,7 @@ async def give_link_command(client: Client, message: Message):
 )
 async def link_command_handler(client: Client, message: Message):
     if len(message.command) != 2:
-        await message.reply("⋟ ✦ ɪɴᴠᴀʟɪᴅ ᴜsᴀɢᴇ ➻ /link group_id")
+        await message.reply("**⋟ ɪɴᴠᴀʟɪᴅ ᴜsᴀɢᴇ :-** `/link group_id`")
         return
 
     group_id = message.command[1]
@@ -70,13 +68,13 @@ async def link_command_handler(client: Client, message: Message):
     try:
         chat = await client.get_chat(int(group_id))
         if chat is None:
-            await message.reply("⋟ ✦ ᴜɴᴀʙʟᴇ ᴛᴏ ɢᴇᴛ ɪɴғᴏʀᴍᴀᴛɪᴏɴ ➻")
+            await message.reply("**⋟ ᴜɴᴀʙʟᴇ ᴛᴏ ɢᴇᴛ ɪɴғᴏʀᴍᴀᴛɪᴏɴ.**")
             return
 
         try:
             invite_link = await client.export_chat_invite_link(chat.id)
         except FloodWait as e:
-            await message.reply(f"⋟ ✦ ғʟᴏᴏᴅᴡᴀɪᴛ {e.x} sᴇᴄᴏɴᴅs ➻")
+            await message.reply(f"**⋟ ғʟᴏᴏᴅᴡᴀɪᴛ** `{e.x}` **sᴇᴄᴏɴᴅs**")
             return
 
         group_data = {
@@ -103,17 +101,17 @@ async def link_command_handler(client: Client, message: Message):
             chat_id=message.chat.id,
             document=file_name,
             caption=(
-                f"⋟ ✦ ɢʀᴏᴜᴘ ɪɴғᴏʀᴍᴀᴛɪᴏɴ\n"
-                f"⋟ ✦ ᴛɪᴛʟᴇ: {chat.title}\n"
-                f"⋟ ✦ ᴍᴇᴍʙᴇʀs: {chat.members_count}\n"
-                f"⋟ ✦ ʟɪɴᴋ: {invite_link}\n"
-                f"⋟ ✦ ʙʏ :- {app.mention}"
+                f"**✦ ɢʀᴏᴜᴘ ɪɴғᴏʀᴍᴀᴛɪᴏɴ**\n\n"
+                f"**✦ ᴛɪᴛʟᴇ :-** {chat.title}\n"
+                f"**✦ ᴍᴇᴍʙᴇʀs :-** `{chat.members_count}`\n"
+                f"**✦ ʟɪɴᴋ :-** [ᴄʟɪᴄᴋ ʜᴇʀᴇ]({invite_link})\n"
+                f"**✦ ʙʏ :- {app.mention}**"
             ),
             reply_markup=ADD_BUTTON
         )
 
     except Exception as e:
-        await message.reply(f"⋟ ✦ ᴇʀʀᴏʀ ➻ {str(e)}")
+        await message.reply(f"**⋟ ᴇʀʀᴏʀ :-** {str(e)}")
 
     finally:
         if os.path.exists(file_name):
