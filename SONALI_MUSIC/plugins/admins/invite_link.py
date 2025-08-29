@@ -97,18 +97,17 @@ async def link_command_handler(client: Client, message: Message):
                 file.write(f"{key}: {value}\n")
 
         await client.send_document(
-            chat_id=message.chat.id,
-            document=file_name,
-            caption=(
-                f"**✦ ɢʀᴏᴜᴘ ɪɴғᴏʀᴍᴀᴛɪᴏɴ**\n\n"
-                f"**✦ ᴛɪᴛʟᴇ :-** {chat.title}\n"
-                f"**✦ ᴍᴇᴍʙᴇʀs :-** `{chat.members_count}`\n"
-                f"**✦ ʟɪɴᴋ :-** [ᴄʟɪᴄᴋ ʜᴇʀᴇ]({invite_link})\n"
-                f"**✦ ʙʏ :- {app.mention}**"
-            ),
-            reply_markup=ADD_BUTTON,
-            disable_web_page_preview=True 
-        )
+    chat_id=message.chat.id,
+    document=file_name,
+    caption=(
+        f"**✦ ɢʀᴏᴜᴘ ɪɴғᴏʀᴍᴀᴛɪᴏɴ**\n\n"
+        f"**✦ ᴛɪᴛʟᴇ :-** {chat.title}\n"
+        f"**✦ ᴍᴇᴍʙᴇʀs :-** `{chat.members_count}`\n"
+        f"**✦ ʟɪɴᴋ :-** [ᴄʟɪᴄᴋ ʜᴇʀᴇ]({invite_link})\n"
+        f"**✦ ʙʏ :- {app.mention}**"
+    ),
+    reply_markup=ADD_BUTTON
+)
 
     except Exception as e:
         await message.reply(f"**⋟ ᴇʀʀᴏʀ :-** {str(e)}", disable_web_page_preview=True)
