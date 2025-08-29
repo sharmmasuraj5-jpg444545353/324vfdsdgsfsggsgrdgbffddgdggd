@@ -35,14 +35,14 @@ async def get_states(client, message):
             await message.reply_text("**⋟ ɴᴏ sᴛᴀᴛᴇs ᴀᴠᴀɪʟᴀʙʟᴇ ғᴏʀ ᴛʜɪs ᴄᴏᴜɴᴛʀʏ.**")
             return
 
-        states_text = "\n".join([f"**⋟** {sub.name}" for sub in subdivisions])
+        states_text = "\n".join([f"**⊚** {sub.name}" for sub in subdivisions])
         total = len(subdivisions)
 
         final_text = (
-            f"**✦ sᴛᴀᴛᴇs ɪɴ {country.name} ✦**\n\n"
+            f"**✦ sᴛᴀᴛᴇs ɪɴ :-** {country.name}\n\n"
             f"{states_text}\n\n"
             f"**⋟ ᴛᴏᴛᴀʟ sᴛᴀᴛᴇs:** `{total}`\n\n"
-            f"**ʙʏ :- {app.mention}**"
+            f"**⋟ ʙʏ :- {app.mention}**"
         )
 
         buttons = InlineKeyboardMarkup(
@@ -77,14 +77,14 @@ async def check_phone(client, message):
 
         g = (
             f"**🔍 ᴘʜᴏɴᴇ ɴᴜᴍʙᴇʀ ᴄʜᴇᴄᴋᴇʀ**\n\n"
-            f"**⋟ ᴠᴀʟɪᴅ:** `{obj['valid']}`\n"
-            f"**⋟ ɴᴜᴍʙᴇʀ:** `{number}`\n"
-            f"**⋟ ᴄᴏᴜɴᴛʀʏ ᴄᴏᴅᴇ:** `{obj['country_code']}`\n"
-            f"**⋟ ᴄᴏᴜɴᴛʀʏ ɴᴀᴍᴇ:** `{obj['country_name']}`\n"
-            f"**⋟ ʟᴏᴄᴀᴛɪᴏɴ:** `{obj['location']}`\n"
-            f"**⋟ ᴄᴀʀʀɪᴇʀ:** `{obj['carrier']}`\n"
-            f"**⋟ ᴅᴇᴠɪᴄᴇ ᴛʏᴘᴇ:** `{obj['line_type']}`\n\n"
-            f"**ʙʏ :- {app.mention}**"
+            f"**⋟ ᴠᴀʟɪᴅ :-** `{obj['valid']}`\n"
+            f"**⋟ ɴᴜᴍʙᴇʀ :-** `{number}`\n"
+            f"**⋟ ᴄᴏᴜɴᴛʀʏ ᴄᴏᴅᴇ :-** `{obj['country_code']}`\n"
+            f"**⋟ ᴄᴏᴜɴᴛʀʏ ɴᴀᴍᴇ :-** `{obj['country_name']}`\n"
+            f"**⋟ ʟᴏᴄᴀᴛɪᴏɴ :-** `{obj['location']}`\n"
+            f"**⋟ ᴄᴀʀʀɪᴇʀ :-** `{obj['carrier']}`\n"
+            f"**⋟ ᴅᴇᴠɪᴄᴇ ᴛʏᴘᴇ :-** `{obj['line_type']}`\n\n"
+            f"**⋟ ʙʏ :- {app.mention}**"
         )
 
         keyboard = InlineKeyboardMarkup(
