@@ -1,24 +1,41 @@
-import os
-import random
-import requests
-from bs4 import BeautifulSoup
 from pyrogram import filters
-from pyrogram.types import Message, CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
-from pytgcalls import PyTgCalls
-from pytgcalls.types.input_stream import InputVideoStream
-import yt_dlp
+import requests, random, os, yt_dlp
+from bs4 import BeautifulSoup
 from SONALI_MUSIC import app
-# -------------------- VIDEO CACHE --------------------
-vdo_link = {}  # chat_id: video_path
+from pyrogram.types import CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton, Message
+from SONALI_MUSIC.plugins.play import play
 
-# -------------------- PYTG CALLS INIT --------------------
-# aapke main bot module me app pass karenge
-def init_pytgcalls(app):
-    pytgcalls = PyTgCalls(app)
-    return pytgcalls
+# Cache
+vdo_link = {}
 
-# -------------------- UTILITY FUNCTIONS --------------------
-async def get_video_stream(link: str) -> str:
+# -------------------- CALLBACKS --------------------
+
+@app.on_callback_query(filters.regex("^vplay"))
+async def vplay_callback(_, query: CallbackQuery):
+    try:
+        data = query.data.split("_")
+        if len(data) > 1 and data[1].isdigit():
+            chat_id = int(data[1])
+        else:
+            return await query.answer("❌ ɪɴᴠᴀʟɪᴅ ᴄᴀʟʟʙᴀᴄᴋ", show_alert=True)
+
+        # अब play function को सही तरीके से call करो
+        await play(_, query.message)
+        await query.answer("▶️ ᴠɪᴅᴇᴏ ᴘʟᴀʏʙᴀᴄᴋ sᴛᴀʀᴛᴇᴅ!")
+
+    except Exception as e:
+        await query.answer(f"Error: {e}", show_alert=True)
+
+
+@app.on_callback_query(filters.regex("^close_data"))
+async def close_callback(_, query: CallbackQuery):
+    await query.message.delete()
+    await query.answer("❌ ᴄʟᴏsᴇᴅ")
+
+
+# -------------------- YTDLP VIDEO DOWNLOADER --------------------
+
+async def get_video_stream(link):
     ydl_opts = {
         "format": "bestvideo+bestaudio/best",
         "outtmpl": "downloads/%(id)s.%(ext)s",
@@ -36,7 +53,9 @@ async def get_video_stream(link: str) -> str:
     return video
 
 
-def get_video_info(title: str):
+# -------------------- VIDEO INFO SCRAPER --------------------
+
+def get_video_info(title):
     url_base = f'https://www.xnxx.com/search/{title}'
     try:
         with requests.Session() as s:
@@ -48,81 +67,94 @@ def get_video_info(title: str):
                 thumbnail = random_video.find('div', class_="thumb").find('img').get("src")
                 if thumbnail:
                     thumbnail_500 = thumbnail.replace('/h', '/m').replace('/1.jpg', '/3.jpg')
-                link = random_video.find('div', class_="thumb-under").find('a').get("href")
-                if link and 'https://' not in link:
-                    return {'link': 'https://www.xnxx.com' + link, 'thumbnail': thumbnail_500}
+                    link = random_video.find('div', class_="thumb-under").find('a').get("href")
+                    if link and 'https://' not in link:
+                        return {'link': 'https://www.xnxx.com' + link, 'thumbnail': thumbnail_500}
     except Exception as e:
         print(f"Error: {e}")
-        return None
+    return None
 
-# -------------------- VC PLAY FUNCTION --------------------
-async def play(pytgcalls, chat_id: int, video_path: str):
-    """
-    Play video in VC using PyTgCalls
-    """
+
+# -------------------- EXTRA INFO SCRAPER --------------------
+
+def get_views_and_ratings(link):
     try:
-        await pytgcalls.join_group_call(
-            chat_id,
-            InputVideoStream(video_path)
-        )
+        with requests.Session() as s:
+            r = s.get(link)
+            soup = BeautifulSoup(r.text, "html.parser")
+
+            # Views text (example: "123,456 views")
+            views = soup.find("span", class_="metadata")
+            views = views.text.strip() if views else "N/A"
+
+            # Rating percentage (example: "96%")
+            rating = soup.find("span", class_="rating")
+            rating = rating.text.strip() if rating else "N/A"
+
+            return views, rating
     except Exception as e:
-        print(f"❌ Error while joining VC: {e}")
+        print(f"Error scraping views/ratings: {e}")
+        return "N/A", "N/A"
 
 
 # -------------------- COMMAND HANDLERS --------------------
-def register_commands(app, pytgcalls):
-    @app.on_message(filters.command(["porn", "xnxx"]))
-    async def get_random_video_info(client, message: Message):
-        if len(message.command) == 1:
-            return await message.reply("⚠️ ᴘʟᴇᴀsᴇ ᴘʀᴏᴠɪᴅᴇ ᴀ ᴛɪᴛʟᴇ ᴛᴏ sᴇᴀʀᴄʜ.")
 
-        title = " ".join(message.command[1:])
-        video_data = get_video_info(title)
-        if not video_data:
-            return await message.reply("❌ ɴᴏ ᴠɪᴅᴇᴏ ғᴏᴜɴᴅ")
+@app.on_message(filters.command("porn"))
+async def get_random_video_info(client, message: Message):
+    if len(message.command) == 1:
+        return await message.reply("⚠️ ᴘʟᴇᴀsᴇ ᴘʀᴏᴠɪᴅᴇ ᴀ ᴛɪᴛʟᴇ ᴛᴏ sᴇᴀʀᴄʜ.")
 
-        video_path = await get_video_stream(video_data['link'])
-        vdo_link[message.chat.id] = video_path  # cache for callback
+    title = ' '.join(message.command[1:])
+    video_info = get_video_info(title)
 
-        buttons = InlineKeyboardMarkup(
+    if video_info:
+        video_link = video_info['link']
+        video = await get_video_stream(video_link)
+
+        vdo_link[message.chat.id] = {'link': video_link}
+
+        keyboard1 = InlineKeyboardMarkup([
             [
-                [InlineKeyboardButton("▶️ ᴘʟᴀʏ ɪɴ ᴠᴄ", callback_data=f"vplay_{message.chat.id}")],
-                [InlineKeyboardButton("❌ ᴄʟᴏsᴇ", callback_data="close_data")]
+                InlineKeyboardButton("⊝ ᴄʟᴏsᴇ ⊝", callback_data="close_data"),
+                InlineKeyboardButton("⊝ ᴠᴘʟᴀʏ ⊝", callback_data=f"vplay_{message.chat.id}"),
             ]
+        ])
+        await message.reply_video(
+            video,
+            caption=f"⧉ ᴛɪᴛʟᴇ: {title}",
+            reply_markup=keyboard1
         )
 
-        await message.reply_photo(
-            photo=video_data['thumbnail'],
-            caption=f"🎬 ʀᴇᴀᴅʏ ᴛᴏ ᴘʟᴀʏ: {title}",
-            reply_markup=buttons
+    else:
+        await message.reply(f"❌ ɴᴏ ᴠɪᴅᴇᴏ ʟɪɴᴋ ғᴏᴜɴᴅ ғᴏʀ '{title}'.")
+
+
+@app.on_message(filters.command("xnxx"))
+async def get_random_video_info_xnxx(client, message: Message):
+    if len(message.command) == 1:
+        return await message.reply("⚠️ ᴘʟᴇᴀsᴇ ᴘʀᴏᴠɪᴅᴇ ᴀ ᴛɪᴛʟᴇ ᴛᴏ sᴇᴀʀᴄʜ.")
+
+    title = ' '.join(message.command[1:])
+    video_info = get_video_info(title)
+
+    if video_info:
+        video_link = video_info['link']
+        video = await get_video_stream(video_link)
+
+        # अब views और ratings scrape करेंगे
+        views, ratings = get_views_and_ratings(video_link)
+
+        keyboard = InlineKeyboardMarkup([
+            [
+                InlineKeyboardButton("⊝ ᴄʟᴏsᴇ ⊝", callback_data="close_data"),
+                InlineKeyboardButton("⊝ ᴠᴘʟᴀʏ ⊝", callback_data=f"vplay_{message.chat.id}"),
+            ]
+        ])
+
+        await message.reply_video(
+            video,
+            caption=f"⧉ ᴛɪᴛʟᴇ: {title}\n⧉ ᴠɪᴇᴡs: {views}\n⧉ ʀᴀᴛɪɴɢs: {ratings}",
+            reply_markup=keyboard
         )
-
-# -------------------- CALLBACKS --------------------
-def register_callbacks(app, pytgcalls):
-    @app.on_callback_query(filters.regex("^vplay"))
-    async def vplay_callback(_, query: CallbackQuery):
-        try:
-            data = query.data.split("_")
-            if len(data) > 1 and data[1].isdigit():
-                chat_id = int(data[1])
-            else:
-                return await query.answer("❌ Invalid callback", show_alert=True)
-
-            video_path = vdo_link.get(chat_id)
-            if not video_path:
-                return await query.answer("❌ No video chosen", show_alert=True)
-
-            await play(pytgcalls, chat_id, video_path)
-            await query.answer("▶️ Playing in VC")
-        except Exception as e:
-            await query.answer(f"❌ Error: {e}", show_alert=True)
-            print(e)
-
-    @app.on_callback_query(filters.regex("^close_data"))
-    async def close_callback(_, query: CallbackQuery):
-        try:
-            await query.message.delete()
-            await query.answer("❌ ᴄʟᴏsᴇᴅ")
-        except Exception as e:
-            await query.answer(f"❌ Error: {e}", show_alert=True)
-            print(e)
+    else:
+        await message.reply(f"❌ ɴᴏ ᴠɪᴅᴇᴏ ʟɪɴᴋ ғᴏᴜɴᴅ ғᴏʀ '{title}'.")
