@@ -1,8 +1,8 @@
 import time
 from pyrogram import filters
 from pyrogram.types import Message
-from SHUKLAMUSIC import app
-from SHUKLAMUSIC.misc import SUDOERS
+from SONALI_MUSIC import app
+from SONALI_MUSIC.misc import SUDOERS
 
 @app.on_message(filters.command("raid", prefixes=".") & SUDOERS)
 async def raid_command(client, message: Message):
