@@ -18,13 +18,12 @@ ADD_ME_BUTTON = InlineKeyboardMarkup(
 )
 
 
-@Sona.on_message(filters.command("mongochk") & SUDOERS)
+@Sona.on_message(filters.command("mongochk"))
 async def mongo_command(client, message: Message):
+
     if len(message.command) < 2:
         await message.reply(
-            f"**⋟ ᴇɴᴛᴇʀ ʏᴏᴜʀ ᴍᴏɴɢᴏ ᴜʀʟ ᴀꜰᴛᴇʀ ᴄᴏᴍᴍᴀɴᴅ.**\n\n"
-            f"**ᴇxᴀᴍᴘʟᴇ :-** `/mongochk mongo_url`\n\n"
-            f"**⋟ ᴄʜᴇᴄᴋ ʙʏ :– {Sona.mention}**",
+            f"**⋟ ᴇɴᴛᴇʀ ʏᴏᴜʀ ᴍᴏɴɢᴏ ᴜʀʟ ᴀꜰᴛᴇʀ ᴄᴏᴍᴍᴀɴᴅ.**\n\n**ᴇxᴀᴍᴘʟᴇ :-** /mongochk mongo_url`",
             reply_markup=ADD_ME_BUTTON
         )
         return
@@ -33,24 +32,19 @@ async def mongo_command(client, message: Message):
     if re.match(mongo_url_pattern, mongo_url):
         try:
             mongo_client = MongoClient(mongo_url, serverSelectionTimeoutMS=5000)
-            mongo_client.server_info()
+            mongo_client.server_info() 
             await message.reply(
-                f"**⋟ ᴍᴏɴɢᴏᴅʙ ᴜʀʟ ɪꜱ ᴠᴀʟɪᴅ ᴀɴᴅ ᴄᴏɴɴᴇᴄᴛɪᴏɴ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟ ✅**\n\n"
-                f"**⋟ ᴄʜᴇᴄᴋ ʙʏ :– {Sona.mention}**",
+                f"**⋟ ᴍᴏɴɢᴏᴅʙ ᴜʀʟ ɪꜱ ᴠᴀʟɪᴅ ᴀɴᴅ ᴄᴏɴɴᴇᴄᴛɪᴏɴ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟ ✅**\n\n**⋟ ᴄʜᴇᴄᴋ ʙʏ :– {Sona.mention}**",
                 reply_markup=ADD_ME_BUTTON
             )
-            mongo_client.close()
         except Exception as e:
             await message.reply(
-                f"**⋟ ꜰᴀɪʟᴇᴅ ᴛᴏ ᴄᴏɴɴᴇᴄᴛ ᴛᴏ ᴍᴏɴɢᴏᴅʙ ❌**\n\n"
-                f"**⋟ ᴇʀʀᴏʀ :–** `{e}`\n"
-                f"**⋟ ᴄʜᴇᴄᴋ ʙʏ :– {Sona.mention}**",
+                f"**⋟ ꜰᴀɪʟᴇᴅ ᴛᴏ ᴄᴏɴɴᴇᴄᴛ ᴛᴏ ᴍᴏɴɢᴏᴅʙ :-** {e}\n\n**⋟ ᴄʜᴇᴄᴋ ʙʏ :– {Sona.mention}",
                 reply_markup=ADD_ME_BUTTON
             )
     else:
         await message.reply(
-            f"**⋟ ɪɴᴠᴀʟɪᴅ ᴍᴏɴɢᴏᴅʙ ᴜʀʟ ꜰᴏʀᴍᴀᴛ 💔**\n\n"
-            f"**⋟ ᴄʜᴇᴄᴋ ʙʏ :– {Sona.mention}**",
+            f"**⋟ ɪɴᴠᴀʟɪᴅ ᴍᴏɴɢᴏᴅʙ ᴜʀʟ ꜰᴏʀᴍᴀᴛ 💔**\n\n**⋟ ᴄʜᴇᴄᴋ ʙʏ :– {Sona.mention}**",
             reply_markup=ADD_ME_BUTTON
         )
 
@@ -139,7 +133,8 @@ async def delete_db_command(client, message: Message):
     except Exception as e:
         await message.reply(f"**⋟ ꜰᴀɪʟᴇᴅ ᴛᴏ ᴅᴇʟᴇᴛᴇ ᴅᴀᴛᴀʙᴀꜱᴇ ❌**\n\n**⋟ ᴇʀʀᴏʀ :–** `{e}`", reply_markup=ADD_ME_BUTTON)
 
-# ================== /transferdb ==================
+
+
 def backup_mongo(client):
     data = {}
     for db_name in client.list_database_names():
@@ -177,7 +172,7 @@ async def transfer_db_command(client, message: Message):
     except Exception as e:
         await message.reply(f"**⋟ ᴅᴀᴛᴀ ᴛʀᴀɴꜱꜰᴇʀ ꜰᴀɪʟᴇᴅ ❌**\n\n**⋟ ᴇʀʀᴏʀ :–** `{e}`", reply_markup=ADD_ME_BUTTON)
 
-# ================== /downloaddata ==================
+
 @Sona.on_message(filters.command(["downloaddata", "owdata"]) & filters.user(OWNER_ID))
 async def download_data_command(client, message: Message):
     try:
