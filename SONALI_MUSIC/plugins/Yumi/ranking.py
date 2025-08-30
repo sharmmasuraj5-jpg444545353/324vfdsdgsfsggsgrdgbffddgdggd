@@ -5,10 +5,11 @@ import random
 import time
 from datetime import datetime, timedelta
 from SONALI_MUSIC import app
-from config import MONGO_DB_URI
 import asyncio
 
-mongo_client = MongoClient(MONGO_DB_URI)
+
+
+mongo_client = MongoClient("mongodb+srv://Rishant:Thakur@cluster0.g5kjakc.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
 db = mongo_client["purvi_rankings"]
 collection = db["ranking"]
 weekly_collection = db["weekly_ranking"]
