@@ -6,8 +6,8 @@ import time
 from datetime import datetime, timedelta
 from SONALI_MUSIC import app
 import asyncio
-
 from config import MONGO_DB_URI
+
 
 #mongo_client = MongoClient("mongodb+srv://Rishant:Thakur@cluster0.g5kjakc.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
 mongo_client = MongoClient(MONGO_DB_URI)
@@ -67,13 +67,26 @@ async def weekly_reset_scheduler():
 
 async def get_user_mention(user_id, chat_id):
     try:
+        # Pehle chat member se try karo
         user = await app.get_chat_member(chat_id, user_id)
         if user.user.username:
             return f"@{user.user.username}"
         else:
             return f"[{user.user.first_name}](tg://user?id={user.user.id})"
     except:
-        return f"[User](tg://user?id={user_id})"
+        try:
+            # Agar chat member nahi mila to direct user se try karo
+            user = await app.get_users(user_id)
+            if user.username:
+                return f"@{user.username}"
+            else:
+                return f"[{user.first_name}](tg://user?id={user.id})"
+        except:
+            # Agar kuch bhi nahi mila to fallback
+            try:
+                return f"[User](tg://user?id={user_id})"
+            except:
+                return "Unknown User"
 
 @app.on_message(filters.group, group=6)
 async def today_watcher(_, message):
@@ -117,7 +130,7 @@ async def leaderboard_panel(_, message):
 
 ⊚ ɢʀᴏᴜᴘ ➠ {group_name}
 
-⊚ ᴄʜᴇᴄᴋ ɢʀᴏᴜᴘ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ ʙʏ ᴛᴀᴘ ʙᴢᴛᴛᴏɴ ʙᴇʟᴏᴡ ↓
+⊚ ᴄʜᴇᴄᴋ ɢʀᴏᴜᴘ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ ʙʏ ᴛᴀᴘ ʙᴜᴛᴛᴏɴ ʙᴇʟᴏᴡ ↓
 
 ➻ ʙʏ ➠ {bot_mention}
     """
@@ -286,7 +299,7 @@ async def show_weekly_leaderboard(query):
     if count > 0:
         button = InlineKeyboardMarkup([
             [InlineKeyboardButton("📊 ᴛᴏᴅᴀʏ", callback_data="rank_today"),
-             InlineKeyboardButton("🏅 ᴏᴠᴇʀᴀʟʟ", callback_data="rank_overall")],
+             InlineKeyboardButton("🏅 ᴏᴠᴇᴅʀᴀʟʟ", callback_data="rank_overall")],
             [InlineKeyboardButton("🔙 ʙᴀᴄᴋ", callback_data="rank_back_to_panel")]
         ])
         await query.message.edit_caption(caption=response, reply_markup=button, parse_mode=enums.ParseMode.MARKDOWN)
@@ -345,7 +358,7 @@ async def regular_callback_handler(_, query):
         buttons = InlineKeyboardMarkup([
         [
          InlineKeyboardButton("📊 ᴛᴏᴅᴀʏ", callback_data="rank_panel_today"),
-         InlineKeyboardButton("📈 ᴡᴇᴋʟʏ", callback_data="rank_panel_weekly")
+         InlineKeyboardButton("📈 ᴡᴇᴇᴋʟʏ", callback_data="rank_panel_weekly")
         ],
         
         [
@@ -368,7 +381,7 @@ async def back_to_main_handler(_, query):
 
 ⊚ ɢʀᴏᴜᴘ ➠ {group_name}
 
-⊚ ᴄʜᴇᴄᴋ ɢʀᴏᴜᴘ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ ʙʏ ᴛᴀᴘ ʙᴜᴛᴛᴏɴ ʙᴇʟᴏᴡ ↓
+⊚ ᴄʜᴇᴄᴋ ɢʀᴏᴜᴘ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ ʙʢ ᴛᴀᴘ ʙᴜᴛᴛᴏɴ ʙᴇʟᴏᴡ ↓
 
 ➻ ʙʏ ➠ {bot_mention}
     """
