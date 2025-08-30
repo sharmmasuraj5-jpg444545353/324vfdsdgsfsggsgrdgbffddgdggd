@@ -141,7 +141,7 @@ async def set_flood_clear(client, message: Message):
     update_chat_flood_settings(chat_id, {"delete_flood": delete_flood})
     await message.reply(f"**⋟ ᴅᴇʟᴇᴛᴇ ғʟᴏᴏᴅ ᴍᴇssᴀɢᴇs sᴇᴛ ᴛᴏ {delete_flood}.**")
 
-# ---------------- Flood Detector ----------------
+
 flood_count = {}
 
 @app.on_message(filters.group, group=31)
@@ -178,7 +178,7 @@ async def flood_detector(client, message: Message):
     except Exception as e:
         print(f"**ᴇʀʀᴏʀ ɪɴ ғʟᴏᴏᴅ ᴅᴇᴛᴇᴄᴛᴏʀ :-** {e}")
 
-# ---------------- Unban Handler ----------------
+
 @app.on_callback_query(filters.regex(r"^unban:(\d+)$"))
 async def handle_unban(client: app, query: CallbackQuery):
     user_id = int(query.data.split(":")[1])
@@ -197,7 +197,6 @@ async def handle_unban(client: app, query: CallbackQuery):
         await query.message.edit_text("**⋟ ғᴀɪʟᴇᴅ ᴛᴏ ᴜɴʙᴀɴ, ᴍᴀʏʙᴇ ᴛʜᴇʏ ᴀʀᴇ ᴀɴ ᴀᴅᴍɪɴ.**")
 
 
-# ----------- Unmute Callback -----------
 @app.on_callback_query(filters.regex(r"^unmute:(\d+)$"))
 async def handle_unmute(client: app, query: CallbackQuery):
     user_id = int(query.data.split(":")[1])
