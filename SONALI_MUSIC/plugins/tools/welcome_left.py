@@ -163,23 +163,28 @@ async def callback_toggle(client, callback_query: CallbackQuery):
         await callback_query.message.edit_text(new_text, parse_mode=enums.ParseMode.HTML)
 
 
-@app.on_message(filters.new_chat_members)
-async def welcome(client, message: Message):
-    if not is_welcome_enabled(message.chat.id):
-        return
 
-    chat_id = message.chat.id
-    if chat_id in last_welcome:
-        try:
-            await client.delete_messages(chat_id, last_welcome[chat_id])
-        except:
-            pass
+@app.on_chat_member_updated()
+async def welcome(client, chat_member: ChatMemberUpdated):
+    chat_id = chat_member.chat.id
+    user = chat_member.new_chat_member.user
 
-    for new_member in message.new_chat_members:
-        text = random.choice(PURVI_WEL_MSG).format(user=new_member.mention)
-        sent = await message.reply_text(text, parse_mode=enums.ParseMode.HTML)
+    if chat_member.old_chat_member.status in [enums.ChatMemberStatus.LEFT, enums.ChatMemberStatus.KICKED] and \
+       chat_member.new_chat_member.status in [enums.ChatMemberStatus.MEMBER, enums.ChatMemberStatus.RESTRICTED]:
+
+        if not is_welcome_enabled(chat_id):
+            return
+
+        if chat_id in last_welcome:
+            try:
+                await client.delete_messages(chat_id, last_welcome[chat_id])
+            except:
+                pass
+
+        text = random.choice(PURVI_WEL_MSG).format(user=user.mention)
+        sent = await client.send_message(chat_id, text, parse_mode=enums.ParseMode.HTML)
         last_welcome[chat_id] = sent.id
-
+           
 
 @app.on_chat_member_updated(filters.group)
 async def left_member_handler(client: app, member: ChatMemberUpdated):
