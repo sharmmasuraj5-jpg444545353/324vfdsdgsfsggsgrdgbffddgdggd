@@ -49,11 +49,12 @@ async def get_flood_settings(client, message: Message):
     chat_id = message.chat.id
     settings = await get_chat_flood_settings(chat_id)
     await message.reply(
-        f"**⋟ ᴄᴜʀʀᴇɴᴛ ғʟᴏᴏᴅ sᴇᴛᴛɪɴɢs:**\n"
-        f"⋟ **Limit:** {settings['flood_limit']} messages\n"
-        f"⋟ **Timer:** {settings['flood_timer']} sec\n"
-        f"⋟ **Action:** {settings['flood_action']}\n"
-        f"⋟ **Delete Flood Messages:** {settings['delete_flood']}"
+        f"**⋟ ᴄᴜʀʀᴇɴᴛ ғʟᴏᴏᴅ sᴇᴛᴛɪɴɢs :-**\n\n"
+        f"**⋟ ʟɪᴍɪᴛ :-** {settings['flood_limit']} messages\n"
+        f"**⋟ ᴛɪᴍᴇʀ :-** {settings['flood_timer']} sec\n"
+        f"**⋟ ᴀᴄᴛɪᴏɴ :-** {settings['flood_action']}\n"
+        f"**⋟ ᴅᴇʟᴇᴛᴇ ғʟᴏᴏᴅ ᴍᴇssᴀɢᴇs :-** {settings['delete_flood']}\n\n"
+        f"**⋟ ʙʏ :-** {app.mention}
     )
 
 @app.on_message(filters.command(["setflood", "etfood", "f"], prefixes=["/", "!", ".", "S", "s"]))
@@ -64,19 +65,19 @@ async def set_flood_limit(client, message: Message):
     args = message.command[1:]
     
     if not args:
-        return await message.reply("**⋟ ᴘʟᴇᴀsᴇ ᴘʀᴏᴠɪᴅᴇ ᴀ ғʟᴏᴏᴅ ʟɪᴍɪᴛ ᴏʀ 'off'.**")
+        return await message.reply("**⋟ ᴘʟᴇᴀsᴇ ᴘʀᴏᴠɪᴅᴇ ᴀ ғʟᴏᴏᴅ ʟɪᴍɪᴛ ᴏʀ 'off'.**\n\n**ᴛʀʏ :-** `setflood 10`")
     
     limit = args[0].lower()
     if limit in ["off", "no", "0"]:
         update_chat_flood_settings(chat_id, {"flood_limit": 0})
-        return await message.reply("**⋟ ᴀɴᴛɪғʟᴏᴏᴅ ʜᴀs ʙᴇᴇɴ ᴅɪsᴀʙʟᴇᴅ!**")
+        return await message.reply("**⋟ ᴀɴᴛɪғʟᴏᴏᴅ ʜᴀs ʙᴇᴇɴ ᴅɪsᴀʙʟᴇᴅ !!**")
     
     try:
         limit = int(limit)
         update_chat_flood_settings(chat_id, {"flood_limit": limit})
-        await message.reply(f"**⋟ ғʟᴏᴏᴅ ʟɪᴍɪᴛ sᴇᴛ ᴛᴏ {limit} ᴄᴏɴsᴇᴄᴜᴛɪᴠᴇ ᴍᴇssᴀɢᴇs.**")
+        await message.reply(f"**⋟ ғʟᴏᴏᴅ ʟɪᴍɪᴛ sᴇᴛ ᴛᴏ** `{limit}` **ᴄᴏɴsᴇᴄᴜᴛɪᴠᴇ ᴍᴇssᴀɢᴇs.**")
     except ValueError:
-        await message.reply("**⋟ ɪɴᴠᴀʟɪᴅ ғʟᴏᴏᴅ ʟɪᴍɪᴛ. ᴘʟᴇᴀsᴇ ᴘʀᴏᴠɪᴅᴇ ᴀ ɴᴜᴍʙᴇʀ ᴏʀ 'off'.**")
+        await message.reply("**⋟ ɪɴᴠᴀʟɪᴅ ғʟᴏᴏᴅ ʟɪᴍɪᴛ. ᴘʟᴇᴀsᴇ ᴘʀᴏᴠɪᴅᴇ ᴀ ᴠᴀʟɪᴅ ɴᴜᴍʙᴇʀ.**")
 
 @app.on_message(filters.command(["setfloodtimer", "etfloodtime", "ft"], prefixes=["/", "!", ".", "S", "s"]))
 async def set_flood_timer(client, message: Message):
@@ -90,7 +91,7 @@ async def set_flood_timer(client, message: Message):
         return await message.reply("**⋟ ᴛɪᴍᴇᴅ ᴀɴᴛɪғʟᴏᴏᴅ ʜᴀs ʙᴇᴇɴ ᴅɪsᴀʙʟᴇᴅ.**")
     
     if len(args) != 2:
-        return await message.reply("**⋟ ᴘʟᴇᴀsᴇ ᴘʀᴏᴠɪᴅᴇ ʙᴏᴛʜ ᴍᴇssᴀɢᴇ ᴄᴏᴜɴᴛ ᴀɴᴅ ᴅᴜʀᴀᴛɪᴏɴ ɪɴ sᴇᴄᴏɴᴅs.**")
+        return await message.reply("**⋟ ᴘʟᴇᴀsᴇ ᴘʀᴏᴠɪᴅᴇ ʙᴏᴛʜ ᴍᴇssᴀɢᴇ** `ᴄᴏᴜɴᴛ` **ᴀɴᴅ ᴅᴜʀᴀᴛɪᴏɴ ɪɴ** `sᴇᴄᴏɴᴅs`.\n\n**ᴛʀʏ :-** `setfloodtimer 10 30s`")
     
     try:
         count = int(args[0])
@@ -112,12 +113,12 @@ async def set_flood_mode(client, message: Message):
     
     action = args[0].lower()
     if action not in ["ban", "mute", "kick", "tban", "tmute"]:
-        return await message.reply("**⋟ ɪɴᴠᴀʟɪᴅ ᴀᴄᴛɪᴏɴ! ᴄʜᴏᴏsᴇ ᴏɴᴇ: ban/mute/kick/tban/tmute.**")
+        return await message.reply("**⋟ ɪɴᴠᴀʟɪᴅ ᴀᴄᴛɪᴏɴ !!, ᴄʜᴏᴏsᴇ ᴏɴᴇ :- ban/mute/kick/tban/tmute.**")
     
     update_chat_flood_settings(chat_id, {"flood_action": action})
     await message.reply(f"**⋟ ғʟᴏᴏᴅ ᴀᴄᴛɪᴏɴ sᴇᴛ ᴛᴏ {action}.**")
 
-@app.on_message(filters.command(["clearflood", "learflood", "f"], prefixes=["/", "!", ".", "C", "c"]))
+@app.on_message(filters.command(["delflood", "clearflood", "learflood", "f"], prefixes=["/", "!", ".", "C", "c"]))
 async def set_flood_clear(client, message: Message):
     if not await check_admin_rights(client, message):
         return
@@ -166,7 +167,7 @@ async def flood_detector(client, message: Message):
             if settings["delete_flood"]:
                 await message.delete()
     except Exception as e:
-        print(f"Error in flood_detector: {e}")
+        print(f"**ᴇʀʀᴏʀ ɪɴ ғʟᴏᴏᴅ ᴅᴇᴛᴇᴄᴛᴏʀ :-** {e}")
 
 # ---------------- Unban Handler ----------------
 @app.on_message(filters.regex(r"^unban:(\d+)$"))
@@ -177,19 +178,18 @@ async def handle_unban(client, message: Message):
         perms = await member_permissions(chat_id, message.from_user.id)
         if "can_restrict_members" not in perms:
             return await message.reply(
-                "⋟ ʏᴏᴜ ᴅᴏɴ'ᴛ ʜᴀᴠᴇ ᴇɴᴏᴜɢʜ ᴘᴇʀᴍɪssɪᴏɴs.\n"
+                "⋟ ʏᴏᴜ ᴅᴏɴ'ᴛ ʜᴀᴠᴇ ᴇɴᴏᴜɢʜ ᴘᴇʀᴍɪssɪᴏɴs.\n\n"
                 "ᴘᴇʀᴍɪssɪᴏɴ ɴᴇᴇᴅᴇᴅ: can_restrict_members"
             )
     except UserNotParticipant:
-        return await message.reply("⋟ ʏᴏᴜ ᴀʀᴇ ɴᴏᴛ ᴀ ᴘᴀʀᴛɪᴄɪᴘᴀɴᴛ.")
+        return await message.reply("*⋟ ʏᴏᴜ ᴀʀᴇ ɴᴏᴛ ᴀ ᴘᴀʀᴛɪᴄɪᴘᴀɴᴛ.**")
     try:
         await client.unban_chat_member(chat_id, user_id)
-        await message.reply("⋟ ᴜsᴇʀ ᴜɴʙᴀɴɴᴇᴅ!")
+        await message.reply("**⋟ ᴜsᴇʀ ᴜɴʙᴀɴɴᴇᴅ !!**")
     except UserAdminInvalid:
-        await message.reply("⋟ ғᴀɪʟᴇᴅ ᴛᴏ ᴜɴʙᴀɴ, ᴍᴀʏʙᴇ ᴛʜᴇʏ ᴀʀᴇ ᴀɴ ᴀᴅᴍɪɴ.")
+        await message.reply("**⋟ ғᴀɪʟᴇᴅ ᴛᴏ ᴜɴʙᴀɴ, ᴍᴀʏʙᴇ ᴛʜᴇʏ ᴀʀᴇ ᴀɴ ᴀᴅᴍɪɴ.**")
 
 
-# ---------------- Unmute Handler ----------------
 @app.on_message(filters.regex(r"^unmute:(\d+)$"))
 async def handle_unmute(client, message: Message):
     user_id = int(message.matches[0].group(1))
@@ -198,19 +198,19 @@ async def handle_unmute(client, message: Message):
         perms = await member_permissions(chat_id, message.from_user.id)
         if "can_restrict_members" not in perms:
             return await message.reply(
-                "⋟ ʏᴏᴜ ᴅᴏɴ'ᴛ ʜᴀᴠᴇ ᴇɴᴏᴜɢʜ ᴘᴇʀᴍɪssɪᴏɴs.\n"
+                "⋟ ʏᴏᴜ ᴅᴏɴ'ᴛ ʜᴀᴠᴇ ᴇɴᴏᴜɢʜ ᴘᴇʀᴍɪssɪᴏɴs.\n\n"
                 "ᴘᴇʀᴍɪssɪᴏɴ ɴᴇᴇᴅᴇᴅ: can_restrict_members"
             )
     except UserNotParticipant:
-        return await message.reply("⋟ ʏᴏᴜ ᴀʀᴇ ɴᴏᴛ ᴀ ᴘᴀʀᴛɪᴄɪᴘᴀɴᴛ.")
+        return await message.reply("**⋟ ʏᴏᴜ ᴀʀᴇ ɴᴏᴛ ᴀ ᴘᴀʀᴛɪᴄɪᴘᴀɴᴛ.**")
     try:
         await client.restrict_chat_member(chat_id, user_id, permissions=ChatPermissions(can_send_messages=True))
-        await message.reply("⋟ ᴜsᴇʀ ᴜɴᴍᴜᴛᴇᴅ!")
+        await message.reply("**⋟ ᴜsᴇʀ ᴜɴᴍᴜᴛᴇᴅ !!**")
     except UserAdminInvalid:
-        await message.reply("⋟ ғᴀɪʟᴇᴅ ᴛᴏ ᴜɴᴍᴜᴛᴇ, ᴍᴀʏʙᴇ ᴛʜᴇʏ ᴀʀᴇ ᴀɴ ᴀᴅᴍɪɴ.")
+        await message.reply("**⋟ ғᴀɪʟᴇᴅ ᴛᴏ ᴜɴᴍᴜᴛᴇ, ᴍᴀʏʙᴇ ᴛʜᴇʏ ᴀʀᴇ ᴀɴ ᴀᴅᴍɪɴ.**")
 
 
-# ------------------ ✦ Flood Action Handler ✦ ------------------
+    
 async def take_flood_action(client, message, action):
     user_id = message.from_user.id
     chat_id = message.chat.id
@@ -222,7 +222,7 @@ async def take_flood_action(client, message, action):
         try:
             await client.ban_chat_member(chat_id, user_id)
             buttons = InlineKeyboardMarkup(
-                [[InlineKeyboardButton("⋟ ᴜɴʙᴀɴ", callback_data=f"unban:{user_id}")]]
+                [[InlineKeyboardButton("ᴜɴʙᴀɴ", callback_data=f"unban:{user_id}")]]
             )
         except UserAdminInvalid:
             return
@@ -232,7 +232,7 @@ async def take_flood_action(client, message, action):
                 chat_id, user_id, permissions=ChatPermissions(can_send_messages=False)
             )
             buttons = InlineKeyboardMarkup(
-                [[InlineKeyboardButton("⋟ ᴜɴᴍᴜᴛᴇ", callback_data=f"unmute:{user_id}")]]
+                [[InlineKeyboardButton("ᴜɴᴍᴜᴛᴇ", callback_data=f"unmute:{user_id}")]]
             )
         except UserAdminInvalid:
             return
@@ -241,7 +241,7 @@ async def take_flood_action(client, message, action):
             await client.kick_chat_member(chat_id, user_id)
             await client.unban_chat_member(chat_id, user_id)
             buttons = InlineKeyboardMarkup(
-                [[InlineKeyboardButton("⋟ ᴠɪᴇᴡ ᴘʀᴏғɪʟᴇ", url=f"tg://user?id={user_id}")]]
+                [[InlineKeyboardButton("ᴠɪᴇᴡ ᴘʀᴏғɪʟᴇ", url=f"tg://user?id={user_id}")]]
             )
         except UserAdminInvalid:
             return
@@ -250,7 +250,7 @@ async def take_flood_action(client, message, action):
             until_date = datetime.now() + timedelta(minutes=1)
             await client.ban_chat_member(chat_id, user_id, until_date=until_date)
             buttons = InlineKeyboardMarkup(
-                [[InlineKeyboardButton("⋟ ᴜɴʙᴀɴ", callback_data=f"unban:{user_id}")]]
+                [[InlineKeyboardButton("ᴜɴʙᴀɴ", callback_data=f"unban:{user_id}")]]
             )
         except UserAdminInvalid:
             return
@@ -264,12 +264,12 @@ async def take_flood_action(client, message, action):
                 until_date=until_date
             )
             buttons = InlineKeyboardMarkup(
-                [[InlineKeyboardButton("⋟ ᴜɴᴍᴜᴛᴇ", callback_data=f"unmute:{user_id}")]]
+                [[InlineKeyboardButton("ᴜɴᴍᴜᴛᴇ", callback_data=f"unmute:{user_id}")]]
             )
         except UserAdminInvalid:
             return
 
     await message.reply(
-        f"**⋟ ᴜsᴇʀ {user_first_name} ᴡᴀs {action}ᴇᴅ ғᴏʀ ғʟᴏᴏᴅɪɴɢ.**",
+        f"**⋟ ᴜsᴇʀ {user_first_name} ᴡᴀs {action}ed ғᴏʀ ғʟᴏᴏᴅɪɴɢ.**",
         reply_markup=buttons
     )
