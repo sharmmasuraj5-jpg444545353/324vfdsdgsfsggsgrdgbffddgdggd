@@ -21,7 +21,7 @@ PURVI_WEL_MSG = [
 
 PURVI_LEFT_MSG = [
     "❖ <b>ʙʏᴇ {user} sᴇᴇ ʏᴏᴜ sᴏᴏɴ.</b>",
-    "❖ <b>{user} ʟᴇғᴛ ᴛʜᴇ ɢʀᴏᴜᴘ... ɪᴛ ғᴇᴇʟs ᴇᴍᴘᴛʏ ᴡɪᴛʜᴏᴜᴛ ʏᴏᴜ.</b>",
+    "❖ <b>{user} ʟᴇғᴛ ᴛʜᴇ ɢʀᴏᴜᴘ... ɪᴛ ғᴇᴇʟs ᴇᴍᴘᴛʏ ᴡɪᴛʜᴏᴜᴛ ʏᴏᴢ.</b>",
     # ... बाकी messages
 ]
 
@@ -126,7 +126,7 @@ async def callback_toggle(client, callback_query: CallbackQuery):
         if action == "enable":
             if not is_welcome_enabled(chat_id):
                 set_welcome(chat_id, True)
-                new_text = f"<b>⋟ ᴡᴇʟᴄᴏᴍᴇ ᴍᴇssᴀɢᴇs ᴇɴᴀʙʟᴇᴅ ɪɴ :- </b>{chat_title}"
+                new_text = f"<b>⋟ ᴡᴇʟᴏᴏᴍᴇ ᴍᴇssᴀɢᴇs ᴇɴᴀʙʟᴇᴅ ɪɴ :- </b>{chat_title}"
             else:
                 new_text = f"<b>⋟ ᴡᴇʟᴄᴏᴍᴇ ᴍᴇssᴀɢᴇs ᴀʟʀᴇᴀᴅʏ ᴇɴᴀʙʟᴇᴅ ɪɴ :- </b>{chat_title}"
         elif action == "disable":
@@ -155,25 +155,22 @@ async def callback_toggle(client, callback_query: CallbackQuery):
     
     await callback_query.answer()
 
-# Welcome handler
+# Welcome handler - FIXED
 @app.on_chat_member_updated()
 async def welcome(client, chat_member: ChatMemberUpdated):
     chat_id = chat_member.chat.id
     
-    if not chat_member.new_chat_member or not chat_member.new_chat_member.user:
-        return
-    
-    user = chat_member.new_chat_member.user
-    old_status = chat_member.old_chat_member.status if chat_member.old_chat_member else None
-    new_status = chat_member.new_chat_member.status
-
-    # FIX: Use BANNED instead of KICKED (which doesn't exist in newer Pyrogram)
-    if old_status in [enums.ChatMemberStatus.LEFT, enums.ChatMemberStatus.BANNED] and \
-       new_status in [enums.ChatMemberStatus.MEMBER, enums.ChatMemberStatus.RESTRICTED, enums.ChatMemberStatus.ADMINISTRATOR]:
-
+    # Check if this is a join event
+    if (chat_member.old_chat_member is None or 
+        chat_member.old_chat_member.status in [enums.ChatMemberStatus.LEFT, enums.ChatMemberStatus.BANNED]) and \
+        chat_member.new_chat_member.status in [enums.ChatMemberStatus.MEMBER, enums.ChatMemberStatus.ADMINISTRATOR, enums.ChatMemberStatus.OWNER]:
+        
         if not is_welcome_enabled(chat_id):
             return
 
+        user = chat_member.new_chat_member.user
+        
+        # Delete previous welcome message if exists
         if chat_id in last_welcome:
             try:
                 await client.delete_messages(chat_id, last_welcome[chat_id])
@@ -184,26 +181,24 @@ async def welcome(client, chat_member: ChatMemberUpdated):
         sent = await client.send_message(chat_id, text, parse_mode=enums.ParseMode.HTML)
         last_welcome[chat_id] = sent.id
 
-# Left handler
-@app.on_chat_member_updated(filters.group)
+# Left handler - FIXED
+@app.on_chat_member_updated()
 async def left_member_handler(client: app, member: ChatMemberUpdated):
     chat_id = member.chat.id
-    if not is_left_enabled(chat_id):
-        return
-
-    old = member.old_chat_member
-    new = member.new_chat_member
-
-    if not old or not old.user:
-        return
-
-    if old.status in (enums.ChatMemberStatus.MEMBER, enums.ChatMemberStatus.ADMINISTRATOR, enums.ChatMemberStatus.OWNER) and \
-       (not new or new.status in (enums.ChatMemberStatus.LEFT, enums.ChatMemberStatus.BANNED)):
+    
+    # Check if this is a leave event
+    if (member.old_chat_member is not None and 
+        member.old_chat_member.status in [enums.ChatMemberStatus.MEMBER, enums.ChatMemberStatus.ADMINISTRATOR, enums.ChatMemberStatus.OWNER]) and \
+        (member.new_chat_member.status in [enums.ChatMemberStatus.LEFT, enums.ChatMemberStatus.BANNED]):
         
-        user = old.user
+        if not is_left_enabled(chat_id):
+            return
+
+        user = member.old_chat_member.user
         text = random.choice(PURVI_LEFT_MSG).format(user=f"<b>{user.first_name}</b>")
         sent = await client.send_message(chat_id, text, parse_mode=enums.ParseMode.HTML)
 
+        # Auto-delete after 30 seconds
         await asyncio.sleep(30)
         try:
             await client.delete_messages(chat_id, sent.id)
