@@ -4,9 +4,9 @@ from pyrogram.errors import UserAdminInvalid, UserNotParticipant
 from pyrogram.enums import ChatMemberStatus
 from datetime import datetime, timedelta
 
-from utils.permissions import adminsOnly, member_permissions
-from ERAVIBES import app
-from ERAVIBES.core.mongo import mongodb
+from SONALI_MUSIC.utils.permissions import adminsOnly, member_permissions
+from SONALI_MUSIC import app
+from SONALI_MUSIC.core.mongo import mongodb
 
 # ---------------- Mongo ----------------
 antiflood_collection = mongodb.antiflood_settings
