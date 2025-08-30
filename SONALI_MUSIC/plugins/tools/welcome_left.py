@@ -7,12 +7,10 @@ from pyrogram.types import Message, CallbackQuery, InlineKeyboardButton, InlineK
 from pymongo import MongoClient
 from config import MONGO_DB_URI
 
-# MongoDB setup
 mongo_client = MongoClient(MONGO_DB_URI)
 db = mongo_client["welcome_db"]
 chat_settings = db["chat_settings"]
 
-# Welcome & Left messages
 PURVI_WEL_MSG = [
     "❖ <b>ʜᴇʏ {user} ᴡᴇʟᴄᴏᴍᴇ ᴛᴏ ᴛʜᴇ ɢʀᴏᴜᴘ!</b>",
     "❖ <b>ɢʟᴀᴅ ᴛᴏ sᴇᴇ ʏᴏᴜ {user} ᴇɴᴊᴏʏ ʏᴏᴜʀ sᴛᴀʏ.</b>",
@@ -31,7 +29,6 @@ PURVI_LEFT_MSG = [
 
 last_welcome = {}
 
-# Helpers
 def is_welcome_enabled(chat_id):
     setting = chat_settings.find_one({"chat_id": chat_id})
     return setting.get("welcome", True) if setting else True
@@ -53,7 +50,7 @@ async def is_admin(client, chat_id, user_id):
     except:
         return False
 
-# Debug command to check status
+
 @app.on_message(filters.command("welcomestatus") & filters.group)
 async def welcome_status(client, message: Message):
     chat_id = message.chat.id
@@ -67,7 +64,6 @@ async def welcome_status(client, message: Message):
         parse_mode=enums.ParseMode.HTML
     )
 
-# Commands
 @app.on_message(filters.command("welcome") & filters.group)
 async def welcome_cmd(client, message: Message):
     chat_id = message.chat.id
@@ -94,7 +90,7 @@ async def left_cmd(client, message: Message):
     chat_title = message.chat.title
     status = "ᴇɴᴀʙʟᴇᴅ" if is_left_enabled(chat_id) else "ᴅɪsᴀʙʟᴇᴅ"
 
-    # Use shorter callback data to avoid BUTTON_DATA_INVALID error
+    
     keyboard = InlineKeyboardMarkup([
         [InlineKeyboardButton("ᴇɴᴀʙʟᴇ", callback_data=f"left_en_{chat_id}"),
          InlineKeyboardButton("ᴅɪsᴀʙʟᴇ", callback_data=f"left_dis_{chat_id}")]
@@ -108,7 +104,7 @@ async def left_cmd(client, message: Message):
         parse_mode=enums.ParseMode.HTML
     )
 
-# Callback handler
+
 @app.on_callback_query()
 async def callback_toggle(client, callback_query: CallbackQuery):
     user = callback_query.from_user
@@ -176,21 +172,21 @@ async def callback_toggle(client, callback_query: CallbackQuery):
     
     await callback_query.answer()
 
-# Welcome handler - FIXED
+
 @app.on_chat_member_updated()
 async def handle_chat_member_update(client, chat_member: ChatMemberUpdated):
     chat_id = chat_member.chat.id
     
-    # Debug logging
+    
     print(f"Chat member updated in {chat_id}")
     print(f"Old status: {getattr(chat_member.old_chat_member, 'status', 'None')}")
     print(f"New status: {getattr(chat_member.new_chat_member, 'status', 'None')}")
     
-    # Check if this is a join event
+
     old_status = getattr(chat_member.old_chat_member, 'status', None)
     new_status = getattr(chat_member.new_chat_member, 'status', None)
     
-    # Handle welcome messages
+
     if (old_status in [enums.ChatMemberStatus.LEFT, enums.ChatMemberStatus.BANNED, None] and 
         new_status in [enums.ChatMemberStatus.MEMBER, enums.ChatMemberStatus.ADMINISTRATOR, enums.ChatMemberStatus.OWNER]):
         
@@ -201,7 +197,7 @@ async def handle_chat_member_update(client, chat_member: ChatMemberUpdated):
 
         user = chat_member.new_chat_member.user
         
-        # Delete previous welcome message if exists
+        
         if chat_id in last_welcome:
             try:
                 await client.delete_messages(chat_id, last_welcome[chat_id])
@@ -213,7 +209,7 @@ async def handle_chat_member_update(client, chat_member: ChatMemberUpdated):
         last_welcome[chat_id] = sent.id
         print(f"Sent welcome message for {user.first_name}")
     
-    # Handle left messages
+    
     elif (old_status in [enums.ChatMemberStatus.MEMBER, enums.ChatMemberStatus.ADMINISTRATOR, enums.ChatMemberStatus.OWNER] and 
           new_status in [enums.ChatMemberStatus.LEFT, enums.ChatMemberStatus.BANNED]):
         
@@ -227,7 +223,7 @@ async def handle_chat_member_update(client, chat_member: ChatMemberUpdated):
         sent = await client.send_message(chat_id, text, parse_mode=enums.ParseMode.HTML)
         print(f"Sent left message for {user.first_name}")
 
-        # Auto-delete after 30 seconds
+
         await asyncio.sleep(30)
         try:
             await client.delete_messages(chat_id, sent.id)
