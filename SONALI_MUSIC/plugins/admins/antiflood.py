@@ -1,5 +1,5 @@
 from pyrogram import filters
-from pyrogram.types import Message, ChatPermissions, InlineKeyboardMarkup, InlineKeyboardButton
+from pyrogram.types import Message, ChatPermissions, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 from pyrogram.errors import UserAdminInvalid, UserNotParticipant
 from pyrogram.enums import ChatMemberStatus
 from datetime import datetime, timedelta
