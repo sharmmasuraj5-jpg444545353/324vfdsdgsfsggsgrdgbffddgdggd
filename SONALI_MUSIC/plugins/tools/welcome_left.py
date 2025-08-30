@@ -16,13 +16,17 @@ chat_settings = db["chat_settings"]
 PURVI_WEL_MSG = [
     "❖ <b>ʜᴇʏ {user} ᴡᴇʟᴄᴏᴍᴇ ᴛᴏ ᴛʜᴇ ɢʀᴏᴜᴘ!</b>",
     "❖ <b>ɢʟᴀᴅ ᴛᴏ sᴇᴇ ʏᴏᴜ {user} ᴇɴᴊᴏʏ ʏᴏᴜʀ sᴛᴀʏ.</b>",
-    # ... बाकी messages
+    "❖ <b>ʜᴇʟʟᴏ {user}, ᴡᴇʟᴄᴏᴍᴇ ᴛᴏ ᴏᴜʀ ғᴀᴍɪʟʏ!</b>",
+    "❖ <b>ʜᴇʏᴀ {user}, ɢʟᴀᴅ ᴛᴏ ʜᴀᴠᴇ ʏᴏᴜ ʜᴇʀᴇ!</b>",
+    "❖ <b>ᴡᴇʟᴄᴏᴍᴇ {user} ᴛᴏ ᴛʜᴇ ɢʀᴏᴜᴘ! ʟᴇᴛ's ʜᴀᴠᴇ ғᴜɴ.</b>"
 ]
 
 PURVI_LEFT_MSG = [
     "❖ <b>ʙʏᴇ {user} sᴇᴇ ʏᴏᴜ sᴏᴏɴ.</b>",
-    "❖ <b>{user} ʟᴇғᴛ ᴛʜᴇ ɢʀᴏᴜᴘ... ɪᴛ ғᴇᴇʟs ᴇᴍᴘᴛʏ ᴡɪᴛʜᴏᴜᴛ ʏᴏᴢ.</b>",
-    # ... बाकी messages
+    "❖ <b>{user} ʟᴇғᴛ ᴛʜᴇ ɢʀᴏᴜᴘ... ɪᴛ ғᴇᴇʟs ᴇᴍᴘᴛʏ ᴡɪᴛʜᴏᴜᴛ ʏᴏᴜ.</b>",
+    "❖ <b>{user} ʜᴀs ʟᴇғᴛ ᴛʜᴇ ɢʀᴏᴜᴘ. ᴡᴇ'ʟʟ ᴍɪss ʏᴏᴜ!</b>",
+    "❖ <b>ɢᴏᴏᴅʙʏᴇ {user}, ʜᴏᴘᴇ ᴛᴏ sᴇᴇ ʏᴏᴜ ᴀɢᴀɪɴ sᴏᴏɴ!</b>",
+    "❖ <b>{user} ʜᴀs ʟᴇғᴛ ᴛʜᴇ ɢʀᴏᴜᴘ. ᴛᴀᴋᴇ ᴄᴀʀᴇ!</b>"
 ]
 
 last_welcome = {}
@@ -43,8 +47,25 @@ def set_left(chat_id, value: bool):
     chat_settings.update_one({"chat_id": chat_id}, {"$set": {"left": value}}, upsert=True)
 
 async def is_admin(client, chat_id, user_id):
-    member = await client.get_chat_member(chat_id, user_id)
-    return member.status in (enums.ChatMemberStatus.ADMINISTRATOR, enums.ChatMemberStatus.OWNER)
+    try:
+        member = await client.get_chat_member(chat_id, user_id)
+        return member.status in (enums.ChatMemberStatus.ADMINISTRATOR, enums.ChatMemberStatus.OWNER)
+    except:
+        return False
+
+# Debug command to check status
+@app.on_message(filters.command("welcomestatus") & filters.group)
+async def welcome_status(client, message: Message):
+    chat_id = message.chat.id
+    welcome_status = "ᴇɴᴀʙʟᴇᴅ" if is_welcome_enabled(chat_id) else "ᴅɪsᴀʙʟᴇᴅ"
+    left_status = "ᴇɴᴀʙʟᴇᴅ" if is_left_enabled(chat_id) else "ᴅɪsᴀʙʟᴇᴅ"
+    
+    await message.reply_text(
+        f"<b>ᴡᴇʟᴄᴏᴍᴇ sᴛᴀᴛᴜs:</b> {welcome_status}\n"
+        f"<b>ʟᴇғᴛ sᴛᴀᴛᴜs:</b> {left_status}\n"
+        f"<b>ᴄʜᴀᴛ ɪᴅ:</b> {chat_id}",
+        parse_mode=enums.ParseMode.HTML
+    )
 
 # Commands
 @app.on_message(filters.command("welcome") & filters.group)
@@ -126,7 +147,7 @@ async def callback_toggle(client, callback_query: CallbackQuery):
         if action == "enable":
             if not is_welcome_enabled(chat_id):
                 set_welcome(chat_id, True)
-                new_text = f"<b>⋟ ᴡᴇʟᴏᴏᴍᴇ ᴍᴇssᴀɢᴇs ᴇɴᴀʙʟᴇᴅ ɪɴ :- </b>{chat_title}"
+                new_text = f"<b>⋟ ᴡᴇʟᴄᴏᴍᴇ ᴍᴇssᴀɢᴇs ᴇɴᴀʙʟᴇᴅ ɪɴ :- </b>{chat_title}"
             else:
                 new_text = f"<b>⋟ ᴡᴇʟᴄᴏᴍᴇ ᴍᴇssᴀɢᴇs ᴀʟʀᴇᴀᴅʏ ᴇɴᴀʙʟᴇᴅ ɪɴ :- </b>{chat_title}"
         elif action == "disable":
@@ -134,7 +155,7 @@ async def callback_toggle(client, callback_query: CallbackQuery):
                 set_welcome(chat_id, False)
                 new_text = f"<b>⋟ ᴡᴇʟᴄᴏᴍᴇ ᴍᴇssᴀɢᴇs ᴅɪsᴀʙʟᴇᴅ ɪɴ :- </b>{chat_title}"
             else:
-                new_text = f"<b>⋟ ᴡᴇʟᴄᴏᴍᴇ ᴍᴇssᴀɢᴇs ᴀʟʀᴇᴀᴅʏ ᴅɪsᴀʙʟᴇᴅ ɪɴ :- </b>{chat_title}"
+                new_text = f"<b>⋟ ᴡᴇʟᴌᴄᴏᴍᴇ ᴍᴇssᴀɢᴇs ᴀʟʀᴇᴀᴅʏ ᴅɪsᴀʙʟᴇᴅ ɪɴ :- </b>{chat_title}"
 
     elif type_ == "left":
         if action == "enable":
@@ -157,15 +178,25 @@ async def callback_toggle(client, callback_query: CallbackQuery):
 
 # Welcome handler - FIXED
 @app.on_chat_member_updated()
-async def welcome(client, chat_member: ChatMemberUpdated):
+async def handle_chat_member_update(client, chat_member: ChatMemberUpdated):
     chat_id = chat_member.chat.id
     
+    # Debug logging
+    print(f"Chat member updated in {chat_id}")
+    print(f"Old status: {getattr(chat_member.old_chat_member, 'status', 'None')}")
+    print(f"New status: {getattr(chat_member.new_chat_member, 'status', 'None')}")
+    
     # Check if this is a join event
-    if (chat_member.old_chat_member is None or 
-        chat_member.old_chat_member.status in [enums.ChatMemberStatus.LEFT, enums.ChatMemberStatus.BANNED]) and \
-        chat_member.new_chat_member.status in [enums.ChatMemberStatus.MEMBER, enums.ChatMemberStatus.ADMINISTRATOR, enums.ChatMemberStatus.OWNER]:
+    old_status = getattr(chat_member.old_chat_member, 'status', None)
+    new_status = getattr(chat_member.new_chat_member, 'status', None)
+    
+    # Handle welcome messages
+    if (old_status in [enums.ChatMemberStatus.LEFT, enums.ChatMemberStatus.BANNED, None] and 
+        new_status in [enums.ChatMemberStatus.MEMBER, enums.ChatMemberStatus.ADMINISTRATOR, enums.ChatMemberStatus.OWNER]):
         
+        print("Detected join event")
         if not is_welcome_enabled(chat_id):
+            print("Welcome messages disabled")
             return
 
         user = chat_member.new_chat_member.user
@@ -180,23 +211,21 @@ async def welcome(client, chat_member: ChatMemberUpdated):
         text = random.choice(PURVI_WEL_MSG).format(user=user.mention)
         sent = await client.send_message(chat_id, text, parse_mode=enums.ParseMode.HTML)
         last_welcome[chat_id] = sent.id
-
-# Left handler - FIXED
-@app.on_chat_member_updated()
-async def left_member_handler(client: app, member: ChatMemberUpdated):
-    chat_id = member.chat.id
+        print(f"Sent welcome message for {user.first_name}")
     
-    # Check if this is a leave event
-    if (member.old_chat_member is not None and 
-        member.old_chat_member.status in [enums.ChatMemberStatus.MEMBER, enums.ChatMemberStatus.ADMINISTRATOR, enums.ChatMemberStatus.OWNER]) and \
-        (member.new_chat_member.status in [enums.ChatMemberStatus.LEFT, enums.ChatMemberStatus.BANNED]):
+    # Handle left messages
+    elif (old_status in [enums.ChatMemberStatus.MEMBER, enums.ChatMemberStatus.ADMINISTRATOR, enums.ChatMemberStatus.OWNER] and 
+          new_status in [enums.ChatMemberStatus.LEFT, enums.ChatMemberStatus.BANNED]):
         
+        print("Detected leave event")
         if not is_left_enabled(chat_id):
+            print("Left messages disabled")
             return
 
-        user = member.old_chat_member.user
-        text = random.choice(PURVI_LEFT_MSG).format(user=f"<b>{user.first_name}</b>")
+        user = chat_member.old_chat_member.user
+        text = random.choice(PURVI_LEFT_MSG).format(user=user.mention)
         sent = await client.send_message(chat_id, text, parse_mode=enums.ParseMode.HTML)
+        print(f"Sent left message for {user.first_name}")
 
         # Auto-delete after 30 seconds
         await asyncio.sleep(30)
