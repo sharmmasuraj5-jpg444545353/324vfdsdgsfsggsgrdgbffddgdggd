@@ -210,26 +210,60 @@ async def handle_chat_member_update(client, chat_member: ChatMemberUpdated):
         print(f"Sent welcome message for {user.first_name}")
     
 
-
-@app.on_chat_member_updated(filters.group)
-async def left_member_handler(client: app, member: ChatMemberUpdated):
-    chat_id = member.chat.id
-    if not is_left_enabled(chat_id):
-        return
-
+@app.on_chat_member_updated()
+async def handle_chat_member_update(client, chat_member: ChatMemberUpdated):
+    chat_id = chat_member.chat.id
     
-    if (
-        member.old_chat_member
-        and (member.old_chat_member.status in (enums.ChatMemberStatus.MEMBER, enums.ChatMemberStatus.ADMINISTRATOR, enums.ChatMemberStatus.OWNER))
-        and (member.new_chat_member is None or member.new_chat_member.status in (enums.ChatMemberStatus.LEFT, enums.ChatMemberStatus.BANNED))
-    ):
-        user = member.old_chat_member.user
-        text = random.choice(PURVI_LEFT_MSG).format(user=f"<b>{user.first_name}</b>")
+    
+    print(f"Chat member updated in {chat_id}")
+    print(f"Old status: {getattr(chat_member.old_chat_member, 'status', 'None')}")
+    print(f"New status: {getattr(chat_member.new_chat_member, 'status', 'None')}")
+    
+
+    old_status = getattr(chat_member.old_chat_member, 'status', None)
+    new_status = getattr(chat_member.new_chat_member, 'status', None)
+    
+
+    if (old_status in [enums.ChatMemberStatus.LEFT, enums.ChatMemberStatus.BANNED, None] and 
+        new_status in [enums.ChatMemberStatus.MEMBER, enums.ChatMemberStatus.ADMINISTRATOR, enums.ChatMemberStatus.OWNER]):
+        
+        print("Detected join event")
+        if not is_welcome_enabled(chat_id):
+            print("Welcome messages disabled")
+            return
+
+        user = chat_member.new_chat_member.user
+        
+        
+        if chat_id in last_welcome:
+            try:
+                await client.delete_messages(chat_id, last_welcome[chat_id])
+            except:
+                pass
+
+        text = random.choice(PURVI_WEL_MSG).format(user=user.mention)
         sent = await client.send_message(chat_id, text, parse_mode=enums.ParseMode.HTML)
+        last_welcome[chat_id] = sent.id
+        print(f"Sent welcome message for {user.first_name}")
+    
+    
+    elif (old_status in [enums.ChatMemberStatus.MEMBER, enums.ChatMemberStatus.ADMINISTRATOR, enums.ChatMemberStatus.OWNER] and 
+          new_status in [enums.ChatMemberStatus.LEFT, enums.ChatMemberStatus.BANNED]):
+        
+        print("Detected leave event")
+        if not is_left_enabled(chat_id):
+            print("Left messages disabled")
+            return
+
+        user = chat_member.old_chat_member.user
+        text = random.choice(PURVI_LEFT_MSG).format(user=user.mention)
+        sent = await client.send_message(chat_id, text, parse_mode=enums.ParseMode.HTML)
+        print(f"Sent left message for {user.first_name}")
+
 
         await asyncio.sleep(30)
         try:
             await client.delete_messages(chat_id, sent.id)
         except:
-            pass    
+            pass
     
