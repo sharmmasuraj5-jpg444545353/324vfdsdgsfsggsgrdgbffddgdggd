@@ -37,7 +37,9 @@ async def bugs(_, msg: Message):
     owner_mention = f"[{owner_user.first_name}](tg://user?id={owner_id})"
 
     bug_report = f"""
-**#ʙᴜɢ ʀᴇᴘᴏʀᴛ {owner_mention}**
+**#ɴᴇᴡ_ʙᴜɢ_ʀᴇᴘᴏʀᴛ**
+
+**ʜᴇʟʟᴏ {owner_mention} ᴀ ɴᴇᴡ ʙᴜɢ ғᴏᴜɴᴅ**
 
 **ʀᴇᴩᴏʀᴛᴇᴅ ʙʏ :-** {mention}
 **ᴜsᴇʀ ɪᴅ :-** `{user_id}`
