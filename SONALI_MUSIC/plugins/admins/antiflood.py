@@ -48,13 +48,24 @@ async def get_flood_settings(client, message: Message):
         return
     chat_id = message.chat.id
     settings = await get_chat_flood_settings(chat_id)
+
+    buttons = InlineKeyboardMarkup(
+        [[
+            InlineKeyboardButton(
+                "Add me in your group",
+                url=f"https://t.me/{app.username}?startgroup=true"
+            )
+        ]]
+    )
+
     await message.reply(
         f"**⋟ ᴄᴜʀʀᴇɴᴛ ғʟᴏᴏᴅ sᴇᴛᴛɪɴɢs :-**\n\n"
         f"**⋟ ʟɪᴍɪᴛ :-** {settings['flood_limit']} messages\n"
         f"**⋟ ᴛɪᴍᴇʀ :-** {settings['flood_timer']} sec\n"
         f"**⋟ ᴀᴄᴛɪᴏɴ :-** {settings['flood_action']}\n"
         f"**⋟ ᴅᴇʟᴇᴛᴇ ғʟᴏᴏᴅ ᴍᴇssᴀɢᴇs :-** {settings['delete_flood']}\n\n"
-        f"**⋟ ʙʏ :-** {app.mention}"
+        f"**⋟ ʙʏ :- {app.mention}**",
+        reply_markup=buttons
     )
 
 @app.on_message(filters.command(["setflood", "etfood", "f"], prefixes=["/", "!", ".", "S", "s"]))
@@ -170,44 +181,41 @@ async def flood_detector(client, message: Message):
         print(f"**ᴇʀʀᴏʀ ɪɴ ғʟᴏᴏᴅ ᴅᴇᴛᴇᴄᴛᴏʀ :-** {e}")
 
 # ---------------- Unban Handler ----------------
-@app.on_message(filters.regex(r"^unban:(\d+)$"))
-async def handle_unban(client, message: Message):
-    user_id = int(message.matches[0].group(1))
-    chat_id = message.chat.id
+@app.on_callback_query(filters.regex(r"^unban:(\d+)$"))
+async def handle_unban(client: app, query: CallbackQuery):
+    user_id = int(query.data.split(":")[1])
+    chat_id = query.message.chat.id
     try:
-        perms = await member_permissions(chat_id, message.from_user.id)
+        perms = await member_permissions(chat_id, query.from_user.id)
         if "can_restrict_members" not in perms:
-            return await message.reply(
-                "⋟ ʏᴏᴜ ᴅᴏɴ'ᴛ ʜᴀᴠᴇ ᴇɴᴏᴜɢʜ ᴘᴇʀᴍɪssɪᴏɴs.\n\n"
-                "ᴘᴇʀᴍɪssɪᴏɴ ɴᴇᴇᴅᴇᴅ: can_restrict_members"
-            )
+            return await query.answer("⋟ ʏᴏᴜ ᴅᴏɴ'ᴛ ʜᴀᴠᴇ ᴘᴇʀᴍɪssɪᴏɴs.", show_alert=True)
     except UserNotParticipant:
-        return await message.reply("*⋟ ʏᴏᴜ ᴀʀᴇ ɴᴏᴛ ᴀ ᴘᴀʀᴛɪᴄɪᴘᴀɴᴛ.**")
+        return await query.answer("⋟ ʏᴏᴜ ᴀʀᴇ ɴᴏᴛ ᴀ ᴘᴀʀᴛɪᴄɪᴘᴀɴᴛ.", show_alert=True)
+
     try:
         await client.unban_chat_member(chat_id, user_id)
-        await message.reply("**⋟ ᴜsᴇʀ ᴜɴʙᴀɴɴᴇᴅ !!**")
+        await query.message.edit_text(f"**⋟ ᴜsᴇʀ ᴜɴʙᴀɴɴᴇᴅ !!**")
     except UserAdminInvalid:
-        await message.reply("**⋟ ғᴀɪʟᴇᴅ ᴛᴏ ᴜɴʙᴀɴ, ᴍᴀʏʙᴇ ᴛʜᴇʏ ᴀʀᴇ ᴀɴ ᴀᴅᴍɪɴ.**")
+        await query.message.edit_text("**⋟ ғᴀɪʟᴇᴅ ᴛᴏ ᴜɴʙᴀɴ, ᴍᴀʏʙᴇ ᴛʜᴇʏ ᴀʀᴇ ᴀɴ ᴀᴅᴍɪɴ.**")
 
 
-@app.on_message(filters.regex(r"^unmute:(\d+)$"))
-async def handle_unmute(client, message: Message):
-    user_id = int(message.matches[0].group(1))
-    chat_id = message.chat.id
+# ----------- Unmute Callback -----------
+@app.on_callback_query(filters.regex(r"^unmute:(\d+)$"))
+async def handle_unmute(client: app, query: CallbackQuery):
+    user_id = int(query.data.split(":")[1])
+    chat_id = query.message.chat.id
     try:
-        perms = await member_permissions(chat_id, message.from_user.id)
+        perms = await member_permissions(chat_id, query.from_user.id)
         if "can_restrict_members" not in perms:
-            return await message.reply(
-                "⋟ ʏᴏᴜ ᴅᴏɴ'ᴛ ʜᴀᴠᴇ ᴇɴᴏᴜɢʜ ᴘᴇʀᴍɪssɪᴏɴs.\n\n"
-                "ᴘᴇʀᴍɪssɪᴏɴ ɴᴇᴇᴅᴇᴅ: can_restrict_members"
-            )
+            return await query.answer("⋟ ʏᴏᴜ ᴅᴏɴ'ᴛ ʜᴀᴠᴇ ᴘᴇʀᴍɪssɪᴏɴs.", show_alert=True)
     except UserNotParticipant:
-        return await message.reply("**⋟ ʏᴏᴜ ᴀʀᴇ ɴᴏᴛ ᴀ ᴘᴀʀᴛɪᴄɪᴘᴀɴᴛ.**")
+        return await query.answer("⋟ ʏᴏᴜ ᴀʀᴇ ɴᴏᴛ ᴀ ᴘᴀʀᴛɪᴄɪᴘᴀɴᴛ.", show_alert=True)
+
     try:
         await client.restrict_chat_member(chat_id, user_id, permissions=ChatPermissions(can_send_messages=True))
-        await message.reply("**⋟ ᴜsᴇʀ ᴜɴᴍᴜᴛᴇᴅ !!**")
+        await query.message.edit_text(f"**⋟ ᴜsᴇʀ ᴜɴᴍᴜᴛᴇᴅ !!**")
     except UserAdminInvalid:
-        await message.reply("**⋟ ғᴀɪʟᴇᴅ ᴛᴏ ᴜɴᴍᴜᴛᴇ, ᴍᴀʏʙᴇ ᴛʜᴇʏ ᴀʀᴇ ᴀɴ ᴀᴅᴍɪɴ.**")
+        await query.message.edit_text("**⋟ ғᴀɪʟᴇᴅ ᴛᴏ ᴜɴᴍᴜᴛᴇ, ᴍᴀʏʙᴇ ᴛʜᴇʏ ᴀʀᴇ ᴀɴ ᴀᴅᴍɪɴ.**")
 
 
     
