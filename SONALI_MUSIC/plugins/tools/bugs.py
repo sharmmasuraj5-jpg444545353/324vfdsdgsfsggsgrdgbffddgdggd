@@ -34,7 +34,7 @@ async def bugs(_, msg: Message):
     datetimes = datetime.utcnow().strftime(datetimes_fmt)
 
     owner_user = await app.get_users(owner_id)
-    owner_mention = f"[{owner_user.first_name}](tg://user?id={OWNER_ID})"
+    owner_mention = f"[{owner_user.first_name}](tg://user?id={owner_id})"
 
     bug_report = f"""
 **#ʙᴜɢ ʀᴇᴘᴏʀᴛ {owner_mention}**
