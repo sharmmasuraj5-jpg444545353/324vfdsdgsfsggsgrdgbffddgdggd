@@ -6,11 +6,10 @@ import time
 from datetime import datetime, timedelta
 from SONALI_MUSIC import app
 import asyncio
-from config import MONGO_DB_URI
 
 
-#mongo_client = MongoClient("mongodb+srv://Rishant:Thakur@cluster0.g5kjakc.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
-mongo_client = MongoClient(MONGO_DB_URI)
+
+mongo_client = MongoClient("mongodb+srv://Rishant:Thakur@cluster0.g5kjakc.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
 db = mongo_client["purvi_rankings"]
 collection = db["ranking"]
 weekly_collection = db["weekly_ranking"]
@@ -33,14 +32,17 @@ PURVI = [
     "https://graph.org/file/0bfe29d15e918917d1305.jpg",
 ]
 
+
 def get_bot_mention():
     return f"[{app.me.first_name}](tg://user?id={app.me.id})"
+
 
 def reset_daily_data():
     global today_stats
     today_stats = {}
     today_collection.delete_many({})
     print("Daily data has been reset!")
+
 
 async def daily_reset_scheduler():
     while True:
@@ -50,11 +52,13 @@ async def daily_reset_scheduler():
         await asyncio.sleep(wait_seconds)
         reset_daily_data()
 
+
 def reset_weekly_data():
     global weekly_stats
     weekly_stats = {}
     weekly_collection.delete_many({})
     print("Weekly data has been reset!")
+
 
 async def weekly_reset_scheduler():
     while True:
@@ -65,28 +69,6 @@ async def weekly_reset_scheduler():
         await asyncio.sleep(wait_seconds)
         reset_weekly_data()
 
-async def get_user_mention(user_id, chat_id):
-    try:
-        # Pehle chat member se try karo
-        user = await app.get_chat_member(chat_id, user_id)
-        if user.user.username:
-            return f"@{user.user.username}"
-        else:
-            return f"[{user.user.first_name}](tg://user?id={user.user.id})"
-    except:
-        try:
-            # Agar chat member nahi mila to direct user se try karo
-            user = await app.get_users(user_id)
-            if user.username:
-                return f"@{user.username}"
-            else:
-                return f"[{user.first_name}](tg://user?id={user.id})"
-       # except:
-            # Agar kuch bhi nahi mila to fallback
-            #try:
-                return f"[User](tg://user?id={user_id})"
-           # except:
-                #return "Unknown User"
 
 @app.on_message(filters.group, group=6)
 async def today_watcher(_, message):
@@ -104,35 +86,39 @@ async def today_watcher(_, message):
         upsert=True
     )
 
+
 @app.on_message(filters.group, group=11)
 async def _watcher(_, message):
     chat_id = message.chat.id
     user_id = message.from_user.id
     
+    # Update overall ranking with chat_id
     collection.update_one(
         {"chat_id": chat_id, "user_id": user_id}, 
         {"$inc": {"total_messages": 1}}, 
         upsert=True
     )
     
+    # Update weekly ranking with chat_id
     weekly_collection.update_one(
         {"chat_id": chat_id, "user_id": user_id}, 
         {"$inc": {"total_messages": 1}}, 
         upsert=True
     )
 
+
 @app.on_message(filters.command(["ranking", "leaderboard", "rank"]))
 async def leaderboard_panel(_, message):
     group_name = message.chat.title
     bot_mention = get_bot_mention()
     caption = f"""
-✦ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ ᴘᴀɴɴᴇʟ 🏆
+**✦ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ ᴘᴀɴɴᴇʟ 🏆**
 
-⊚ ɢʀᴏᴜᴘ ➠ {group_name}
+**⊚ ɢʀᴏᴜᴘ :-** {group_name}
 
-⊚ ᴄʜᴇᴄᴋ ɢʀᴏᴜᴘ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ ʙʏ ᴛᴀᴘ ʙᴜᴛᴛᴏɴ ʙᴇʟᴏᴡ ↓
+**⊚ ᴄʜᴇᴄᴋ ɢʀᴏᴜᴘ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ ʙʏ ᴛᴀᴘ ʙᴜᴛᴛᴏɴ ʙᴇʟᴏᴡ ↓**
 
-➻ ʙʏ ➠ {bot_mention}
+**➻ ʙʏ :- {bot_mention}**
     """
 
     buttons = InlineKeyboardMarkup([
@@ -146,20 +132,25 @@ async def leaderboard_panel(_, message):
         parse_mode=enums.ParseMode.MARKDOWN
     )
 
+
 @app.on_message(filters.command("today"))
 async def today_command(_, message):
     chat_id = message.chat.id
     
     today_members = today_collection.find({"chat_id": chat_id}).sort("total_messages", -1).limit(10)
 
-    response = "✦ ᴛᴏᴅᴀʏ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ 📈\n\n"
+    response = "**✦ ᴛᴏᴅᴀʏ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ 📈**\n\n"
     count = 0
     
     for idx, member in enumerate(today_members, start=1):
         uid = member["user_id"]
         total = member["total_messages"]
-        user_mention = await get_user_mention(uid, chat_id)
-        response += f"{idx}. {user_mention} ➠ {total} ᴍsɢ\n"
+        try:
+            user = await app.get_users(uid)
+            user_mention = f"[{user.first_name}](tg://user?id={uid})"
+        except:
+            user_mention = f"`{uid}`"
+        response += f"**{idx}**. {user_mention} ➠ {total} ᴍsɢ\n"
         count += 1
 
     if count > 0:
@@ -168,21 +159,27 @@ async def today_command(_, message):
         ])
         await message.reply_photo(random.choice(PURVI), caption=response, reply_markup=button, parse_mode=enums.ParseMode.MARKDOWN)
     else:
-        await message.reply_text("❅ ɴᴏ ᴅᴀᴛᴀ ᴀᴠᴀɪʟᴀʙʟᴇ ғᴏʀ ᴛᴏᴅᴀʏ.")
+        await message.reply_text("**❅ ɴᴏ ᴅᴀᴛᴀ ᴀᴠᴀɪʟᴀʙʟᴇ ғᴏʀ ᴛᴏᴅᴀʏ.**")
+
 
 @app.on_message(filters.command("weekly"))
 async def weekly_command(_, message):
     chat_id = message.chat.id
     
+    # Filter by chat_id for weekly leaderboard
     top_members = weekly_collection.find({"chat_id": chat_id}).sort("total_messages", -1).limit(10)
 
-    response = "✦ ᴡᴇᴇᴋʟʏ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ 📈\n\n"
+    response = "**✦ ᴡᴇᴇᴋʟʏ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ 📈**\n\n"
     count = 0
     for idx, member in enumerate(top_members, start=1):
         uid = member["user_id"]
         total = member["total_messages"]
-        user_mention = await get_user_mention(uid, chat_id)
-        response += f"{idx}. {user_mention} ➠ {total} ᴍsɢ\n"
+        try:
+            user = await app.get_users(uid)
+            user_mention = f"[{user.first_name}](tg://user?id={uid})"
+        except:
+            user_mention = f"`{uid}`"
+        response += f"**{idx}**. {user_mention} ➠ {total} ᴍsɢ\n"
         count += 1
 
     if count > 0:
@@ -191,21 +188,27 @@ async def weekly_command(_, message):
         ])
         await message.reply_photo(random.choice(PURVI), caption=response, reply_markup=button, parse_mode=enums.ParseMode.MARKDOWN)
     else:
-        await message.reply_text("❅ ɴᴏ ᴅᴀᴛᴀ ᴀᴠᴀɪʟᴀʙʟᴇ ғᴏʀ ᴡᴇᴇᴋʟʏ.")
+        await message.reply_text("**❅ ɴᴏ ᴅᴀᴛᴀ ᴀᴠᴀɪʟᴀʙʟᴇ ғᴏʀ ᴡᴇᴇᴋʟʏ.**")
+
 
 @app.on_message(filters.command("overall"))
 async def overall_command(_, message):
     chat_id = message.chat.id
     
+    # Filter by chat_id for overall leaderboard
     top_members = collection.find({"chat_id": chat_id}).sort("total_messages", -1).limit(10)
 
-    response = "✦ ᴏᴠᴇʀᴀʟʟ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ 🏅\n\n"
+    response = "**✦ ᴏᴠᴇʀᴀʟʟ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ 🏅**\n\n"
     count = 0
     for idx, member in enumerate(top_members, start=1):
         uid = member["user_id"]
         total = member["total_messages"]
-        user_mention = await get_user_mention(uid, chat_id)
-        response += f"{idx}. {user_mention} ➠ {total} ᴍsɢ\n"
+        try:
+            user = await app.get_users(uid)
+            user_mention = f"[{user.first_name}](tg://user?id={uid})"
+        except:
+            user_mention = f"`{uid}`"
+        response += f"**{idx}**. {user_mention} ➠ {total} ᴍsɢ\n"
         count += 1
 
     if count > 0:
@@ -214,22 +217,24 @@ async def overall_command(_, message):
         ])
         await message.reply_photo(random.choice(PURVI), caption=response, reply_markup=button, parse_mode=enums.ParseMode.MARKDOWN)
     else:
-        await message.reply_text("❅ ɴᴏ ᴅᴀᴛᴀ ᴀᴠᴀɪʟᴀʙʟᴇ ғᴏʀ ᴏᴠᴇʀᴀʟʟ.")
+        await message.reply_text("**❅ ɴᴏ ᴅᴀᴛᴀ ᴀᴠᴀɪʟᴀʙʟᴇ ғᴏʀ ᴏᴠᴇʀᴀʟʟ.**")
 
+
+# Callback query handlers (unchanged from your original code)
 @app.on_callback_query(filters.regex("^rank_show_leaderboard_buttons$"))
 async def show_leaderboard_buttons(_, query):
     group_name = query.message.chat.title
     bot_mention = get_bot_mention()
     caption = f"""
-✦ ᴄʜᴏᴏsᴇ ᴀ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ ᴛʏᴘᴇ 🏅
+**✦ ᴄʜᴏᴏsᴇ ᴀ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ ᴛʏᴘᴇ 🏅**
 
-⊚ ʏᴏᴜ ᴄᴀɴ ᴀʟsᴏ ᴄʜᴇᴄᴋ ʙʏ :-
+**⊚ ʏᴏᴜ ᴄᴀɴ ᴀʟsᴏ ᴄʜᴇᴄᴋ ʙʏ :-**
 
-/today :- ᴛᴏᴅᴀʏ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ.
-/weekly:- ᴡᴇᴇᴋʟʏ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ.
-/overall:- ᴀʟʟ ᴛɪᴍᴇ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ.
+`/today` :- ᴛᴏᴅᴀʏ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ.
+`/weekly` :- ᴡᴇᴇᴋʟʏ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ.
+`/overall` :- ᴀʟʟ ᴛɪᴍᴇ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ.
 
-➻ ʙʏ :- {bot_mention}
+**➻ ʙʏ :- {bot_mention}**
     """
 
     buttons = InlineKeyboardMarkup([
@@ -244,7 +249,8 @@ async def show_leaderboard_buttons(_, query):
         ]
     ])
 
-    await query.message.edit_caption(caption=caption, reply_markup=buttons, parse_mode=enums.ParseMode.MARKDOWN)
+    await query.message.edit_text(caption, reply_markup=buttons, parse_mode=enums.ParseMode.MARKDOWN)
+
 
 @app.on_callback_query(filters.regex("^rank_panel_"))
 async def panel_callback_handler(_, query):
@@ -257,19 +263,24 @@ async def panel_callback_handler(_, query):
     elif data == "rank_panel_overall":
         await show_overall_leaderboard(query)
 
+
 async def show_today_leaderboard(query):
     chat_id = query.message.chat.id
     
     today_members = today_collection.find({"chat_id": chat_id}).sort("total_messages", -1).limit(10)
 
-    response = "✦ ᴛᴏᴅᴀʏ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ 📊\n\n"
+    response = "**✦ ᴛᴏᴅᴀʏ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ 📊**\n\n"
     count = 0
     
     for idx, member in enumerate(today_members, start=1):
         uid = member["user_id"]
         total = member["total_messages"]
-        user_mention = await get_user_mention(uid, chat_id)
-        response += f"{idx}. {user_mention} ➠ {total} ᴍsɢ\n"
+        try:
+            user = await app.get_users(uid)
+            user_mention = f"[{user.first_name}](tg://user?id={uid})"
+        except:
+            user_mention = f"`{uid}`"
+        response += f"**{idx}**. {user_mention} ➠ {total} ᴍsɢ\n"
         count += 1
 
     if count > 0:
@@ -278,46 +289,58 @@ async def show_today_leaderboard(query):
              InlineKeyboardButton("🏅 ᴏᴠᴇʀᴀʟʟ", callback_data="rank_overall")],
             [InlineKeyboardButton("🔙 ʙᴀᴄᴋ", callback_data="rank_back_to_panel")]
         ])
-        await query.message.edit_caption(caption=response, reply_markup=button, parse_mode=enums.ParseMode.MARKDOWN)
+        await query.message.edit_text(response, reply_markup=button, parse_mode=enums.ParseMode.MARKDOWN)
     else:
         await query.answer("❅ ɴᴏ ᴅᴀᴛᴀ ᴀᴠᴀɪʟᴀʙʟᴇ ғᴏʀ ᴛᴏᴅᴀʏ.", show_alert=True)
+
 
 async def show_weekly_leaderboard(query):
     chat_id = query.message.chat.id
     
+    # Filter by chat_id for weekly leaderboard
     top_members = weekly_collection.find({"chat_id": chat_id}).sort("total_messages", -1).limit(10)
 
-    response = "✦ ᴡᴇᴇᴋʟʏ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ 📈\n\n"
+    response = "**✦ ᴡᴇᴇᴋʟʏ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ 📈**\n\n"
     count = 0
     for idx, member in enumerate(top_members, start=1):
         uid = member["user_id"]
         total = member["total_messages"]
-        user_mention = await get_user_mention(uid, chat_id)
-        response += f"{idx}. {user_mention} ➠ {total} ᴍsɢ\n"
+        try:
+            user = await app.get_users(uid)
+            user_mention = f"[{user.first_name}](tg://user?id={uid})"
+        except:
+            user_mention = f"`{uid}`"
+        response += f"**{idx}**. {user_mention} ➠ {total} ᴍsɢ\n"
         count += 1
 
     if count > 0:
         button = InlineKeyboardMarkup([
             [InlineKeyboardButton("📊 ᴛᴏᴅᴀʏ", callback_data="rank_today"),
-             InlineKeyboardButton("🏅 ᴏᴠᴇᴅʀᴀʟʟ", callback_data="rank_overall")],
+             InlineKeyboardButton("🏅 ᴏᴠᴇʀᴀʟʟ", callback_data="rank_overall")],
             [InlineKeyboardButton("🔙 ʙᴀᴄᴋ", callback_data="rank_back_to_panel")]
         ])
-        await query.message.edit_caption(caption=response, reply_markup=button, parse_mode=enums.ParseMode.MARKDOWN)
+        await query.message.edit_text(response, reply_markup=button, parse_mode=enums.ParseMode.MARKDOWN)
     else:
         await query.answer("❅ ɴᴏ ᴅᴀᴛᴀ ᴀᴠᴀɪʟᴀʙʟᴇ ғᴏʀ ᴡᴇᴇᴋʟʏ.", show_alert=True)
+
 
 async def show_overall_leaderboard(query):
     chat_id = query.message.chat.id
     
+    # Filter by chat_id for overall leaderboard
     top_members = collection.find({"chat_id": chat_id}).sort("total_messages", -1).limit(10)
 
-    response = "✦ ᴏᴠᴇʀᴀʟʟ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ 🏅\n\n"
+    response = "**✦ ᴏᴠᴇʀᴀʟʟ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ 🏅**\n\n"
     count = 0
     for idx, member in enumerate(top_members, start=1):
         uid = member["user_id"]
         total = member["total_messages"]
-        user_mention = await get_user_mention(uid, chat_id)
-        response += f"{idx}. {user_mention} ➠ {total} ᴍsɢ\n"
+        try:
+            user = await app.get_users(uid)
+            user_mention = f"[{user.first_name}](tg://user?id={uid})"
+        except:
+            user_mention = f"`{uid}`"
+        response += f"**{idx}**. {user_mention} ➠ {total} ᴍsɢ\n"
         count += 1
 
     if count > 0:
@@ -326,9 +349,10 @@ async def show_overall_leaderboard(query):
              InlineKeyboardButton("📈 ᴡᴇᴇᴋʟʏ", callback_data="rank_weekly")],
             [InlineKeyboardButton("🔙 ʙᴀᴄᴋ", callback_data="rank_back_to_panel")]
         ])
-        await query.message.edit_caption(caption=response, reply_markup=button, parse_mode=enums.ParseMode.MARKDOWN)
+        await query.message.edit_text(response, reply_markup=button, parse_mode=enums.ParseMode.MARKDOWN)
     else:
         await query.answer("❅ ɴᴏ ᴅᴀᴛᴀ ᴀᴠᴀɪʟᴀʙʟᴇ ғᴏʀ ᴏᴠᴇʀᴀʟʟ.", show_alert=True)
+
 
 @app.on_callback_query(filters.regex("^rank_(today|weekly|overall|back_to_panel)$"))
 async def regular_callback_handler(_, query):
@@ -344,15 +368,15 @@ async def regular_callback_handler(_, query):
         group_name = query.message.chat.title
         bot_mention = get_bot_mention()
         caption = f"""
-✦ ᴄʜᴏᴏsᴇ ᴀ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ ᴛʏᴘᴇ 🏅
+**✦ ᴄʜᴏᴏsᴇ ᴀ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ ᴛʏᴘᴇ 🏅**
 
-⊚ ʏᴏᴜ ᴄᴀɴ ᴀʟsᴏ ᴄʜᴇᴄᴋ ʙʏ :-
+**⊚ ʏᴏᴜ ᴄᴀɴ ᴀʟsᴏ ᴄʜᴇᴄᴋ ʙʏ :-**
 
-/today :- ᴛᴏᴅᴀʏ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ.
-/weekly:- ᴡᴇᴇᴋʟʏ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ.
-/overall:- ᴀʟʟ ᴛɪᴍᴇ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ.
+`/today` :- ᴛᴏᴅᴀʏ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ.
+`/weekly` :- ᴡᴇᴇᴋʟʏ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ.
+`/overall` :- ᴀʟʟ ᴛɪᴍᴇ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ.
 
-➻ ʙʏ :- {bot_mention}
+**➻ ʙʏ :- {bot_mention}**
         """
 
         buttons = InlineKeyboardMarkup([
@@ -368,29 +392,31 @@ async def regular_callback_handler(_, query):
     ])
 
         try:
-            await query.message.edit_caption(caption=caption, reply_markup=buttons, parse_mode=enums.ParseMode.MARKDOWN)
+            await query.message.edit_text(caption, reply_markup=buttons, parse_mode=enums.ParseMode.MARKDOWN)
         except:
-            await query.answer()
+            await query.answer()  
+
 
 @app.on_callback_query(filters.regex("^rank_back_to_main$"))
 async def back_to_main_handler(_, query):
     group_name = query.message.chat.title
     bot_mention = get_bot_mention()
     caption = f"""
-✦ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ ᴘᴀɴɴᴇʟ 🏆
+**✦ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ ᴘᴀɴɴᴇʟ 🏆**
 
-⊚ ɢʀᴏᴜᴘ ➠ {group_name}
+**⊚ ɢʀᴏᴜᴘ :-** {group_name}
 
-⊚ ᴄʜᴇᴄᴋ ɢʀᴏᴜᴘ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ ʙʢ ᴛᴀᴘ ʙᴜᴛᴛᴏɴ ʙᴇʟᴏᴡ ↓
+**⊚ ᴄʜᴇᴄᴋ ɢʀᴏᴜᴘ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ ʙʏ ᴛᴀᴘ ʙᴜᴛᴛᴏɴ ʙᴇʟᴏᴡ ↓**
 
-➻ ʙʏ ➠ {bot_mention}
+**➻ ʙʏ :- {bot_mention}**
     """
 
     buttons = InlineKeyboardMarkup([
         [InlineKeyboardButton("🔍 ᴄʜᴇᴄᴋ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ", callback_data="rank_show_leaderboard_buttons")]
     ])
 
-    await query.message.edit_caption(caption=caption, reply_markup=buttons, parse_mode=enums.ParseMode.MARKDOWN)
+    await query.message.edit_text(caption, reply_markup=buttons, parse_mode=enums.ParseMode.MARKDOWN)
+
 
 asyncio.create_task(daily_reset_scheduler())
 asyncio.create_task(weekly_reset_scheduler())
