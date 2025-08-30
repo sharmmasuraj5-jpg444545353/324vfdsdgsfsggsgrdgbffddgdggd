@@ -125,7 +125,7 @@ async def set_flood_mode(client, message: Message):
         return await message.reply("**⋟ ɪɴᴠᴀʟɪᴅ ᴀᴄᴛɪᴏɴ !!, ᴄʜᴏᴏsᴇ ᴏɴᴇ :- ban/mute/kick/tban/tmute.**")
     
     update_chat_flood_settings(chat_id, {"flood_action": action})
-    await message.reply(f"**⋟ ғʟᴏᴏᴅ ᴀᴄᴛɪᴏɴ sᴇᴛ ᴛᴏ {action}.**")
+    await message.reply(f"**⋟ ғʟᴏᴏᴅ ᴀᴄᴛɪᴏɴ sᴇᴛ ᴛᴏ :-** `{action}`")
 
 @app.on_message(filters.command(["delflood", "clearflood", "learflood", "f"], prefixes=["/", "!", ".", "C", "c"]))
 async def set_flood_clear(client, message: Message):
@@ -135,11 +135,11 @@ async def set_flood_clear(client, message: Message):
     args = message.command[1:]
     
     if not args or args[0].lower() not in ["yes", "no", "on", "off"]:
-        return await message.reply("**⋟ ᴘʟᴇᴀsᴇ ᴄʜᴏᴏsᴇ ᴇɪᴛʜᴇʀ 'yes' ᴏʀ 'no'.**")
+        return await message.reply("**⋟ ᴘʟᴇᴀsᴇ ᴄʜᴏᴏsᴇ ᴇɪᴛʜᴇʀ** `yes` **ᴏʀ** `no`")
     
     delete_flood = args[0].lower() in ["yes", "on"]
     update_chat_flood_settings(chat_id, {"delete_flood": delete_flood})
-    await message.reply(f"**⋟ ᴅᴇʟᴇᴛᴇ ғʟᴏᴏᴅ ᴍᴇssᴀɢᴇs sᴇᴛ ᴛᴏ {delete_flood}.**")
+    await message.reply(f"**⋟ ᴅᴇʟᴇᴛᴇ ғʟᴏᴏᴅ ᴍᴇssᴀɢᴇs sᴇᴛ ᴛᴏ :-** `{delete_flood}`")
 
 
 flood_count = {}
