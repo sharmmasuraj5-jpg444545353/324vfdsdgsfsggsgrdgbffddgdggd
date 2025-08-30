@@ -53,9 +53,10 @@ async def welcome_cmd(client, message: Message):
     chat_title = message.chat.title
     status = "ᴇɴᴀʙʟᴇᴅ" if is_welcome_enabled(chat_id) else "ᴅɪsᴀʙʟᴇᴅ"
 
+    # Use shorter callback data to avoid BUTTON_DATA_INVALID error
     keyboard = InlineKeyboardMarkup([
-        [InlineKeyboardButton("ᴇɴᴀʙʟᴇ", callback_data=json.dumps({"type":"welcome","action":"enable","chat_id":chat_id})),
-         InlineKeyboardButton("ᴅɪsᴀʙʟᴇ", callback_data=json.dumps({"type":"welcome","action":"disable","chat_id":chat_id}))]
+        [InlineKeyboardButton("ᴇɴᴀʙʟᴇ", callback_data=f"wel_en_{chat_id}"),
+         InlineKeyboardButton("ᴅɪsᴀʙʟᴇ", callback_data=f"wel_dis_{chat_id}")]
     ])
 
     await message.reply_text(
@@ -72,9 +73,10 @@ async def left_cmd(client, message: Message):
     chat_title = message.chat.title
     status = "ᴇɴᴀʙʟᴇᴅ" if is_left_enabled(chat_id) else "ᴅɪsᴀʙʟᴇᴅ"
 
+    # Use shorter callback data to avoid BUTTON_DATA_INVALID error
     keyboard = InlineKeyboardMarkup([
-        [InlineKeyboardButton("ᴇɴᴀʙʟᴇ", callback_data=json.dumps({"type":"left","action":"enable","chat_id":chat_id})),
-         InlineKeyboardButton("ᴅɪsᴀʙʟᴇ", callback_data=json.dumps({"type":"left","action":"disable","chat_id":chat_id}))]
+        [InlineKeyboardButton("ᴇɴᴀʙʟᴇ", callback_data=f"left_en_{chat_id}"),
+         InlineKeyboardButton("ᴅɪsᴀʙʟᴇ", callback_data=f"left_dis_{chat_id}")]
     ])
 
     await message.reply_text(
@@ -89,51 +91,69 @@ async def left_cmd(client, message: Message):
 @app.on_callback_query()
 async def callback_toggle(client, callback_query: CallbackQuery):
     user = callback_query.from_user
-    try:
-        data = json.loads(callback_query.data)
-    except:
+    data = callback_query.data
+    
+    if not data:
         return
-
-    chat_id = data.get("chat_id")
-    if not chat_id:
+    
+    # Parse the simplified callback data
+    if data.startswith("wel_en_"):
+        chat_id = int(data[7:])
+        action = "enable"
+        type_ = "welcome"
+    elif data.startswith("wel_dis_"):
+        chat_id = int(data[8:])
+        action = "disable"
+        type_ = "welcome"
+    elif data.startswith("left_en_"):
+        chat_id = int(data[8:])
+        action = "enable"
+        type_ = "left"
+    elif data.startswith("left_dis_"):
+        chat_id = int(data[9:])
+        action = "disable"
+        type_ = "left"
+    else:
         return
 
     if not await is_admin(client, chat_id, user.id):
         return await callback_query.answer("ᴛʜɪs ɪs ɴᴏᴛ ғᴏʀ ʏᴏᴜ 🥺", show_alert=True)
 
-    new_text = callback_query.message.text
     chat_title = callback_query.message.chat.title
+    new_text = ""
 
-    if data["type"] == "welcome":
-        if data["action"] == "enable":
+    if type_ == "welcome":
+        if action == "enable":
             if not is_welcome_enabled(chat_id):
                 set_welcome(chat_id, True)
                 new_text = f"<b>⋟ ᴡᴇʟᴄᴏᴍᴇ ᴍᴇssᴀɢᴇs ᴇɴᴀʙʟᴇᴅ ɪɴ :- </b>{chat_title}"
             else:
                 new_text = f"<b>⋟ ᴡᴇʟᴄᴏᴍᴇ ᴍᴇssᴀɢᴇs ᴀʟʀᴇᴀᴅʏ ᴇɴᴀʙʟᴇᴅ ɪɴ :- </b>{chat_title}"
-        elif data["action"] == "disable":
+        elif action == "disable":
             if is_welcome_enabled(chat_id):
                 set_welcome(chat_id, False)
                 new_text = f"<b>⋟ ᴡᴇʟᴄᴏᴍᴇ ᴍᴇssᴀɢᴇs ᴅɪsᴀʙʟᴇᴅ ɪɴ :- </b>{chat_title}"
             else:
                 new_text = f"<b>⋟ ᴡᴇʟᴄᴏᴍᴇ ᴍᴇssᴀɢᴇs ᴀʟʀᴇᴀᴅʏ ᴅɪsᴀʙʟᴇᴅ ɪɴ :- </b>{chat_title}"
 
-    elif data["type"] == "left":
-        if data["action"] == "enable":
+    elif type_ == "left":
+        if action == "enable":
             if not is_left_enabled(chat_id):
                 set_left(chat_id, True)
                 new_text = f"<b>⋟ ʟᴇғᴛ ᴍᴇssᴀɢᴇs ᴇɴᴀʙʟᴇᴅ ɪɴ :- </b>{chat_title}"
             else:
                 new_text = f"<b>⋟ ʟᴇғᴛ ᴍᴇssᴀɢᴇs ᴀʟʀᴇᴀᴅʏ ᴇɴᴀʙʟᴇᴅ ɪɴ :- </b>{chat_title}"
-        elif data["action"] == "disable":
+        elif action == "disable":
             if is_left_enabled(chat_id):
                 set_left(chat_id, False)
                 new_text = f"<b>⋟ ʟᴇғᴛ ᴍᴇssᴀɢᴇs ᴅɪsᴀʙʟᴇᴅ ɪɴ :- </b>{chat_title}"
             else:
                 new_text = f"<b>⋟ ʟᴇғᴛ ᴍᴇssᴀɢᴇs ᴀʟʀᴇᴀᴅʏ ᴅɪsᴀʙʟᴇᴅ ɪɴ :-</b>{chat_title}"
 
-    if callback_query.message.text != new_text:
+    if new_text and callback_query.message.text != new_text:
         await callback_query.message.edit_text(new_text, parse_mode=enums.ParseMode.HTML)
+    
+    await callback_query.answer()
 
 # Welcome handler
 @app.on_chat_member_updated()
@@ -147,8 +167,9 @@ async def welcome(client, chat_member: ChatMemberUpdated):
     old_status = chat_member.old_chat_member.status if chat_member.old_chat_member else None
     new_status = chat_member.new_chat_member.status
 
-    if old_status in [enums.ChatMemberStatus.LEFT, enums.ChatMemberStatus.KICKED] and \
-       new_status in [enums.ChatMemberStatus.MEMBER, enums.ChatMemberStatus.RESTRICTED]:
+    # FIX: Use BANNED instead of KICKED (which doesn't exist in newer Pyrogram)
+    if old_status in [enums.ChatMemberStatus.LEFT, enums.ChatMemberStatus.BANNED] and \
+       new_status in [enums.ChatMemberStatus.MEMBER, enums.ChatMemberStatus.RESTRICTED, enums.ChatMemberStatus.ADMINISTRATOR]:
 
         if not is_welcome_enabled(chat_id):
             return
