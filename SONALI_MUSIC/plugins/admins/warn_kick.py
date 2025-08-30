@@ -13,7 +13,7 @@ from pyrogram.types import (
 from SONALI_MUSIC import app
 from SONALI_MUSIC.misc import SUDOERS
 from SONALI_MUSIC.core.mongo import mongodb
-from SONALI_MUSIC.utils.error import capture_err
+from SONALI_MUSIC.utils.errors import capture_err
 from SONALI_MUSIC.utils.keyboard import ikb
 from SONALI_MUSIC.utils.database import save_filter
 from SONALI_MUSIC.utils.functions import extract_user, extract_user_and_reason
