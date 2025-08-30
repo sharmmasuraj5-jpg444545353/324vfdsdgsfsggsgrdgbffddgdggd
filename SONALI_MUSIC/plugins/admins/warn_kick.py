@@ -17,7 +17,7 @@ from SONALI_MUSIC.utils.errors import capture_err
 from SONALI_MUSIC.utils.keyboard import ikb
 from SONALI_MUSIC.utils.database import save_filter
 from SONALI_MUSIC.utils.functions import extract_user, extract_user_and_reason
-from utils.permissions import adminsOnly, member_permissions
+from SONALI_MUSIC.utils.permissions import adminsOnly, member_permissions
 from config import BANNED_USERS
 
 
