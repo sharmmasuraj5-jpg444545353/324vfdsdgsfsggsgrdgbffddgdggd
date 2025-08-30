@@ -8,7 +8,6 @@ from SONALI_MUSIC.utils.permissions import adminsOnly, member_permissions
 from SONALI_MUSIC import app
 from SONALI_MUSIC.core.mongo import mongodb
 
-# ---------------- Mongo ----------------
 antiflood_collection = mongodb.antiflood_settings
 DEFAULT_FLOOD_ACTION = "tmute"
 
@@ -38,10 +37,9 @@ async def check_admin_rights(client, message: Message):
             return True
     except UserNotParticipant:
         pass
-    await message.reply("**⋟ ʏᴏᴜ ᴀʀᴇ ɴᴏᴛ ᴀɴ ᴀᴅᴍɪɴ!**")
+    await message.reply("**⋟ ʏᴏᴜ ᴀʀᴇ ɴᴏᴛ ᴀɴ ᴀᴅᴍɪɴ !!**")
     return False
 
-# ---------------- Commands ----------------
 @app.on_message(filters.command(["flood", "lood"], prefixes=["/", "!", ".", "F", "f"]))
 async def get_flood_settings(client, message: Message):
     if not await check_admin_rights(client, message):
@@ -52,7 +50,7 @@ async def get_flood_settings(client, message: Message):
     buttons = InlineKeyboardMarkup(
         [[
             InlineKeyboardButton(
-                "Add me in your group",
+                "✙ ʌᴅᴅ ϻє ɪη ʏσυʀ ɢʀσυᴘ ✙",
                 url=f"https://t.me/{app.username}?startgroup=true"
             )
         ]]
@@ -60,10 +58,10 @@ async def get_flood_settings(client, message: Message):
 
     await message.reply(
         f"**⋟ ᴄᴜʀʀᴇɴᴛ ғʟᴏᴏᴅ sᴇᴛᴛɪɴɢs :-**\n\n"
-        f"**⋟ ʟɪᴍɪᴛ :-** {settings['flood_limit']} messages\n"
-        f"**⋟ ᴛɪᴍᴇʀ :-** {settings['flood_timer']} sec\n"
-        f"**⋟ ᴀᴄᴛɪᴏɴ :-** {settings['flood_action']}\n"
-        f"**⋟ ᴅᴇʟᴇᴛᴇ ғʟᴏᴏᴅ ᴍᴇssᴀɢᴇs :-** {settings['delete_flood']}\n\n"
+        f"**➤ ʟɪᴍɪᴛ :-** {settings['flood_limit']} messages\n"
+        f"**➤ ᴛɪᴍᴇʀ :-** {settings['flood_timer']} sec\n"
+        f"**➤ ᴀᴄᴛɪᴏɴ :-** {settings['flood_action']}\n"
+        f"**➤ ᴅᴇʟᴇᴛᴇ ғʟᴏᴏᴅ ᴍᴇssᴀɢᴇs :-** {settings['delete_flood']}\n\n"
         f"**⋟ ʙʏ :- {app.mention}**",
         reply_markup=buttons
     )
