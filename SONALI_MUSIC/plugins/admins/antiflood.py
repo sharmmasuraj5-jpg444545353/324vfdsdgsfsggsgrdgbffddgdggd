@@ -54,7 +54,7 @@ async def get_flood_settings(client, message: Message):
         f"**⋟ ᴛɪᴍᴇʀ :-** {settings['flood_timer']} sec\n"
         f"**⋟ ᴀᴄᴛɪᴏɴ :-** {settings['flood_action']}\n"
         f"**⋟ ᴅᴇʟᴇᴛᴇ ғʟᴏᴏᴅ ᴍᴇssᴀɢᴇs :-** {settings['delete_flood']}\n\n"
-        f"**⋟ ʙʏ :-** {app.mention}
+        f"**⋟ ʙʏ :-** {app.mention}"
     )
 
 @app.on_message(filters.command(["setflood", "etfood", "f"], prefixes=["/", "!", ".", "S", "s"]))
