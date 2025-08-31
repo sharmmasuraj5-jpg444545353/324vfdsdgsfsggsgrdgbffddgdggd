@@ -21,7 +21,8 @@ async def join_request_handler(client, join_req):
         "**🚨 ᴀ ɴᴇᴡ ᴊᴏɪɴ ʀᴇǫᴜᴇsᴛ ғᴏᴜɴᴅ !!**\n\n"
         f"**👤 ᴜsᴇʀ :-** {user.mention}\n"
         f"**🆔 ɪᴅ :-** `{user.id}`\n"
-        f"**🔗 ᴜsᴇʀɴᴀᴍᴇ :-** @{user.username if user.username else 'ɴᴏɴᴇ'}"
+        f"**🔗 ᴜsᴇʀɴᴀᴍᴇ :-** @{user.username if user.username else 'ɴᴏɴᴇ'}\n\n"
+        f"**ɴᴏᴛᴇ :-** <i>ᴀᴜᴛᴏ ᴅᴇʟᴇᴛᴇ ɪɴ 10 ᴍɪɴᴜᴛᴇs.</i>"
     )
 
     buttons = InlineKeyboardMarkup(
