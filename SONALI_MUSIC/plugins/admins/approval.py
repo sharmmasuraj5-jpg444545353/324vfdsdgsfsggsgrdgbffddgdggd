@@ -65,7 +65,7 @@ async def callback_handler(client: Client, query: CallbackQuery):
         try:
             await client.approve_chat_join_request(chat_id, user_id)
             col.delete_one({"chat_id": chat_id, "user_id": user_id})
-            await query.edit_message_text(f"✅ ᴀᴘᴘʀᴏᴠᴇᴅ [ᴜsᴇʀ](tg://user?id={user_id})")
+            await query.edit_message_text(f"✅ ᴀᴘᴘʀᴏᴠᴇᴅ {query.from_user.mention} ɪɴ ᴛʜɪs ᴄʜᴀᴛ")
         except Exception as e:
             await query.answer(f"⚠️ ᴇʀʀᴏʀ : {e}", show_alert=True)
 
@@ -73,7 +73,7 @@ async def callback_handler(client: Client, query: CallbackQuery):
         try:
             await client.decline_chat_join_request(chat_id, user_id)
             col.delete_one({"chat_id": chat_id, "user_id": user_id})
-            await query.edit_message_text(f"❌ ᴅɪsᴍɪssᴇᴅ [ᴜsᴇʀ](tg://user?id={user_id})")
+            await query.edit_message_text(f"❌ ᴅɪsᴍɪssᴇᴅ {query.from_user.mention} ɪɴ ᴛʜɪs ᴄʜᴀᴛ")
         except Exception as e:
             await query.answer(f"⚠️ ᴇʀʀᴏʀ : {e}", show_alert=True)
 
@@ -92,10 +92,14 @@ async def approve_all(_, message: Message):
         return await message.reply_text("❌ ᴏɴʟʏ ᴀᴅᴍɪɴs ᴄᴀɴ ᴜsᴇ ᴛʜɪs ᴄᴏᴍᴍᴀɴᴅ ❕")
 
     # MongoDB se saari pending requests fetch karo
-    pending_requests = col.find({"chat_id": chat_id})
+    pending_requests = list(col.find({"chat_id": chat_id}))
+    
+    # Check if no requests found
+    if not pending_requests:
+        return await message.reply_text("❌ ɴᴏ ᴘᴇɴᴅɪɴɢ ʀᴇǫᴜᴇsᴛs ɪɴ ᴛʜɪs ᴄʜᴀᴛ ❕")
     
     count = 0
-    async for request in pending_requests:
+    for request in pending_requests:
         try:
             user_id_to_approve = request["user_id"]
             await app.approve_chat_join_request(chat_id, user_id_to_approve)
@@ -121,10 +125,14 @@ async def dismiss_all(_, message: Message):
         return await message.reply_text("❌ ᴏɴʟʏ ᴀᴅᴍɪɴs ᴄᴀɴ ᴜsᴇ ᴛʜɪs ᴄᴏᴍᴍᴀɴᴅ ❕")
 
     # MongoDB se saari pending requests fetch karo
-    pending_requests = col.find({"chat_id": chat_id})
+    pending_requests = list(col.find({"chat_id": chat_id}))
+    
+    # Check if no requests found
+    if not pending_requests:
+        return await message.reply_text("❌ ɴᴏ ᴘᴇɴᴅɪɴɢ ʀᴇǫᴜᴇsᴛs ɪɴ ᴛʜɪs ᴄʜᴀᴛ ❕")
     
     count = 0
-    async for request in pending_requests:
+    for request in pending_requests:
         try:
             user_id_to_dismiss = request["user_id"]
             await app.decline_chat_join_request(chat_id, user_id_to_dismiss)
