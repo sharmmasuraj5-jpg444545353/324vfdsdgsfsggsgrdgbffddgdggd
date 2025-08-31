@@ -1,3 +1,4 @@
+
 import asyncio
 from pyrogram import Client, filters, enums
 from pyrogram.types import CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup
@@ -37,15 +38,20 @@ async def join_request_handler(client, join_req):
 
     sent = await client.send_message(chat.id, text, reply_markup=buttons)
 
-    # ⏳ 10 minutes (600 sec) baad auto delete
-    await asyncio.sleep(600)
-    try:
-        await client.delete_messages(chat.id, sent.id)
-        # Remove from active buttons
-        if request_key in active_buttons:
-            del active_buttons[request_key]
-    except:
-        pass
+    # ⏳ 10 minutes (600 sec) baad auto delete aur active_buttons se remove
+    async def delete_and_cleanup():
+        await asyncio.sleep(600)
+        try:
+            await client.delete_messages(chat.id, sent.id)
+        except:
+            pass
+        finally:
+            # Button ko active list se remove karo
+            if request_key in active_buttons:
+                del active_buttons[request_key]
+
+    # Background task start karo
+    asyncio.create_task(delete_and_cleanup())
 
 
 # 🔘 Callback handle karega
@@ -102,15 +108,3 @@ async def callback_handler(client: Client, query: CallbackQuery):
     request_key = f"{chat_id}_{user_id}"
     if request_key in active_buttons:
         del active_buttons[request_key]
-
-
-# 🧹 Cleanup active buttons regularly (safety measure)
-async def cleanup_buttons():
-    while True:
-        await asyncio.sleep(3600)  # 1 hour
-        active_buttons.clear()  # Clear all active buttons
-
-# Start cleanup task when bot starts
-@app.on_ready()
-async def start_cleanup():
-    asyncio.create_task(cleanup_buttons())
