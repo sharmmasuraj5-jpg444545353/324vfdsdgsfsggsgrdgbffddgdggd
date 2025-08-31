@@ -20,7 +20,13 @@ async def join_request_handler(client, join_req):
     # MongoDB me save
     col.update_one(
         {"chat_id": chat.id, "user_id": user.id},
-        {"$set": {"chat_id": chat.id, "user_id": user.id, "username": user.username}},
+        {"$set": {
+            "chat_id": chat.id, 
+            "user_id": user.id, 
+            "username": user.username,
+            "first_name": user.first_name,
+            "status": "pending"
+        }},
         upsert=True,
     )
 
@@ -74,7 +80,7 @@ async def callback_handler(client: Client, query: CallbackQuery):
 
 # -------- Commands for all -------- #
 
-# ✅ Approve all
+# ✅ Approve all - FIXED VERSION
 @app.on_message(filters.command("approveall") & filters.group)
 async def approve_all(_, message: Message):
     chat_id = message.chat.id
@@ -85,18 +91,25 @@ async def approve_all(_, message: Message):
     if member.status not in [enums.ChatMemberStatus.OWNER, enums.ChatMemberStatus.ADMINISTRATOR]:
         return await message.reply_text("❌ ᴏɴʟʏ ᴀᴅᴍɪɴs ᴄᴀɴ ᴜsᴇ ᴛʜɪs ᴄᴏᴍᴍᴀɴᴅ ❕")
 
-    async for req in app.get_chat_join_requests(chat_id):
+    # MongoDB se saari pending requests fetch karo
+    pending_requests = col.find({"chat_id": chat_id})
+    
+    count = 0
+    async for request in pending_requests:
         try:
-            await app.approve_chat_join_request(chat_id, req.from_user.id)
-            col.delete_one({"chat_id": chat_id, "user_id": req.from_user.id})
-            await asyncio.sleep(0.2)
-        except Exception:
-            pass
+            user_id_to_approve = request["user_id"]
+            await app.approve_chat_join_request(chat_id, user_id_to_approve)
+            col.delete_one({"chat_id": chat_id, "user_id": user_id_to_approve})
+            count += 1
+            await asyncio.sleep(0.2)  # Rate limit avoid karne ke liye
+        except Exception as e:
+            print(f"Error approving user {request['user_id']}: {e}")
+            continue
 
-    await message.reply_text(f"✅ ᴀᴄᴄᴇᴘᴛɪɴɢ ʀᴇǫᴜᴇsᴛs sᴛᴀʀᴛᴇᴅ ʙʏ {message.from_user.mention}")
+    await message.reply_text(f"✅ {count} ʀᴇǫᴜᴇsᴛs ᴀᴘᴘʀᴏᴠᴇᴅ ʙʏ {message.from_user.mention}")
 
 
-# ❌ Dismiss all
+# ❌ Dismiss all - FIXED VERSION
 @app.on_message(filters.command("dismissall") & filters.group)
 async def dismiss_all(_, message: Message):
     chat_id = message.chat.id
@@ -107,12 +120,19 @@ async def dismiss_all(_, message: Message):
     if member.status not in [enums.ChatMemberStatus.OWNER, enums.ChatMemberStatus.ADMINISTRATOR]:
         return await message.reply_text("❌ ᴏɴʟʏ ᴀᴅᴍɪɴs ᴄᴀɴ ᴜsᴇ ᴛʜɪs ᴄᴏᴍᴍᴀɴᴅ ❕")
 
-    async for req in app.get_chat_join_requests(chat_id):
+    # MongoDB se saari pending requests fetch karo
+    pending_requests = col.find({"chat_id": chat_id})
+    
+    count = 0
+    async for request in pending_requests:
         try:
-            await app.decline_chat_join_request(chat_id, req.from_user.id)
-            col.delete_one({"chat_id": chat_id, "user_id": req.from_user.id})
-            await asyncio.sleep(0.2)
-        except Exception:
-            pass
+            user_id_to_dismiss = request["user_id"]
+            await app.decline_chat_join_request(chat_id, user_id_to_dismiss)
+            col.delete_one({"chat_id": chat_id, "user_id": user_id_to_dismiss})
+            count += 1
+            await asyncio.sleep(0.2)  # Rate limit avoid karne ke liye
+        except Exception as e:
+            print(f"Error dismissing user {request['user_id']}: {e}")
+            continue
 
-    await message.reply_text(f"❌ ᴅɪsᴍɪssɪɴɢ ʀᴇǫᴜᴇsᴛs sᴛᴀʀᴛᴇᴅ ʙʏ {message.from_user.mention}")
+    await message.reply_text(f"❌ {count} ʀᴇǫᴜᴇsᴛs ᴅɪsᴍɪssᴇᴅ ʙʏ {message.from_user.mention}")
