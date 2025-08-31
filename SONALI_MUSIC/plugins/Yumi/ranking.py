@@ -13,6 +13,7 @@ db = mongo_client["purvi_rankings"]
 collection = db["ranking"]
 weekly_collection = db["weekly_ranking"]
 today_collection = db["today_ranking"]
+meta_collection = db["meta"]
 
 user_data = {}
 today_stats = {}
@@ -62,32 +63,43 @@ def reset_weekly_data():
     global weekly_stats
     weekly_stats = {}
     weekly_collection.delete_many({})
-    print("ᴡᴇᴇᴋʟʏ ᴅᴀᴛᴀ ʜᴀs ʙᴇᴇɴ ʀᴇsᴇᴛ!")
+    meta_collection.update_one(
+        {"_id": "weekly_reset"},
+        {"$set": {"last_reset": datetime.utcnow()}},
+        upsert=True
+    )
+    print("✅ ᴡᴇᴇᴋʟʏ ᴅᴀᴛᴀ ʜᴀs ʙᴇᴇɴ ʀᴇsᴇᴛ!")
 
 
 async def weekly_reset_scheduler():
     while True:
         try:
-            now = datetime.now()
-            # ɢᴇᴛ ɴᴇxᴛ sᴜɴᴅᴀʏ
-            days_ahead = 6 - now.weekday()  # 6 ɪs sᴜɴᴅᴀʏ
-            if days_ahead <= 0:  # ɪғ ᴛᴏᴅᴀʏ ɪs sᴜɴᴅᴀʏ
-                days_ahead += 7
-            next_sunday = now + timedelta(days=days_ahead)
-            next_sunday = next_sunday.replace(hour=0, minute=0, second=0, microsecond=0)
-            wait_seconds = (next_sunday - now).total_seconds()
-            print(f"ᴡᴇᴇᴋʟʏ ʀᴇsᴇᴛ sᴄʜᴇᴅᴜʟᴇᴅ ɪɴ {wait_seconds} sᴇᴄᴏɴᴅs")
+            record = meta_collection.find_one({"_id": "weekly_reset"})
+            last_reset = record["last_reset"] if record else None
+
+            if not last_reset:
+                reset_weekly_data()
+                last_reset = datetime.utcnow()
+
+            next_reset = last_reset + timedelta(days=7)
+            now = datetime.utcnow()
+
+            if now >= next_reset:
+                reset_weekly_data()
+                next_reset = datetime.utcnow() + timedelta(days=7)
+
+            wait_seconds = (next_reset - now).total_seconds()
+            print(f"⏳ ɴᴇxᴛ ᴡᴇᴇᴋʟʏ ʀᴇsᴇᴛ sᴄʜᴇᴅᴜʟᴇᴅ ɪɴ {wait_seconds} sᴇᴄᴏɴᴅs")
             await asyncio.sleep(wait_seconds)
-            reset_weekly_data()
+
         except Exception as e:
-            print(f"ᴇʀʀᴏʀ ɪɴ ᴡᴇᴇᴋʟʏ ʀᴇsᴇᴛ sᴄʜᴇᴅᴜʟᴇʀ: {e}")
+            print(f"⚠️ ᴇᴛʀᴏʀ ɪɴ ᴡᴇᴇᴋʟʏ ʀᴇsᴇᴛ sᴄʜᴇᴅᴜʟᴇʀ :- {e}")
             await asyncio.sleep(3600)
 
 
 @app.on_message(filters.group, group=6)
 async def today_watcher(_, message):
     try:
-        # ᴄʜᴇᴄᴋ ɪғ ᴍᴇssᴀɢᴇ ʜᴀs ᴀ ᴜsᴇʀ
         if not message.from_user:
             return
         
