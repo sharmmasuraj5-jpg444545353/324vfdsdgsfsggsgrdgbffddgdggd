@@ -6,13 +6,13 @@ from SONALI_MUSIC.utils.errors import capture_err
 import httpx 
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
-start_txt = """**<u>❃ ᴡєʟᴄσϻє ᴛᴏ ᴛєᴧϻ ᴘᴜʀᴠɪ ʀєᴘσs ❃</u>
+start_txt = """**<u>❃ ᴘᴜʀᴠɪ ʙᴏᴛs ʀєᴘσs ❃</u>
 
-✼ ʀєᴘᴏ ᴛᴏ ηʜɪ ϻɪʟєɢᴧ ʏʜᴧ
+✼ ʀєᴘᴏ ɪs ηᴏᴡ ᴘʀɪᴠᴧᴛє ᴅᴜᴅє 😌
  
-❉ ᴘᴧʜʟє ᴘᴧᴘᴧ ʙσʟ ʀєᴘᴏ ᴏᴡηєʀ ᴋᴏ 
+❉  ʏᴏᴜ ᴄᴧη мʏ ᴜsє ᴘᴜʙʟɪᴄ ʀєᴘσs !! 
 
-✼ || [ᴧʟᴘʜᴧ-ʙᴧʙʏ](https://t.me/ll_ALPHA_BABY_lll) ||
+✼ || ɢɪᴛ :-  [ᴧʟᴘʜᴧ-ʙᴧʙʏ](https://t.me/TheSigmaCoder) ||
  
 ❊ ʀᴜη 24x7 ʟᴧɢ ϝʀєє ᴡɪᴛʜσᴜᴛ sᴛσᴘ**
 """
@@ -24,7 +24,7 @@ start_txt = """**<u>❃ ᴡєʟᴄσϻє ᴛᴏ ᴛєᴧϻ ᴘᴜʀᴠɪ ʀєᴘ
 async def start(_, msg):
     buttons = [
         [ 
-          InlineKeyboardButton("✙ ᴧᴅᴅ ϻє вᴧʙʏ ✙", url=f"https://t.me/{BOT_USERNAME}?startgroup=true")
+          InlineKeyboardButton("✙ ᴧᴅᴅ ϻє вᴧʙʏ ✙", url=f"https://t.me/{app.username}?startgroup=true")
         ],
         [
           InlineKeyboardButton("• ʜєʟᴘ •", url="https://t.me/+gMy8Cp190ediNzZl"),
