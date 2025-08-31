@@ -78,7 +78,7 @@ async def callback_handler(client: Client, query: CallbackQuery):
             if "already handled" in error_msg.lower():
                 await query.edit_message_text("**✅ ʀᴇǫᴜᴇsᴛ ᴀʟʀᴇᴀᴅʏ ᴀᴘᴘʀᴏᴠᴇᴅ**")
             else:
-                await query.answer(f"**⚠️ ᴇʀʀᴏʀ :-** {error_msg}", show_alert=True)
+                await query.answer(f"⚠️ ᴇʀʀᴏʀ :- {error_msg}", show_alert=True)
 
     elif action == "dismiss":
         try:
