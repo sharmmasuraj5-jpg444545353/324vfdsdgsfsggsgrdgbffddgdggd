@@ -31,7 +31,7 @@ async def raid_command(client, message: Message):
                 user = await client.get_users(user_arg)
                 target_user = f"<a href='tg://user?id={user.id}'>{user.first_name}</a>"
             except:
-                await message.reply_text("⚠️ ᴘʟᴇᴀsᴇ ᴘʀᴏᴠɪᴅᴇ ᴀ ᴠᴀʟɪᴅ ᴜsᴇʀɴᴀᴍᴇ ᴏʀ ɪᴅ.")
+                await message.reply_text("**⚠️ ᴘʀᴏᴠɪᴅᴇ ᴠᴀʟɪᴅ ᴜsᴇʀɴᴀᴍᴇ/ɪᴅ.**\n\n**⊚ ᴜsᴀɢᴇ :-** `.raid username 5 hi`")
                 return
 
             try:
@@ -42,7 +42,7 @@ async def raid_command(client, message: Message):
             try:
                 text_to_spam = " ".join(message.command[3:])
             except:
-                text_to_spam = "Sᴘᴀᴍ!"
+                text_to_spam = "𝖧ᴇʟʟᴏ !!"
 
         for _ in range(count):
             await message.reply_text(f"{target_user} **{text_to_spam}**")
