@@ -183,18 +183,6 @@ class Helper(object):
 '''
 
 
-    HELP_13 = '''```
-❖ ᴛʀυᴛʜ ᴧηᴅ ᴅᴧʀє ❖```
-
-**❖ ᴛʀυᴛʜ ᴧηᴅ ᴅᴧʀє ᴄσϻϻᴧηᴅ
-
-❍ /truth : sєηᴅs ᴧ ʀᴧηᴅσϻ ᴛʀυᴛʜ sᴛʀɪηɢ
-❍ /dare : sєηᴅs ᴧ ʀᴧηᴅσϻ ᴅᴧʀє sᴛʀɪηɢ
-
-❖ 𝐏ᴏᴡᴇʀᴇᴅ 𝖡ʏ » [⎯᪵፝֟፝֟⎯꯭𓆩꯭ 𝐀 ꯭ʟ ꯭ᴘ ꯭ʜ꯭ ᴧ꯭⎯꯭꯭‌꯭🥂꯭༎꯭ 𓆪](https://t.me/ll_ALPHA_BABY_lll)**
-'''
-
-
 
 #------------------------------------------------------------------------------------------------------------------------
 # MANAGEMENT | MANAGEMENT | MANAGEMENT | MANAGEMENT | MANAGEMENT | MANAGEMENT | MANAGEMENT | MANAGEMENT | MANAGEMENT | 
