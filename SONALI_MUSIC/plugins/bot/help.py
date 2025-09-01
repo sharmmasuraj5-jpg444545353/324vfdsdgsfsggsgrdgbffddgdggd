@@ -239,8 +239,11 @@ async def mb_plugin_button(client, CallbackQuery):
 
 @app.on_callback_query(filters.regex("ALLBOT_CP") & ~BANNED_USERS)
 async def helper_cb(client, CallbackQuery):
-    await CallbackQuery.edit_message_text(Helper.HELP_ALLBOT, reply_markup=InlineKeyboardMarkup(BUTTONS.ABUTTON))
-
+    text = Helper.HELP_ALLBOT.format(app.mention)
+    await CallbackQuery.edit_message_text(
+        text,
+        reply_markup=InlineKeyboardMarkup(BUTTONS.ABUTTON)
+    )
         
 @app.on_callback_query(filters.regex('ALLBOT_BACK'))      
 async def mb_plugin_button(client, CallbackQuery):
