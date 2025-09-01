@@ -41,28 +41,21 @@ class BUTTONS(object):
     
     
     MBUTTON = [
-                [
-            InlineKeyboardButton("єxᴛʀᴧ", callback_data="MANAGEMENT_BACK HELP_25"),
+
+        [
+            InlineKeyboardButton("ᴀɴᴛɪ ғʟᴏᴏᴅ", callback_data="MANAGEMENT_BACK HELP_28"),
+            InlineKeyboardButton("ʙᴜɢs", callback_data="MANAGEMENT_BACK HELP_29"),
+            InlineKeyboardButton("ᴄᴏᴜɴᴛʀʏ", callback_data="MANAGEMENT_BACK HELP_30"),
         ],
         [
-            InlineKeyboardButton("ʙᴧη", callback_data="MANAGEMENT_BACK HELP_14"),
-            InlineKeyboardButton("ᴋɪᴄᴋ", callback_data="MANAGEMENT_BACK HELP_15"),
-            InlineKeyboardButton("ϻυᴛє", callback_data="MANAGEMENT_BACK HELP_16"),
+            InlineKeyboardButton("ᴘᴜʀɢᴇ", callback_data="MANAGEMENT_BACK HELP_31"),
+            InlineKeyboardButton("ᴘʏᴛʜᴏɴ", callback_data="MANAGEMENT_BACK HELP_32"),
+            InlineKeyboardButton("ʀᴀɴᴋɪɴɢ", callback_data="MANAGEMENT_BACK HELP_33"),
         ],
         [
-            InlineKeyboardButton("ᴘɪη", callback_data="MANAGEMENT_BACK HELP_17"),
-            InlineKeyboardButton("sᴛᴧғғ", callback_data="MANAGEMENT_BACK HELP_18"),
-            InlineKeyboardButton("sєᴛ-υᴘ", callback_data="MANAGEMENT_BACK HELP_19"),
-        ],
-        [
-            InlineKeyboardButton("ᴢσϻʙɪє", callback_data="MANAGEMENT_BACK HELP_20"),
-            InlineKeyboardButton("ɢᴧϻє", callback_data="MANAGEMENT_BACK HELP_21"),
-            InlineKeyboardButton("ɪϻᴘσsᴛєʀ", callback_data="MANAGEMENT_BACK HELP_22"),
-        ],
-        [
-            InlineKeyboardButton("sɢ", callback_data="MANAGEMENT_BACK HELP_23"),
-            InlineKeyboardButton("ᴛʀ", callback_data="MANAGEMENT_BACK HELP_24"),
-            InlineKeyboardButton("ɢʀᴧᴘʜ", callback_data="MANAGEMENT_BACK HELP_26"),
+            InlineKeyboardButton("ʀᴛᴍᴘ ʟɪᴠᴇ", callback_data="MANAGEMENT_BACK HELP_34"),
+            InlineKeyboardButton("sᴏᴜʀᴄᴇ", callback_data="MANAGEMENT_BACK HELP_34"),
+            InlineKeyboardButton("ᴠᴄ ᴛᴏᴏʟs", callback_data="MANAGEMENT_BACK HELP_36"),
         ],
         [
             InlineKeyboardButton("⌯ ʙᴧᴄᴋ ⌯", callback_data=f"MAIN_CP"), 
