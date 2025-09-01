@@ -85,6 +85,10 @@ class BUTTONS(object):
             InlineKeyboardButton("ϻᴧηᴧɢєϻєηᴛ", callback_data="TOOL_CP"),
         ],
         [
+            InlineKeyboardButton("ɴᴇᴡ ᴍᴏᴅᴜʟᴇs", callback_data="MANAGEMENT_CP"),
+            
+        ],
+        [
             InlineKeyboardButton("ᴧʟʟ ʙσᴛ's", callback_data="MAIN_BACK HELP_ABOUT"),
             InlineKeyboardButton("ᴘʀσϻσᴛɪση", callback_data="PROMOTION_CP"),
         ],
