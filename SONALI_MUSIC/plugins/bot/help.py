@@ -2,7 +2,6 @@ from typing import Union
 from pyrogram import filters, types
 from pyrogram.types import InlineKeyboardMarkup, Message, InlineKeyboardButton
 from SONALI_MUSIC import app
-from SONALI_MUSIC.misc import SUDOERS
 from SONALI_MUSIC.utils import help_pannel
 from SONALI_MUSIC.utils.database import get_lang
 from SONALI_MUSIC.utils.decorators.language import LanguageStart, languageCB
