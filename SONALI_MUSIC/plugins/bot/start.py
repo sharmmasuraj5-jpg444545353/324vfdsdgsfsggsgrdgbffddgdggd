@@ -62,22 +62,19 @@ EFFECT_IDS = [
 ]
 
 
-
 @app.on_message(filters.command(["start"]) & filters.private & ~BANNED_USERS)
 @LanguageStart
 async def start_pm(client, message: Message, _):
     await add_served_user(message.from_user.id)
 
-    
-    await message.reply_sticker(random.choice(PURVI_STKR))
-await asyncio.sleep(2) 
-await sticker.delete()
-
-    
+    sticker = await message.reply_sticker(random.choice(PURVI_STKR))
+    await asyncio.sleep(2)
+    await sticker.delete()
 
     if len(message.text.split()) > 1:
         name = message.text.split(None, 1)[1]
-        if name[0:4] == "help":
+
+        if name.startswith("help"):
             keyboard = help_pannel(_)
             return await message.reply_photo(
                 random.choice(NEXIO),
@@ -85,15 +82,19 @@ await sticker.delete()
                 caption=_["help_1"].format(config.SUPPORT_CHAT),
                 reply_markup=keyboard,
             )
-        if name[0:3] == "sud":
+
+        if name.startswith("sud"):
             await sudoers_list(client=client, message=message, _=_)
             if await is_on_off(2):
                 return await app.send_message(
                     chat_id=config.LOGGER_ID,
-                    text=f"✦ {message.from_user.mention} ᴊᴜsᴛ sᴛᴀʀᴛᴇᴅ ᴛʜᴇ ʙᴏᴛ ᴛᴏ ᴄʜᴇᴄᴋ <b>sᴜᴅᴏʟɪsᴛ</b>.\n\n<b>✦ ᴜsᴇʀ ɪᴅ ➠</b> <code>{message.from_user.id}</code>\n<b>✦ ᴜsᴇʀɴᴀᴍᴇ ➠</b> @{message.from_user.username}",
+                    text=f"✦ {message.from_user.mention} ᴊᴜsᴛ sᴛᴀʀᴛᴇᴅ ᴛʜᴇ ʙᴏᴛ ᴛᴏ ᴄʜᴇᴄᴋ <b>sᴜᴅᴏʟɪsᴛ</b>.\n\n"
+                         f"<b>✦ ᴜsᴇʀ ɪᴅ ➠</b> <code>{message.from_user.id}</code>\n"
+                         f"<b>✦ ᴜsᴇʀɴᴀᴍᴇ ➠</b> @{message.from_user.username}",
                 )
             return
-        if name[0:3] == "inf":
+
+        if name.startswith("inf"):
             m = await message.reply_text("🔎")
             query = (str(name)).replace("info_", "", 1)
             query = f"https://www.youtube.com/watch?v={query}"
@@ -107,6 +108,7 @@ await sticker.delete()
                 channel = result["channel"]["name"]
                 link = result["link"]
                 published = result["publishedTime"]
+
             searched_text = _["start_6"].format(
                 title, duration, views, published, channellink, channel, app.mention
             )
@@ -119,29 +121,31 @@ await sticker.delete()
                 ]
             )
             await m.delete()
-            await app.send_photo(
+            return await app.send_photo(
                 chat_id=message.chat.id,
                 photo=thumbnail,
                 message_effect_id=random.choice(EFFECT_IDS),
                 caption=searched_text,
                 reply_markup=key,
             )
-    else:
-        out = private_panel(_)
-        baby = await message.reply_text(f"**ʜєʟʟᴏ ᴅєᴧʀ {user.mention}**")
-        await asyncio.sleep(0.3)
-        await baby.edit_text(f"**ɪ ᴧϻ ʏσᴜʀ ϻᴜsɪᴄ ʙσᴛ..🦋**")
-        await asyncio.sleep(0.3)
-        await baby.edit_text(f"**ʜσᴡ ᴧʀє ʏσᴜ ᴛσᴅᴧʏ.....??**")
-        await asyncio.sleep(0.3)
-        await baby.delete()
 
+    else:
+        purvi = await message.reply_text(f"**ʜєʟʟᴏ ᴅєᴧʀ {message.from_user.mention}**")
+        await asyncio.sleep(0.4)
+        await purvi.edit_text("**ɪ ᴧϻ ʏσᴜʀ ϻᴜsɪᴄ ʙσᴛ..🦋**")
+        await asyncio.sleep(0.4)
+        await purvi.edit_text("**ʜσᴡ ᴧʀє ʏσᴜ ᴛσᴅᴧʏ.....??**")
+        await asyncio.sleep(0.4)
+        await purvi.delete()
+
+        out = private_panel(_)
         await message.reply_photo(
             random.choice(NEXIO),
             message_effect_id=random.choice(EFFECT_IDS),
             caption=_["start_2"].format(message.from_user.mention, app.mention),
             reply_markup=InlineKeyboardMarkup(out),
         )
+
 
 
 @app.on_message(filters.command(["start"]) & filters.group & ~BANNED_USERS)
