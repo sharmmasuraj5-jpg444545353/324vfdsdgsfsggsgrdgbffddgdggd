@@ -35,6 +35,9 @@ from SONALI_MUSIC.utils.inline.settings import (
 )
 from SONALI_MUSIC.utils.inline.start import private_panel
 from config import BANNED_USERS, OWNER_ID
+from SONALI_MUSIC.misc import SUDOERS
+from SONALI_MUSIC.help import Helper
+
 
 
 @app.on_message(
@@ -86,6 +89,32 @@ async def settings_back_markup(client, CallbackQuery: CallbackQuery, _):
         return await CallbackQuery.edit_message_reply_markup(
             reply_markup=InlineKeyboardMarkup(buttons)
         )
+
+
+@app.on_callback_query()
+async def sudo_callback(client: app, callback_query: CallbackQuery):
+    user_id = callback_query.from_user.id
+    data = callback_query.data
+
+    if data == "SUDO_BTN":
+        if user_id not in SUDOERS:
+            await callback_query.answer(
+                "⛔ ʏᴏᴜ ᴀʀᴇ ɴᴏᴛ ɪɴ sᴜᴅᴏ ʟɪsᴛ.",
+                show_alert=True
+            )
+            return
+
+        keyboard = InlineKeyboardMarkup(
+            [
+                [InlineKeyboardButton("⌯ ʙᴧᴄᴋ ⌯", callback_data="MAIN_CP")]
+            ]
+        )
+
+        await callback_query.message.edit_text(
+            Helper.SUDO_INFO,
+            reply_markup=keyboard
+)
+
 
 
 @app.on_callback_query(
