@@ -291,7 +291,15 @@ async def sudo_callback(client: app, callback_query: CallbackQuery):
 )
 
 
+@app.on_callback_query(filters.regex("abot_cb") & ~BANNED_USERS)
+async def helper_cb(client, CallbackQuery):
+    bot = await client.get_me()
+    bot_mention = bot.mention
 
+    await CallbackQuery.edit_message_text(
+        Helper.HELP_ALLBOT.format(bot_mention),
+        reply_markup=InlineKeyboardMarkup(BUTTONS.ABUTTON),
+    )
 #------------------------------------------------------------------------------------------------------------------------
 #------------------------------------------------------------------------------------------------------------------------
 #------------------------------------------------------------------------------------------------------------------------
