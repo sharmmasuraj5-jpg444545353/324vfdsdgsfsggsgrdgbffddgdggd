@@ -54,6 +54,15 @@ PURVI_STKR = [
     "CAACAgUAAxkBAAIBQGi1Sqk3OGQ2jRW2rN6ZVZ7vWY2ZAAJZHQACCa-pVfefqZZtTHEdHgQ",
 ]
 
+EFFECT_IDS = [
+    5046509860389126442,
+    5107584321108051014,
+    5104841245755180586,
+    5159385139981059251,
+]
+
+
+
 @app.on_message(filters.command(["start"]) & filters.private & ~BANNED_USERS)
 @LanguageStart
 async def start_pm(client, message: Message, _):
