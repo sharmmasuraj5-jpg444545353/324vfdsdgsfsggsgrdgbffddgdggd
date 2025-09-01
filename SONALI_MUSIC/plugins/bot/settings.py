@@ -36,7 +36,8 @@ from SONALI_MUSIC.utils.inline.settings import (
 from SONALI_MUSIC.utils.inline.start import private_panel
 from config import BANNED_USERS, OWNER_ID
 from SONALI_MUSIC.misc import SUDOERS
-from SONALI_MUSIC.help import Helper
+from SONALI_MUSIC.help.buttons import BUTTONS
+from SONALI_MUSIC.help.helper import Helper
 
 
 
