@@ -29,48 +29,16 @@ class BUTTONS(object):
         [
             InlineKeyboardButton("ɢᴧϻє", callback_data="TOOL_BACK HELP_21"),
             InlineKeyboardButton("sєᴛᴜᴘ", callback_data="TOOL_BACK HELP_17"),
-            InlineKeyboardButton("sᴧηɢϻᴧᴛᴧ", callback_data="TOOL_BACK HELP_23"),
+            InlineKeyboardButton("ʜɪsᴛᴏʀʏ", callback_data="TOOL_BACK HELP_23"),
         ],
         [
             InlineKeyboardButton("ɢɪᴛʜᴜʙ", callback_data="TOOL_BACK HELP_25"),
-            InlineKeyboardButton("ᴢᴏᴍʙɪᴇs", callback_data=f"TOOL_BACK HELP_27"),
+            InlineKeyboardButton("ᴛᴛs", callback_data=f"TOOL_BACK HELP_27"),
             InlineKeyboardButton("sᴛɪᴄᴋєʀs", callback_data="TOOL_BACK HELP_10"),
         ],
         [InlineKeyboardButton("⌯ ʙᴧᴄᴋ ⌯", callback_data=f"MAIN_CP")]
     ]
-
     
-
-
-
-    
-    ALPHABUTTON = [
-        [
-            InlineKeyboardButton("ᴧɪ | ᴄʜᴧᴛɢᴘᴛ", callback_data="TOOL_BACK HELP_01"),
-        ],
-        [
-            InlineKeyboardButton("sєᴧʀᴄʜ", callback_data="TOOL_BACK HELP_02"),
-            InlineKeyboardButton("ᴛᴛs", callback_data="TOOL_BACK HELP_03"),
-            InlineKeyboardButton("ɪηғσ", callback_data="TOOL_BACK HELP_04"),
-        ],
-        [
-            InlineKeyboardButton("ғσηᴛ", callback_data="TOOL_BACK HELP_05"),
-            InlineKeyboardButton("ϻᴧᴛʜ", callback_data="TOOL_BACK HELP_06"),
-            InlineKeyboardButton("ᴛᴧɢᴧʟʟ", callback_data="TOOL_BACK HELP_07"),
-        ],
-        [
-            InlineKeyboardButton("ɪϻᴧɢє", callback_data="TOOL_BACK HELP_08"),
-            InlineKeyboardButton("ʜᴧsᴛᴧɢ", callback_data="TOOL_BACK HELP_09"),
-            InlineKeyboardButton("sᴛɪᴄᴋєʀs", callback_data="TOOL_BACK HELP_10"),
-        ],
-        [
-            InlineKeyboardButton("ғυη", callback_data="TOOL_BACK HELP_11"),
-            InlineKeyboardButton("ǫυσᴛʟʏ", callback_data="TOOL_BACK HELP_12"),
-            InlineKeyboardButton("ᴛ-ᴅ", callback_data="TOOL_BACK HELP_13"),
-        ],
-        [   
-            InlineKeyboardButton("⌯ ʙᴧᴄᴋ ⌯", callback_data=f"MAIN_CP"),]
-        ]
     
     MBUTTON = [
                 [
@@ -102,11 +70,8 @@ class BUTTONS(object):
         ]
     PBUTTON = [
         [
-            InlineKeyboardButton("˹ ᴄσηᴛᴧᴄᴛ ˼", url="https://t.me/TheSigmaCoder")
-        ],
-        [
+            InlineKeyboardButton("˹ ᴄσηᴛᴧᴄᴛ ˼", url="https://t.me/TheSigmaCoder"),
             InlineKeyboardButton("⌯ ʙᴧᴄᴋ ⌯", callback_data="MAIN_CP"),
-            
         ]
         ]
     
