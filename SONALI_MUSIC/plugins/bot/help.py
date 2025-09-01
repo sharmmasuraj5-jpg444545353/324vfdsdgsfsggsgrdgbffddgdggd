@@ -2,6 +2,7 @@ from typing import Union
 from pyrogram import filters, types
 from pyrogram.types import InlineKeyboardMarkup, Message, InlineKeyboardButton
 from SONALI_MUSIC import app
+from SONALI_MUSIC.misc import SUDOERS
 from SONALI_MUSIC.utils import help_pannel
 from SONALI_MUSIC.utils.database import get_lang
 from SONALI_MUSIC.utils.decorators.language import LanguageStart, languageCB
@@ -10,6 +11,7 @@ from config import BANNED_USERS, START_IMG_URL, SUPPORT_CHAT
 from strings import get_string, helpers
 from SONALI_MUSIC.help.buttons import BUTTONS
 from SONALI_MUSIC.help.helper import Helper
+
 
 #------------------------------------------------------------------------------------------------------------------------
 # MUSIC | MUSIC | MUSIC | MUSIC | MUSIC | MUSIC | MUSIC | MUSIC | MUSIC | MUSIC | MUSIC | MUSIC | MUSIC | MUSIC | MUSIC | 
@@ -259,6 +261,31 @@ async def mb_plugin_button(client, CallbackQuery):
         await CallbackQuery.edit_message_text(f"`something errors`",reply_markup=keyboard,parse_mode=enums.ParseMode.MARKDOWN)
     else:
         await CallbackQuery.edit_message_text(getattr(Helper, cb), reply_markup=keyboard)
+
+@app.on_callback_query()
+async def sudo_callback(client: app, callback_query: CallbackQuery):
+    user_id = callback_query.from_user.id
+    data = callback_query.data
+
+    if data == "SUDO_INFO":
+        if user_id not in SUDOERS:
+            await callback_query.answer(
+                "⛔ ʏᴏᴜ ᴀʀᴇ ɴᴏᴛ ɪɴ sᴜᴅᴏ ʟɪsᴛ.",
+                show_alert=True
+            )
+            return
+
+        keyboard = InlineKeyboardMarkup(
+            [
+                [InlineKeyboardButton("ʙᴀᴄᴋ", callback_data="MAIN_CP")]
+            ]
+        )
+
+        await callback_query.message.edit_text(
+            Helper.SUDO_INFO,
+            reply_markup=keyboard
+)
+
 
 
 #------------------------------------------------------------------------------------------------------------------------
