@@ -44,17 +44,17 @@ class BUTTONS(object):
 
         [
             InlineKeyboardButton("ᴀɴᴛɪ ғʟᴏᴏᴅ", callback_data="MANAGEMENT_BACK HELP_28"),
-            InlineKeyboardButton("ʙᴜɢs", callback_data="MANAGEMENT_BACK HELP_29"),
-            InlineKeyboardButton("ᴄᴏᴜɴᴛʀʏ", callback_data="MANAGEMENT_BACK HELP_30"),
+            InlineKeyboardButton("ᴀᴘʀᴏᴠᴀʟ", callback_data="MANAGEMENT_BACK HELP_29"),
+            InlineKeyboardButton("ʙᴜɢs", callback_data="MANAGEMENT_BACK HELP_30"),
         ],
         [
-            InlineKeyboardButton("ᴘᴜʀɢᴇ", callback_data="MANAGEMENT_BACK HELP_31"),
-            InlineKeyboardButton("ᴘʏᴛʜᴏɴ", callback_data="MANAGEMENT_BACK HELP_32"),
-            InlineKeyboardButton("ʀᴀɴᴋɪɴɢ", callback_data="MANAGEMENT_BACK HELP_33"),
+            InlineKeyboardButton("ᴄᴏᴜɴᴛʀʏ", callback_data="MANAGEMENT_BACK HELP_31"),
+            InlineKeyboardButton("ᴘᴜʀɢᴇ", callback_data="MANAGEMENT_BACK HELP_32"),
+            InlineKeyboardButton("ᴘʏᴛʜᴏɴ", callback_data="MANAGEMENT_BACK HELP_33"),
         ],
         [
+            InlineKeyboardButton("ʀᴀɴᴋɪɴɢ", callback_data="MANAGEMENT_BACK HELP_34"),
             InlineKeyboardButton("ʀᴛᴍᴘ ʟɪᴠᴇ", callback_data="MANAGEMENT_BACK HELP_34"),
-            InlineKeyboardButton("sᴏᴜʀᴄᴇ", callback_data="MANAGEMENT_BACK HELP_34"),
             InlineKeyboardButton("ᴠᴄ ᴛᴏᴏʟs", callback_data="MANAGEMENT_BACK HELP_36"),
         ],
         [
