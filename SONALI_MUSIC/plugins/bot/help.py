@@ -1,6 +1,6 @@
 from typing import Union
 from pyrogram import filters, types
-from pyrogram.types import InlineKeyboardMarkup, Message, InlineKeyboardButton
+from pyrogram.types import InlineKeyboardMarkup, Message, InlineKeyboardButton, CallbackQuery
 from SONALI_MUSIC import app
 from SONALI_MUSIC.misc import SUDOERS
 from SONALI_MUSIC.utils import help_pannel
