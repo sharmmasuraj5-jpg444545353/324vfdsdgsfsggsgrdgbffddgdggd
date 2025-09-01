@@ -1,0 +1,78 @@
+from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, Message
+from pyrogram import Client, filters, enums 
+
+import config
+from SONALI_MUSIC import app
+
+class BUTTONS(object):
+    BBUTTON = [
+        [
+            InlineKeyboardButton("ᴄʜᴧᴛ-ɢᴘᴛ", callback_data="TOOL_BACK HELP_01"),
+            InlineKeyboardButton("ᴧᴄᴛɪση", callback_data="TOOL_BACK HELP_14"),
+            InlineKeyboardButton("ᴄσᴜᴘʟєs", callback_data="TOOL_BACK HELP_08"),
+        ],
+        [
+            InlineKeyboardButton("sєᴧʀᴄʜ", callback_data="TOOL_BACK HELP_02"),
+            InlineKeyboardButton("ᴛʀᴧηsʟᴧᴛє", callback_data="TOOL_BACK HELP_24"),
+            InlineKeyboardButton("ɪηғσ", callback_data="TOOL_BACK HELP_04"),
+        ],
+        [
+            InlineKeyboardButton("ғσηᴛ", callback_data="TOOL_BACK HELP_05"),
+            InlineKeyboardButton("ᴡʜɪsᴘєʀ", callback_data="TOOL_BACK HELP_03"),
+            InlineKeyboardButton("ᴛᴧɢᴧʟʟ", callback_data="TOOL_BACK HELP_07"),
+        ],
+        [
+            InlineKeyboardButton("ғυη", callback_data="TOOL_BACK HELP_11"),
+            InlineKeyboardButton("ǫυσᴛʟʏ", callback_data="TOOL_BACK HELP_12"),
+            InlineKeyboardButton("Ⓣ-ɢʀᴧᴘʜ", callback_data="TOOL_BACK HELP_26"),
+        ],
+        [
+            InlineKeyboardButton("ɢᴧϻє", callback_data="TOOL_BACK HELP_21"),
+            InlineKeyboardButton("sєᴛᴜᴘ", callback_data="TOOL_BACK HELP_17"),
+            InlineKeyboardButton("ʜɪsᴛᴏʀʏ", callback_data="TOOL_BACK HELP_23"),
+        ],
+        [
+            InlineKeyboardButton("ɢɪᴛʜᴜʙ", callback_data="TOOL_BACK HELP_25"),
+            InlineKeyboardButton("ᴛᴛs", callback_data=f"TOOL_BACK HELP_27"),
+            InlineKeyboardButton("sᴛɪᴄᴋєʀs", callback_data="TOOL_BACK HELP_10"),
+        ],
+        [InlineKeyboardButton("⌯ ʙᴧᴄᴋ ⌯", callback_data=f"MAIN_CP")]
+    ]
+    
+    
+    
+    PBUTTON = [
+        [
+            InlineKeyboardButton("˹ ᴄσηᴛᴧᴄᴛ ˼", url="https://t.me/TheSigmaCoder"),
+            InlineKeyboardButton("⌯ ʙᴧᴄᴋ ⌯", callback_data="MAIN_CP"),
+        ]
+        ]
+    
+    ABUTTON = [
+        [
+            InlineKeyboardButton("˹ sυᴘᴘσʀᴛ ˼", url="https://t.me/PURVI_BOTS"),
+            InlineKeyboardButton("˹ υᴘᴅᴧᴛєs ˼", url="https://t.me/+gMy8Cp190ediNzZl"),
+        ],
+        [  
+            InlineKeyboardButton("˹ ᴘʀɪᴠᴧᴄʏ ˼", url="https://telegra.ph/Privacy-Policy--Purvi-Bots-by-ALPHA-BABY-08-06"),
+            InlineKeyboardButton("⌯ ʙᴧᴄᴋ ⌯", callback_data="settingsback_helper"),
+        ]
+        ]
+    
+    SBUTTON = [
+        [
+            InlineKeyboardButton("ϻᴜѕɪᴄ", callback_data="settings_back_helper"),
+            InlineKeyboardButton("ϻᴧηᴧɢєϻєηᴛ", callback_data="TOOL_CP"),
+        ],
+        [
+            InlineKeyboardButton("ᴧʟʟ ʙσᴛ's", callback_data="MAIN_BACK HELP_ABOUT"),
+            InlineKeyboardButton("ᴘʀσϻσᴛɪση", callback_data="PROMOTION_CP"),
+        ],
+        [
+            InlineKeyboardButton("⌯ ʙᴧᴄᴋ ᴛσ ʜσϻє ⌯", callback_data="settingsback_helper"),
+            
+        ]
+        ]
+
+
+
