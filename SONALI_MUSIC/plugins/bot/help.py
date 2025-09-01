@@ -208,8 +208,6 @@ async def mb_plugin_button(client, CallbackQuery):
 #------------------------------------------------------------------------------------------------------------------------
 # PROMOTION | PROMOTION | PROMOTION | PROMOTION | PROMOTION | PROMOTION | PROMOTION | PROMOTION | PROMOTION | PROMOTION |
 #------------------------------------------------------------------------------------------------------------------------
-
-
 @app.on_callback_query(filters.regex("PROMOTION_CP") & ~BANNED_USERS)
 async def helper_cb(client, CallbackQuery):
     await CallbackQuery.edit_message_text(Helper.HELP_PROMOTION, reply_markup=InlineKeyboardMarkup(BUTTONS.PBUTTON))
@@ -222,7 +220,7 @@ async def mb_plugin_button(client, CallbackQuery):
     keyboard = InlineKeyboardMarkup(
     [
     [
-    InlineKeyboardButton("⌯ ʙᴧᴄᴋ ⌯", callback_data=f"PROMOTION_CP")
+    InlineKeyboardButton("ʙᴀᴄᴋ", callback_data=f"PROMOTION_CP")
     ]
     ]
     )
@@ -242,12 +240,7 @@ async def mb_plugin_button(client, CallbackQuery):
 
 @app.on_callback_query(filters.regex("ALLBOT_CP") & ~BANNED_USERS)
 async def helper_cb(client, CallbackQuery):
-    bot_mention = app.mention
-    text = Helper.HELP_ALLBOT.format(bot_mention)
-    await CallbackQuery.edit_message_text(
-        text,
-        reply_markup=InlineKeyboardMarkup(BUTTONS.ABUTTON)
-    )
+    await CallbackQuery.edit_message_text(Helper.HELP_ALLBOT, reply_markup=InlineKeyboardMarkup(BUTTONS.ABUTTON))
 
         
 @app.on_callback_query(filters.regex('ALLBOT_BACK'))      
@@ -257,7 +250,7 @@ async def mb_plugin_button(client, CallbackQuery):
     keyboard = InlineKeyboardMarkup(
     [
     [
-    InlineKeyboardButton("⌯ ʙᴧᴄᴋ ⌯", callback_data=f"ALLBOT_CP")
+    InlineKeyboardButton("ʙᴀᴄᴋ", callback_data=f"ALLBOT_CP")
     ]
     ]
     )
@@ -265,6 +258,15 @@ async def mb_plugin_button(client, CallbackQuery):
         await CallbackQuery.edit_message_text(f"`something errors`",reply_markup=keyboard,parse_mode=enums.ParseMode.MARKDOWN)
     else:
         await CallbackQuery.edit_message_text(getattr(Helper, cb), reply_markup=keyboard)
+        
+
+
+        
+        
+
+
+
+
 
 @app.on_callback_query()
 async def sudo_callback(client: app, callback_query: CallbackQuery):
