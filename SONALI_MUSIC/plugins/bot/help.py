@@ -213,27 +213,43 @@ async def mb_plugin_button(client, CallbackQuery):
 #------------------------------------------------------------------------------------------------------------------------
 
 
-@app.on_callback_query(filters.regex("PROMOTION_CP") & ~BANNED_USERS)
+@app.on_callback_query(filters.regex("ALLBOT_CP") & ~BANNED_USERS)
 async def helper_cb(client, CallbackQuery):
-    await CallbackQuery.edit_message_text(Helper.HELP_PROMOTION, reply_markup=InlineKeyboardMarkup(BUTTONS.PBUTTON))
+    bot_mention = app.mention
+    text = Helper.HELP_ALLBOT.format(bot_mention)
+    await CallbackQuery.edit_message_text(
+        text,
+        reply_markup=InlineKeyboardMarkup(BUTTONS.ABUTTON)
+    )
 
-        
-@app.on_callback_query(filters.regex('PROMOTION_BACK'))      
+@app.on_callback_query(filters.regex('ALLBOT_BACK'))      
 async def mb_plugin_button(client, CallbackQuery):
     callback_data = CallbackQuery.data.strip()
-    cb = callback_data.split(None, 1)[1]
+    try:
+        cb = callback_data.split(None, 1)[1]
+    except IndexError:
+        cb = "" 
     keyboard = InlineKeyboardMarkup(
-    [
-    [
-    InlineKeyboardButton("ʙᴀᴄᴋ", callback_data=f"PROMOTION_CP")
-    ]
-    ]
+        [
+            [
+                InlineKeyboardButton("ʙᴀᴄᴋ", callback_data="ALLBOT_CP")
+            ]
+        ]
     )
-    if cb == "PROMOTION":
-        await CallbackQuery.edit_message_text(f"`something errors`",reply_markup=keyboard,parse_mode=enums.ParseMode.MARKDOWN)
-    else:
-        await CallbackQuery.edit_message_text(getattr(Helper, cb), reply_markup=keyboard)
 
+    if cb == "ALLBOT":
+        await CallbackQuery.edit_message_text(
+            "`something errors`",
+            reply_markup=keyboard,
+            parse_mode=enums.ParseMode.MARKDOWN
+        )
+    else:
+        bot_mention = app.mention
+        text = getattr(Helper, cb).format(bot_mention)  
+        await CallbackQuery.edit_message_text(
+            text,
+            reply_markup=keyboard
+        )
         
         
 
