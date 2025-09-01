@@ -119,7 +119,7 @@ async def mb_plugin_button(client, CallbackQuery):
     keyboard = InlineKeyboardMarkup(
     [
     [
-    InlineKeyboardButton("ʙᴀᴄᴋ", callback_data=f"MANAGEMENT_CP")
+    InlineKeyboardButton("⌯ ʙᴧᴄᴋ ⌯", callback_data=f"MANAGEMENT_CP")
     ]
     ]
     )
@@ -152,7 +152,7 @@ async def mb_plugin_button(client, CallbackQuery):
     keyboard = InlineKeyboardMarkup(
     [
     [
-    InlineKeyboardButton("ʙᴀᴄᴋ", callback_data=f"TOOL_CP")
+    InlineKeyboardButton("⌯ ʙᴧᴄᴋ ⌯", callback_data=f"TOOL_CP")
     ]
     ]
     )
@@ -186,7 +186,7 @@ async def mb_plugin_button(client, CallbackQuery):
 
     keyboard = InlineKeyboardMarkup([
         [    
-            InlineKeyboardButton("ʙᴀᴄᴋ", callback_data="MAIN_CP"),
+            InlineKeyboardButton("⌯ ʙᴧᴄᴋ ⌯", callback_data="MAIN_CP"),
             InlineKeyboardButton("˹ ᴘʀɪᴠᴧᴄʏ ˼", url="https://telegra.ph/Privacy-Policy--Purvi-Bots-by-ALPHA-BABY-08-06")
         ]
     ])
@@ -222,7 +222,7 @@ async def mb_plugin_button(client, CallbackQuery):
     keyboard = InlineKeyboardMarkup(
     [
     [
-    InlineKeyboardButton("ʙᴀᴄᴋ", callback_data=f"PROMOTION_CP")
+    InlineKeyboardButton("⌯ ʙᴧᴄᴋ ⌯", callback_data=f"PROMOTION_CP")
     ]
     ]
     )
@@ -257,7 +257,7 @@ async def mb_plugin_button(client, CallbackQuery):
     keyboard = InlineKeyboardMarkup(
     [
     [
-    InlineKeyboardButton("ʙᴀᴄᴋ", callback_data=f"ALLBOT_CP")
+    InlineKeyboardButton("⌯ ʙᴧᴄᴋ ⌯", callback_data=f"ALLBOT_CP")
     ]
     ]
     )
@@ -281,7 +281,7 @@ async def sudo_callback(client: app, callback_query: CallbackQuery):
 
         keyboard = InlineKeyboardMarkup(
             [
-                [InlineKeyboardButton("ʙᴀᴄᴋ", callback_data="MAIN_CP")]
+                [InlineKeyboardButton("⌯ ʙᴧᴄᴋ ⌯", callback_data="MAIN_CP")]
             ]
         )
 
