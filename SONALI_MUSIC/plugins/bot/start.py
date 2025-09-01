@@ -68,7 +68,7 @@ async def start_pm(client, message: Message, _):
     await add_served_user(message.from_user.id)
 
     sticker = await message.reply_sticker(random.choice(PURVI_STKR))
-    await asyncio.sleep(2)
+    await asyncio.sleep(1)
     await sticker.delete()
 
     if len(message.text.split()) > 1:
@@ -88,9 +88,7 @@ async def start_pm(client, message: Message, _):
             if await is_on_off(2):
                 return await app.send_message(
                     chat_id=config.LOGGER_ID,
-                    text=f"✦ {message.from_user.mention} ᴊᴜsᴛ sᴛᴀʀᴛᴇᴅ ᴛʜᴇ ʙᴏᴛ ᴛᴏ ᴄʜᴇᴄᴋ <b>sᴜᴅᴏʟɪsᴛ</b>.\n\n"
-                         f"<b>✦ ᴜsᴇʀ ɪᴅ ➠</b> <code>{message.from_user.id}</code>\n"
-                         f"<b>✦ ᴜsᴇʀɴᴀᴍᴇ ➠</b> @{message.from_user.username}",
+                    text=f"{message.from_user.mention} ᴊᴜsᴛ sᴛᴀʀᴛᴇᴅ ᴛʜᴇ ʙᴏᴛ ᴛᴏ ᴄʜᴇᴄᴋ <b>sᴜᴅᴏʟɪsᴛ</b>.\n\n<b>ᴜsᴇʀ ɪᴅ :</b> <code>{message.from_user.id}</code>\n<b>ᴜsᴇʀɴᴀᴍᴇ :</b> @{message.from_user.username}",
                 )
             return
 
@@ -128,6 +126,11 @@ async def start_pm(client, message: Message, _):
                 caption=searched_text,
                 reply_markup=key,
             )
+            if await is_on_off(2):
+                return await app.send_message(
+                    chat_id=config.LOGGER_ID,
+                    text=f"{message.from_user.mention} ᴊᴜsᴛ sᴛᴀʀᴛᴇᴅ ᴛʜᴇ ʙᴏᴛ ᴛᴏ ᴄʜᴇᴄᴋ <b>ᴛʀᴀᴄᴋ ɪɴғᴏʀᴍᴀᴛɪᴏɴ</b>.\n\n<b>ᴜsᴇʀ ɪᴅ :</b> <code>{message.from_user.id}</code>\n<b>ᴜsᴇʀɴᴀᴍᴇ :</b> @{message.from_user.username}",
+                )
 
     else:
         purvi = await message.reply_text(f"**ʜєʟʟᴏ ᴅєᴧʀ {message.from_user.mention}**")
@@ -145,6 +148,11 @@ async def start_pm(client, message: Message, _):
             caption=_["start_2"].format(message.from_user.mention, app.mention),
             reply_markup=InlineKeyboardMarkup(out),
         )
+        if await is_on_off(2):
+            return await app.send_message(
+                chat_id=config.LOGGER_ID,
+                text=f"{message.from_user.mention} ᴊᴜsᴛ sᴛᴀʀᴛᴇᴅ ᴛʜᴇ ʙᴏᴛ.\n\n<b>ᴜsᴇʀ ɪᴅ :</b> <code>{message.from_user.id}</code>\n<b>ᴜsᴇʀɴᴀᴍᴇ :</b> @{message.from_user.username}",
+            )
 
 
 
@@ -155,7 +163,6 @@ async def start_gp(client, message: Message, _):
     uptime = int(time.time() - _boot_)
     await message.reply_photo(
         random.choice(NEXIO),
-        message_effect_id=random.choice(EFFECT_IDS),
         caption=_["start_1"].format(app.mention, get_readable_time(uptime)),
         reply_markup=InlineKeyboardMarkup(out),
     )
@@ -191,7 +198,6 @@ async def welcome(client, message: Message):
                 out = start_panel(_)
                 await message.reply_photo(
                     random.choice(NEXIO),
-                    message_effect_id=random.choice(EFFECT_IDS),
                     caption=_["start_3"].format(
                         message.from_user.mention,
                         app.mention,
