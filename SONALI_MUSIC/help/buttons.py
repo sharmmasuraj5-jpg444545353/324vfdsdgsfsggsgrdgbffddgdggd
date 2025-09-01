@@ -85,8 +85,8 @@ class BUTTONS(object):
             InlineKeyboardButton("ϻᴧηᴧɢєϻєηᴛ", callback_data="TOOL_CP"),
         ],
         [
-            InlineKeyboardButton("ɴᴇᴡ ᴍᴏᴅᴜʟᴇs", callback_data="MANAGEMENT_CP"),
-            
+            InlineKeyboardButton("ηєᴡ ϻσᴅᴜʟєs", callback_data="MANAGEMENT_CP"),
+            InlineKeyboardButton("ᴏᴡηєʀ & sᴜᴅᴏ", callback_data="SUDO_INFO"),
         ],
         [
             InlineKeyboardButton("ᴧʟʟ ʙσᴛ's", callback_data="MAIN_BACK HELP_ABOUT"),
