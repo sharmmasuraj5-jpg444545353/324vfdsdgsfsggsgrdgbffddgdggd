@@ -53,9 +53,9 @@ class BUTTONS(object):
             InlineKeyboardButton("ᴠᴄ ᴛᴏᴏʟs", callback_data="MANAGEMENT_BACK HELP_36"),
         ],
         [
-            InlineKeyboardButton("ᴧᴄᴛɪση", callback_data="TOOL_BACK HELP_01"),
-            InlineKeyboardButton("ʜɪsᴛᴏʀʏ", callback_data="TOOL_BACK HELP_23"),
-            InlineKeyboardButton("ᴛᴛs", callback_data="TOOL_BACK HELP_27"),
+            InlineKeyboardButton("ᴧᴄᴛɪση", callback_data="MANAGEMENT_BACK HELP_14"),
+            InlineKeyboardButton("ʜɪsᴛᴏʀʏ", callback_data="MANAGEMENT_BACK HELP_23"),
+            InlineKeyboardButton("ᴛᴛs", callback_data="MANAGEMENT_BACK HELP_27"),
         ],
         [
             InlineKeyboardButton("⌯ ʙᴧᴄᴋ ⌯", callback_data=f"MAIN_CP"), 
