@@ -18,6 +18,7 @@ from SONALI_MUSIC.help.helper import Helper
 #------------------------------------------------------------------------------------------------------------------------
 
 
+
 @app.on_message(filters.command(["help"]) & filters.private & ~BANNED_USERS)
 @app.on_callback_query(filters.regex("settings_back_helper") & ~BANNED_USERS)
 async def helper_private(
@@ -32,12 +33,9 @@ async def helper_private(
         chat_id = update.message.chat.id
         language = await get_lang(chat_id)
         _ = get_string(language)
-        await update.edit_message_media(
-            media=types.InputMediaPhoto(
-                media=START_IMG_URL,
-                caption=Helper.HELP_M
-            ),
-            reply_markup=InlineKeyboardMarkup(BUTTONS.SBUTTON) 
+        keyboard = help_pannel(_, True)
+        await update.edit_message_text(
+            _["help_1"].format(SUPPORT_CHAT), reply_markup=keyboard
         )
     else:
         try:
@@ -46,10 +44,11 @@ async def helper_private(
             pass
         language = await get_lang(update.chat.id)
         _ = get_string(language)
+        keyboard = help_pannel(_)
         await update.reply_photo(
             photo=START_IMG_URL,
-            caption=Helper.HELP_M,
-            reply_markup=InlineKeyboardMarkup(BUTTONS.SBUTTON)  
+            caption=_["help_1"].format(SUPPORT_CHAT),
+            reply_markup=keyboard,
         )
 
 
@@ -262,7 +261,7 @@ async def helper_cb(client, CallbackQuery):
     await CallbackQuery.edit_message_text(Helper.HELP_ALLBOT, reply_markup=InlineKeyboardMarkup(BUTTONS.ABUTTON))
 
         
-@app.on_callback_query(filters.regex('ALLBOT_BACK'))      
+@@app.on_callback_query(filters.regex('ALLBOT_BACK'))      
 async def mb_plugin_button(client, CallbackQuery):
     callback_data = CallbackQuery.data.strip()
     cb = callback_data.split(None, 1)[1]
