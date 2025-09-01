@@ -1,6 +1,6 @@
 from typing import Union
 from pyrogram import filters, types
-from pyrogram.types import InlineKeyboardMarkup, Message, InlineKeyboardButton, CallbackQuery
+from pyrogram.types import InlineKeyboardMarkup, Message, InlineKeyboardButton
 from SONALI_MUSIC import app
 from SONALI_MUSIC.misc import SUDOERS
 from SONALI_MUSIC.utils import help_pannel
@@ -259,49 +259,6 @@ async def mb_plugin_button(client, CallbackQuery):
     else:
         await CallbackQuery.edit_message_text(getattr(Helper, cb), reply_markup=keyboard)
         
-
-
-        
-        
-
-
-
-
-
-@app.on_callback_query()
-async def sudo_callback(client: app, callback_query: CallbackQuery):
-    user_id = callback_query.from_user.id
-    data = callback_query.data
-
-    if data == "SUDO_INFO":
-        if user_id not in SUDOERS:
-            await callback_query.answer(
-                "⛔ ʏᴏᴜ ᴀʀᴇ ɴᴏᴛ ɪɴ sᴜᴅᴏ ʟɪsᴛ.",
-                show_alert=True
-            )
-            return
-
-        keyboard = InlineKeyboardMarkup(
-            [
-                [InlineKeyboardButton("⌯ ʙᴧᴄᴋ ⌯", callback_data="MAIN_CP")]
-            ]
-        )
-
-        await callback_query.message.edit_text(
-            Helper.SUDO_INFO,
-            reply_markup=keyboard
-)
-
-
-@app.on_callback_query(filters.regex("abot_cb") & ~BANNED_USERS)
-async def helper_cb(client, CallbackQuery):
-    bot = await client.get_me()
-    bot_mention = bot.mention
-
-    await CallbackQuery.edit_message_text(
-        Helper.HELP_ALLBOT.format(bot_mention),
-        reply_markup=InlineKeyboardMarkup(BUTTONS.ABUTTON),
-    )
 #------------------------------------------------------------------------------------------------------------------------
 #------------------------------------------------------------------------------------------------------------------------
 #------------------------------------------------------------------------------------------------------------------------
