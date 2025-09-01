@@ -35,7 +35,7 @@ class BUTTONS(object):
             InlineKeyboardButton("ɢɪᴛʜᴜʙ", callback_data="TOOL_BACK HELP_25"),
             InlineKeyboardButton("ᴢᴏᴍʙɪᴇs", callback_data=f"TOOL_BACK HELP_27"),
             InlineKeyboardButton("sᴛɪᴄᴋєʀs", callback_data="TOOL_BACK HELP_10"),
-        ]
+        ],
         [InlineKeyboardButton("⌯ ʙᴧᴄᴋ ⌯", callback_data=f"MAIN_CP")]
     ]
 
