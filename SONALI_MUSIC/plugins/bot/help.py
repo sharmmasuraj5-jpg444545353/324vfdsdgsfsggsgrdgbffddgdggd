@@ -18,8 +18,6 @@ from SONALI_MUSIC.help.helper import Helper
 #------------------------------------------------------------------------------------------------------------------------
 
 
-
-
 @app.on_message(filters.command(["help"]) & filters.private & ~BANNED_USERS)
 @app.on_callback_query(filters.regex("settings_back_helper") & ~BANNED_USERS)
 async def helper_private(
@@ -39,7 +37,7 @@ async def helper_private(
                 media=START_IMG_URL,
                 caption=Helper.HELP_M
             ),
-            reply_markup=BUTTONS.SBUTTON
+            reply_markup=InlineKeyboardMarkup(BUTTONS.SBUTTON) 
         )
     else:
         try:
@@ -51,7 +49,7 @@ async def helper_private(
         await update.reply_photo(
             photo=START_IMG_URL,
             caption=Helper.HELP_M,
-            reply_markup=BUTTONS.SBUTTON
+            reply_markup=InlineKeyboardMarkup(BUTTONS.SBUTTON)  
         )
 
 
