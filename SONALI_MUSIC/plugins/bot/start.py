@@ -44,10 +44,28 @@ NEXIO = [
 ]
 
 
+PURVI_STKR = [
+    "CAACAgUAAxkBAAIBO2i1Spi48ZdWCNehv-GklSI9aRYWAAJ9GAACXB-pVds_sm8brMEqHgQ",
+    "CAACAgUAAxkBAAIBOmi1Sogwaoh01l5-e-lJkK1VNY6MAAIlGAACKI6wVVNEvN-6z3Z7HgQ",
+    "CAACAgUAAxkBAAIBPGi1Spv1tlx90xM1Q7TRNyL0fhcJAAKDGgACZSupVbmJpWW9LmXJHgQ",
+    "CAACAgUAAxkBAAIBPWi1SpxJZKxuWYsZ_G06j_G_9QGkAAIsHwACdd6xVd2HOWQPA_qtHgQ",
+    "CAACAgUAAxkBAAIBPmi1Sp4QFoLkZ0oN3d01kZQOHQRwAAI4FwACDDexVVp91U_1BZKFHgQ",
+    "CAACAgUAAxkBAAIBP2i1SqFoa4yqgl1QSISZrQ4VuYWgAAIpFQACvTqpVWqbFSKOnWYxHgQ",
+    "CAACAgUAAxkBAAIBQGi1Sqk3OGQ2jRW2rN6ZVZ7vWY2ZAAJZHQACCa-pVfefqZZtTHEdHgQ",
+]
+
 @app.on_message(filters.command(["start"]) & filters.private & ~BANNED_USERS)
 @LanguageStart
 async def start_pm(client, message: Message, _):
     await add_served_user(message.from_user.id)
+
+    
+    await message.reply_sticker(random.choice(PURVI_STKR))
+await asyncio.sleep(2) 
+await sticker.delete()
+
+    
+
     if len(message.text.split()) > 1:
         name = message.text.split(None, 1)[1]
         if name[0:4] == "help":
@@ -62,7 +80,7 @@ async def start_pm(client, message: Message, _):
             if await is_on_off(2):
                 return await app.send_message(
                     chat_id=config.LOGGER_ID,
-                    text=f"{message.from_user.mention} ᴊᴜsᴛ sᴛᴀʀᴛᴇᴅ ᴛʜᴇ ʙᴏᴛ ᴛᴏ ᴄʜᴇᴄᴋ <b>sᴜᴅᴏʟɪsᴛ</b>.\n\n<b>ᴜsᴇʀ ɪᴅ :</b> <code>{message.from_user.id}</code>\n<b>ᴜsᴇʀɴᴀᴍᴇ :</b> @{message.from_user.username}",
+                    text=f"{message.from_user.mention} just started the bot to check <b>sudolist</b>.\n\n<b>User ID:</b> <code>{message.from_user.id}</code>\n<b>Username:</b> @{message.from_user.username}",
                 )
             return
         if name[0:3] == "inf":
@@ -97,11 +115,6 @@ async def start_pm(client, message: Message, _):
                 caption=searched_text,
                 reply_markup=key,
             )
-            if await is_on_off(2):
-                return await app.send_message(
-                    chat_id=config.LOGGER_ID,
-                    text=f"{message.from_user.mention} ᴊᴜsᴛ sᴛᴀʀᴛᴇᴅ ᴛʜᴇ ʙᴏᴛ ᴛᴏ ᴄʜᴇᴄᴋ <b>ᴛʀᴀᴄᴋ ɪɴғᴏʀᴍᴀᴛɪᴏɴ</b>.\n\n<b>ᴜsᴇʀ ɪᴅ :</b> <code>{message.from_user.id}</code>\n<b>ᴜsᴇʀɴᴀᴍᴇ :</b> @{message.from_user.username}",
-                )
     else:
         out = private_panel(_)
         baby = await message.reply_text(f"**__ᴅɪηɢ ᴅᴏηɢ.🥀__**")
@@ -109,28 +122,23 @@ async def start_pm(client, message: Message, _):
         await baby.edit_text(f"**__ᴅɪηɢ ᴅᴏηɢ...🥀__**")
         await baby.edit_text(f"**__ᴅɪηɢ ᴅᴏηɢ....🥀__**")
         await baby.edit_text(f"**__ᴅɪηɢ ᴅᴏηɢ.....🥀__**")
-        await baby.edit_text(f"**__sᴛᴧʀᴛɪηɢ.❤️‍🔥__**")
-        await baby.edit_text(f"**__sᴛᴧʀᴛɪηɢ..❤️‍🔥__**")
-        await baby.edit_text(f"**__sᴛᴧʀᴛɪηɢ...❤️‍🔥__**")
-        await baby.edit_text(f"**__sᴛᴧʀᴛɪηɢ....❤️‍🔥__**")
-        await baby.edit_text(f"**__sᴛᴧʀᴛɪηɢ.....❤️‍🔥__**")
-        await baby.edit_text(f"**__ʙσᴛ sᴛᴧʀᴛєᴅ.💤__**")
-        await baby.edit_text(f"**__ʙσᴛ sᴛᴧʀᴛєᴅ..💤__**")
-        await baby.edit_text(f"**__ʙσᴛ sᴛᴧʀᴛєᴅ...💤__**")
-        await baby.edit_text(f"**__ʙσᴛ sᴛᴧʀᴛєᴅ....💤__**")
-        await baby.edit_text(f"**__ʙσᴛ sᴛᴧʀᴛєᴅ.....💤__**")
+        await baby.edit_text(f"**__sᴛᴀʀᴛɪɴɢ.❤️‍🔥__**")
+        await baby.edit_text(f"**__sᴛᴀʀᴛɪɴɢ..❤️‍🔥__**")
+        await baby.edit_text(f"**__sᴛᴀʀᴛɪɴɢ...❤️‍🔥__**")
+        await baby.edit_text(f"**__sᴛᴀʀᴛɪɴɢ....❤️‍🔥__**")
+        await baby.edit_text(f"**__sᴛᴀʀᴛɪɴɢ.....❤️‍🔥__**")
+        await baby.edit_text(f"**__ʙᴏᴛ sᴛᴀʀᴛᴇᴅ.💤__**")
+        await baby.edit_text(f"**__ʙᴏᴛ sᴛᴀʀᴛᴇᴅ..💤__**")
+        await baby.edit_text(f"**__ʙᴏᴛ sᴛᴀʀᴛᴇᴅ...💤__**")
+        await baby.edit_text(f"**__ʙᴏᴛ sᴛᴀʀᴛᴇᴅ....💤__**")
+        await baby.edit_text(f"**__ʙᴏᴛ sᴛᴀʀᴛᴇᴅ.....💤__**")
         await baby.delete()
-        
+
         await message.reply_photo(
             random.choice(NEXIO),
             caption=_["start_2"].format(message.from_user.mention, app.mention),
             reply_markup=InlineKeyboardMarkup(out),
         )
-        if await is_on_off(2):
-            return await app.send_message(
-                chat_id=config.LOGGER_ID,
-                text=f"{message.from_user.mention} ᴊᴜsᴛ sᴛᴀʀᴛᴇᴅ ᴛʜᴇ ʙᴏᴛ.\n\n<b>ᴜsᴇʀ ɪᴅ :</b> <code>{message.from_user.id}</code>\n<b>ᴜsᴇʀɴᴀᴍᴇ :</b> @{message.from_user.username}",
-            )
 
 
 @app.on_message(filters.command(["start"]) & filters.group & ~BANNED_USERS)
