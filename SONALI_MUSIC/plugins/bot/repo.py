@@ -12,7 +12,7 @@ start_txt = """**<u>❃ ᴘᴜʀᴠɪ ʙᴏᴛs ʀєᴘσs ❃</u>
  
 ❉  ʏᴏᴜ ᴄᴧη мʏ ᴜsє ᴘᴜʙʟɪᴄ ʀєᴘσs !! 
 
-✼ || ɢɪᴛ :-  [ᴧʟᴘʜᴧ-ʙᴧʙʏ](https://t.me/TheSigmaCoder) ||
+✼ || ɢɪᴛ :-  [ᴧʟᴘʜᴧ-ʙᴧʙʏ](https://github.com/TEAMPURVI) ||
  
 ❊ ʀᴜη 24x7 ʟᴧɢ ϝʀєє ᴡɪᴛʜσᴜᴛ sᴛσᴘ**
 """
@@ -23,17 +23,30 @@ start_txt = """**<u>❃ ᴘᴜʀᴠɪ ʙᴏᴛs ʀєᴘσs ❃</u>
 @app.on_message(filters.command("repo"))
 async def start(_, msg):
     buttons = [
-        [ 
-          InlineKeyboardButton("✙ ᴧᴅᴅ ϻє вᴧʙʏ ✙", url=f"https://t.me/{app.username}?startgroup=true")
-        ],
-        [
-          InlineKeyboardButton("• ʜєʟᴘ •", url="https://t.me/+gMy8Cp190ediNzZl"),
-          InlineKeyboardButton("• 𝛅ᴜᴘᴘσʀᴛ •", url="https://t.me/PURVI_SUPPORT"),
-          ],
-[
-InlineKeyboardButton("• ϻᴧɪη ʙσᴛ •", url=f"https://t.me/PURVI_MUSIC_ROBOT"),
-
-        ]]
+    [
+        InlineKeyboardButton("• ᴘᴜʀᴠɪ ᴍᴜsɪᴄ •", url="https://github.com/TEAMPURVI/PURVI_MUSIC"),
+        InlineKeyboardButton("• sᴏɴᴀʟɪ ᴍᴜsɪᴄ •", url="https://github.com/TEAMPURVI/SONALI_MUSIC")
+    ],
+    [
+        InlineKeyboardButton("• sɪᴍᴘʟᴇ ᴍᴜsɪᴄ •", url="https://github.com/TEAMPURVI/ALPHA_MUSIC"),
+        InlineKeyboardButton("• ᴄʜᴀᴛ ʙᴏᴛ •", url="https://github.com/TEAMPURVI/PURVI_CHAT")
+    ],
+    [
+        InlineKeyboardButton("• ᴜsᴇʀ ʙᴏᴛ •", url="https://github.com/TEAMPURVI/ALPHA_USERBOT"),
+        InlineKeyboardButton("• sᴘᴀᴍ ʙᴏᴛ •", url="https://github.com/TEAMPURVI/ALPHA_SPAM")
+    ],
+    [
+        InlineKeyboardButton("• sᴇssɪᴏɴ ʙᴏᴛ •", url="https://github.com/TEAMPURVI/PURVI_STRING"),
+        InlineKeyboardButton("• sᴇssɪᴏɴ ʜᴀᴄᴋ •", url="https://github.com/TEAMPURVI/STRING_HACK")
+    ],
+    [
+        InlineKeyboardButton("• sᴘᴀᴍ ʙᴏᴛ •", url="https://github.com/TEAMPURVI"),
+        InlineKeyboardButton("• ʙᴀɴᴀʟʟ ʙᴏᴛ •", url="https://github.com/TEAMPURVI/ALPHA_BANALL")
+    ],
+    [
+        InlineKeyboardButton("✙ ᴀᴅᴅ ᴍᴇ ɪɴ ʏᴏᴜʀ ɢʀᴏᴜᴘ ✙", url=f"https://t.me/{app.username}?startgroup=true")
+    ]
+]
     
     reply_markup = InlineKeyboardMarkup(buttons)
     
