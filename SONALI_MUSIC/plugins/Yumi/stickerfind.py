@@ -13,5 +13,5 @@ async def generate_sticker(client, message):
     else:
         await message.reply_text(
             "**ᴘʀᴏᴠɪᴅᴇ ᴀ sᴛɪᴄᴋᴇʀ ɪᴅ ᴀғᴛᴇʀ ᴄᴏᴍᴍᴀɴᴅ.**\n\n"
-            "**ᴜsᴀɢᴇ :-** `/st <sticker_id>`"
+            "**ᴜsᴀɢᴇ :-** `/st sticker_id`"
         )
