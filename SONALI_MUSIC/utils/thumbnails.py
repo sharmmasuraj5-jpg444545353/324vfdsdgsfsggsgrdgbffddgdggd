@@ -107,7 +107,7 @@ async def get_thumb(videoid: str, player_username: str = None) -> str:
     try:
         title_font = ImageFont.truetype("SONALI_MUSIC/assets/f.ttf", 32)
         regular_font = ImageFont.truetype("SONALI_MUSIC/assets/font.ttf", 18)
-        shukla_font = ImageFont.truetype("SONALI_MUSIC/assets/font2.ttf", 26)
+        shukla_font = ImageFont.truetype("SONALI_MUSIC/assets/font.ttf", 26)
     except OSError:
         title_font = regular_font = shukla_font = ImageFont.load_default()
 
