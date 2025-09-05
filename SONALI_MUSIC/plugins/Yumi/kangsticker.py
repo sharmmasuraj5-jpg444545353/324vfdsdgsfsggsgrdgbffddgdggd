@@ -14,7 +14,6 @@ from pyrogram.errors import (
 )
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message
 from SONALI_MUSIC import app
-from config import BOT_USERNAME
 from SONALI_MUSIC.utils.errors import capture_err
 
 from SONALI_MUSIC.utils.files import (
@@ -32,21 +31,20 @@ from SONALI_MUSIC.utils.stickerset import (
 
 # -----------
 
-MAX_STICKERS = (
-    120  # would be better if we could fetch this limit directly from telegram
-)
+MAX_STICKERS = 120  # would be better if we could fetch this limit directly from telegram
 SUPPORTED_TYPES = ["jpeg", "png", "webp"]
+
 # ------------------------------------------
-@app.on_message(filters.command("get_sticker"))
+@app.on_message(filters.command("dlsticker"))
 @capture_err
 async def sticker_image(_, message: Message):
     r = message.reply_to_message
 
     if not r:
-        return await message.reply("✦ ʀᴇᴘʟʏ ᴛᴏ ᴍᴇssᴀɢᴇ")
+        return await message.reply("**✦ ʀᴇᴘʟʏ ᴛᴏ ᴍᴇssᴀɢᴇ**")
 
     if not r.sticker:
-        return await message.reply("✦ ʀᴇᴘʟʏ ᴛᴏ sᴛɪᴄᴋᴇʀ.")
+        return await message.reply("**✦ ʀᴇᴘʟʏ ᴛᴏ sᴛɪᴄᴋᴇʀ.**")
 
     m = await message.reply("✦ sᴇɴᴅɪɴɢ..")
     f = await r.download(f"{r.sticker.file_unique_id}.png")
@@ -60,17 +58,19 @@ async def sticker_image(_, message: Message):
 
     await m.delete()
     os.remove(f)
+
+
 #----------------
 @app.on_message(filters.command("kang"))
 @capture_err
 async def kang(client, message: Message):
     if not message.reply_to_message:
-        return await message.reply_text("✦ ʀᴇᴘʟʏ ᴛᴏ ᴀ sᴛɪᴄᴋᴇʀ/ɪᴍᴀɢᴇ ᴛᴏ ᴋᴀɴɢ ɪᴛ.")
+        return await message.reply_text("**✦ ʀᴇᴘʟʏ ᴛᴏ ᴀ sᴛɪᴄᴋᴇʀ/ɪᴍᴀɢᴇ ᴛᴏ ᴋᴀɴɢ ɪᴛ.**")
     if not message.from_user:
         return await message.reply_text(
-            "✦ ʏᴏᴜ ᴀʀᴇ ᴀɴᴏɴ ᴀᴅᴍɪɴ, ᴋᴀɴɢ sᴛɪᴄᴋᴇʀs ɪɴ ᴍʏ ᴅᴍ."
+            "**✦ ʏᴏᴜ ᴀʀᴇ ᴀɴᴏɴ ᴀᴅᴍɪɴ, ᴋᴀɴɢ sᴛɪᴄᴋᴇʀs ɪɴ ᴍʏ ᴅᴍ.**"
         )
-    msg = await message.reply_text("✦ ᴋᴀɴɢɪɴɢ sɪᴄᴋᴇʀ...")
+    msg = await message.reply_text("**✦ ᴋᴀɴɢɪɴɢ sɪᴄᴋᴇʀ...**")
 
     # Find the proper emoji
     args = message.text.split()
@@ -82,9 +82,8 @@ async def kang(client, message: Message):
     ):
         sticker_emoji = message.reply_to_message.sticker.emoji
     else:
-        sticker_emoji = "🤔"
+        sticker_emoji = "🙈"
 
-    # Get the corresponding fileid, resize the file if necessary
     doc = message.reply_to_message.photo or message.reply_to_message.document
     try:
         if message.reply_to_message.sticker:
@@ -96,7 +95,7 @@ async def kang(client, message: Message):
             )
         elif doc:
             if doc.file_size > 10000000:
-                return await msg.edit("✦ ғɪʟᴇ sɪᴢᴇ ᴛᴏᴏ ʟᴀʀɢᴇ.")
+                return await msg.edit("**✦ ғɪʟᴇ sɪᴢᴇ ᴛᴏᴏ ʟᴀʀɢᴇ.**")
 
             temp_file_path = await app.download_media(doc)
             image_type = imghdr.what(temp_file_path)
@@ -109,7 +108,7 @@ async def kang(client, message: Message):
                     temp_file_path
                 )
             except OSError as e:
-                await msg.edit_text("✦ sᴏᴍᴇᴛʜɪɴɢ ᴡʀᴏɴɢ ʜᴀᴘᴘᴇɴᴇᴅ.")
+                await msg.edit_text("**✦ sᴏᴍᴇᴛʜɪɴɢ ᴡʀᴏɴɢ ʜᴀᴘᴘᴇɴᴇᴅ.**")
                 raise Exception(
                     f"✦ sᴏᴍᴇᴛʜɪɴɢ ᴡᴇɴᴛ ᴡʀᴏɴɢ ᴡʜɪʟᴇ ʀᴇsɪᴢɪɴɢ ᴛʜᴇ sᴛɪᴄᴋᴇʀ (at {temp_file_path}); {e}"
                 )
@@ -120,18 +119,19 @@ async def kang(client, message: Message):
             if os.path.isfile(temp_file_path):
                 os.remove(temp_file_path)
         else:
-            return await msg.edit("✦ ɴᴏᴘᴇ, ᴄᴀɴ'ᴛ  ᴋᴀɴɢ ᴛʜᴀᴛ.")
+            return await msg.edit("**✦ ɴᴏᴘᴇ, ᴄᴀɴ'ᴛ  ᴋᴀɴɢ ᴛʜᴀᴛ.**")
     except ShortnameOccupyFailed:
-        await message.reply_text("✦ ᴄʜᴀɴɢᴇ ʏᴏᴜʀ ɴᴀᴍᴇ ᴏʀ ᴜsᴇʀɴᴀᴍᴇ.")
+        await message.reply_text("**✦ ᴄʜᴀɴɢᴇ ʏᴏᴜʀ ɴᴀᴍᴇ ᴏʀ ᴜsᴇʀɴᴀᴍᴇ.**")
         return
 
     except Exception as e:
         await message.reply_text(str(e))
         e = format_exc()
         return print(e)
-#-------
+
+    #-------
     packnum = 0
-    packname = "f" + str(message.from_user.id) + "_by_" + BOT_USERNAME
+    packname = "f" + str(message.from_user.id) + "_by_" + app.username
     limit = 0
     try:
         while True:
@@ -144,7 +144,7 @@ async def kang(client, message: Message):
                 stickerset = await create_sticker_set(
                     client,
                     message.from_user.id,
-                    f"{message.from_user.first_name[:32]}'s ᴘᴀᴄᴋ ʙʏ @Sonali_Music_bot",
+                    f"{message.from_user.first_name[:32]}'s ᴘᴀᴄᴋ ʙʏ @{app.username}",
                     packname,
                     [sticker],
                 )
@@ -156,7 +156,7 @@ async def kang(client, message: Message):
                     + "_"
                     + str(message.from_user.id)
                     + "_by_"
-                    + BOT_USERNAME
+                    + app.username
                 )
                 limit += 1
                 continue
@@ -169,21 +169,19 @@ async def kang(client, message: Message):
             break
 
         await msg.edit(
-            "✦ sᴛɪᴄᴋᴇʀ ᴋᴀɴɢᴇᴅ ᴛᴏ [ᴘᴀᴄᴋ](t.me/addstickers/{})\n✦ ᴇᴍᴏᴊɪ: {}".format(
-                packname, sticker_emoji
-            )
+            f"**✦ sᴛɪᴄᴋᴇʀ ᴋᴀɴɢᴇᴅ ᴛᴏ [ᴘᴀᴄᴋ](t.me/addstickers/{packname})**\n**✦ ᴇᴍᴏᴊɪ :-** {sticker_emoji}"
         )
     except (PeerIdInvalid, UserIsBlocked):
         keyboard = InlineKeyboardMarkup(
-            [[InlineKeyboardButton(text="⌯ sᴛᴀʀᴛ ɪɴ ᴘᴍ ⌯", url=f"t.me/{BOT_USERNAME}")]]
+            [[InlineKeyboardButton(text="⌯ sᴛᴀʀᴛ ɪɴ ᴘᴍ ⌯", url=f"t.me/{app.username}")]]
         )
         await msg.edit(
-            "✦ ʏᴏᴜ ɴᴇᴇᴅ ᴛᴏ sᴛᴀʀᴛ ᴀ ᴘʀɪᴠᴀᴛᴇ ᴄʜᴀᴛ ᴡɪᴛʜ ᴍᴇ.",
+            "**✦ ʏᴏᴜ ɴᴇᴇᴅ ᴛᴏ sᴛᴀʀᴛ ᴀ ᴘʀɪᴠᴀᴛᴇ ᴄʜᴀᴛ ᴡɪᴛʜ ᴍᴇ.**",
             reply_markup=keyboard,
         )
     except StickerPngNopng:
         await message.reply_text(
-            "✦ sᴛɪᴄᴋᴇʀs ᴍᴜsᴛ ʙᴇ ᴘɴɢ ғɪʟᴇs ᴛʜᴇ ᴘʀᴏᴠɪᴅᴇᴅ ɪᴍᴀɢᴇ ᴡᴀs ɴᴏᴛ ᴀ ᴘɴɢ."
+            "**✦ sᴛɪᴄᴋᴇʀs ᴍᴜsᴛ ʙᴇ ᴘɴɢ ғɪʟᴇs ᴛʜᴇ ᴘʀᴏᴠɪᴅᴇᴅ ɪᴍᴀɢᴇ ᴡᴀs ɴᴏᴛ ᴀ ᴘɴɢ.**"
         )
     except StickerPngDimensions:
-        await message.reply_text("✦ ᴛʜᴇ sᴛɪᴄᴋᴇʀ ᴘɴɢ ᴅɪᴍᴇɴsɪᴏɴs ᴀʀᴇ ɪɴᴠᴀʟɪᴅ.")
+        await message.reply_text("**✦ ᴛʜᴇ sᴛɪᴄᴋᴇʀ ᴘɴɢ ᴅɪᴍᴇɴsɪᴏɴs ᴀʀᴇ ɪɴᴠᴀʟɪᴅ.**")
