@@ -18,9 +18,9 @@ BOT_TOKEN = getenv("BOT_TOKEN")
 OWNER_ID = int(getenv("OWNER_ID", 7473021518))
 OWNER_USERNAME = getenv("OWNER_USERNAME", "TheSigmaCoder")
 
-BOT_USERNAME = getenv("BOT_USERNAME", "LadduSongBot")
-BOT_NAME = getenv("BOT_NAME", "˹sᴏɴᴧʟɪ ꭙ ᴍᴜsɪᴄ˼ ♪ [ ᴛᴘʙ ]™")
-ASSUSERNAME = getenv("ASSUSERNAME", "ALPHA")
+BOT_USERNAME = getenv("BOT_USERNAME", "Sonali_Music_Bot")
+BOT_NAME = getenv("BOT_NAME", "˹sᴏɴᴧʟɪ ꭙ ᴍᴜsɪᴄ˼ ♪")
+ASSUSERNAME = getenv("ASSUSERNAME", "Sonali")
 
 # -------------------- [ DATABASE / HEROKU / REPO ] --------------------
 
@@ -29,7 +29,7 @@ MONGO_DB_URI = getenv("MONGO_DB_URI", None)
 HEROKU_APP_NAME = getenv("HEROKU_APP_NAME")
 HEROKU_API_KEY = getenv("HEROKU_API_KEY")
 
-UPSTREAM_REPO = getenv("UPSTREAM_REPO", "https://github.com/Im-Notcoder/New-Sonali")
+UPSTREAM_REPO = getenv("UPSTREAM_REPO", "https://github.com/Im-Notcoder/SonaliV2")
 UPSTREAM_BRANCH = getenv("UPSTREAM_BRANCH", "main")
 
 GIT_TOKEN = getenv("GIT_TOKEN", "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")
