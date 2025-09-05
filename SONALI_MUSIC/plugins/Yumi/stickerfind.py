@@ -1,14 +1,17 @@
-from pyrogram import Client, filters
+from pyrogram import filters
 from SONALI_MUSIC import app
 
 
 @app.on_message(filters.command("st"))
-def generate_sticker(client, message):
+async def generate_sticker(client, message):
     if len(message.command) == 2:
         sticker_id = message.command[1]
         try:
-            client.send_sticker(message.chat.id, sticker=sticker_id)
+            await client.send_sticker(message.chat.id, sticker=sticker_id)
         except Exception as e:
-            message.reply_text(f"Error: {e}")
+            await message.reply_text(f"**ᴇʀʀᴏʀ :-** `{e}`")
     else:
-        message.reply_text("**ᴘʀᴏᴠɪᴅᴇ ᴀ sᴛɪᴄᴋᴇʀ ɪᴅ ᴀғᴛᴇʀ ᴄᴏᴍᴍᴀɴᴅ.**\n\n**ᴜsᴀɢᴇ :-** `/st CJJHGGG××××`")
+        await message.reply_text(
+            "**ᴘʀᴏᴠɪᴅᴇ ᴀ sᴛɪᴄᴋᴇʀ ɪᴅ ᴀғᴛᴇʀ ᴄᴏᴍᴍᴀɴᴅ.**\n\n"
+            "**ᴜsᴀɢᴇ :-** `/st <sticker_id>`"
+        )
