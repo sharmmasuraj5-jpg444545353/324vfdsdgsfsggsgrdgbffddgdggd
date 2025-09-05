@@ -11,4 +11,4 @@ def generate_sticker(client, message):
         except Exception as e:
             message.reply_text(f"Error: {e}")
     else:
-        message.reply_text("Please provide a sticker ID after /st command.")
+        message.reply_text("**ᴘʀᴏᴠɪᴅᴇ ᴀ sᴛɪᴄᴋᴇʀ ɪᴅ ᴀғᴛᴇʀ ᴄᴏᴍᴍᴀɴᴅ.**\n\n**ᴜsᴀɢᴇ :-** `/st CJJHGGG××××`")
