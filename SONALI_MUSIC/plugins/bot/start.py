@@ -61,11 +61,14 @@ EFFECT_IDS = [
     5159385139981059251,
 ]
 
+emojis = ["🥰", "🔥", "💖", "😁", "😎", "🌚", "❤️‍🔥", "♥️", "🎉", "🙈"]
 
 @app.on_message(filters.command(["start"]) & filters.private & ~BANNED_USERS)
 @LanguageStart
 async def start_pm(client, message: Message, _):
     await add_served_user(message.from_user.id)
+    
+    await message.react(random.choice(emojis))
 
     sticker = await message.reply_sticker(random.choice(PURVI_STKR))
     await asyncio.sleep(1)
