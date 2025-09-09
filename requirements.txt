@@ -11,6 +11,7 @@ gitpython
 hachoir
 Faker
 pydub
+lottie
 pycountry
 heroku3
 apscheduler
