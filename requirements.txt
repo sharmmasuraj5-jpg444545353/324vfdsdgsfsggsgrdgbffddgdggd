@@ -11,7 +11,7 @@ gitpython
 hachoir
 Faker
 pydub
-lottie==3.5.5
+#lottie==3.5.5
 pycountry
 heroku3
 apscheduler
