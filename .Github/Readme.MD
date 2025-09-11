@@ -2,7 +2,7 @@
   <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif"/>
 </p>
 
-<h1 align="center">─「 ѕᴏɴᴀʟɪ ᴍᴜsɪᴄ 」─</h1>
+<h1 align="center">─「 brahix ᴍᴜsɪᴄ 」─</h1>
 
 <p align="center">
   <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif"/>
