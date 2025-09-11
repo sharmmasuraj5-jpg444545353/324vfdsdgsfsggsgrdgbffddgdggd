@@ -92,30 +92,6 @@ async def settings_back_markup(client, CallbackQuery: CallbackQuery, _):
         )
 
 
-@app.on_callback_query()
-async def sudo_callback(client: app, callback_query: CallbackQuery):
-    user_id = callback_query.from_user.id
-    data = callback_query.data
-
-    if data == "SUDO_BTN":
-        if user_id not in SUDOERS:
-            await callback_query.answer(
-                "⛔ ʏᴏᴜ ᴀʀᴇ ɴᴏᴛ ɪɴ sᴜᴅᴏ ʟɪsᴛ.",
-                show_alert=True
-            )
-            return
-
-        keyboard = InlineKeyboardMarkup(
-            [
-                [InlineKeyboardButton("⌯ ʙᴧᴄᴋ ⌯", callback_data="MAIN_CP")]
-            ]
-        )
-
-        await callback_query.message.edit_text(
-            Helper.SUDO_INFO,
-            reply_markup=keyboard
-)
-
 
 
 @app.on_callback_query(
