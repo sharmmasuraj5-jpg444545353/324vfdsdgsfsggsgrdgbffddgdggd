@@ -15,7 +15,7 @@ BOT_TOKEN = getenv("BOT_TOKEN")
 
 # -------------------- [ OWNER & BOT INFO ] --------------------
 
-OWNER_ID = int(getenv("OWNER_ID", 7473021518))
+OWNER_ID = int(getenv("OWNER_ID", 7727943403))
 OWNER_USERNAME = getenv("OWNER_USERNAME", "brahix")
 
 BOT_USERNAME = getenv("BOT_USERNAME", "saregama_musics_bot")
@@ -36,7 +36,7 @@ GIT_TOKEN = getenv("GIT_TOKEN", "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")
 
 # -------------------- [ LOGGER & LINKS ] --------------------
 
-LOGGER_ID = int(getenv("LOGGER_ID", -1002141133985))
+LOGGER_ID = int(getenv("LOGGER_ID", -1002933652916))
 
 PRIVACY_LINK = getenv("PRIVACY_LINK", "https://telegra.ph/Privacy-Policy-for-YukkiMusic-08-30")
 SUPPORT_CHANNEL = getenv("SUPPORT_CHANNEL", "https://t.me/about_brahix")
