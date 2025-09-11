@@ -17,7 +17,7 @@ INFO_TEXT = """
 <b>● ᴘʀᴇᴍɪᴜᴍ ➠</b> {premium}
 <b>● ꜱᴄᴀᴍ ➠</b> {scam}
 
-<b>● ᴘᴏᴡᴇʀᴇᴅ ʙʏ ➠ <a href="https://t.me/purvi_bots">ᴘᴜʀᴠɪ-ʙᴏᴛꜱ</a></b>
+<b>● ᴘᴏᴡᴇʀᴇᴅ ʙʏ ➠ <a href="https://t.me/about_brahix">𝐁𝐑𝐀𝐇𝐈𝐗 -ʙᴏᴛꜱ</a></b>
 """
 
 

@@ -16,9 +16,9 @@ BOT_TOKEN = getenv("BOT_TOKEN")
 # -------------------- [ OWNER & BOT INFO ] --------------------
 
 OWNER_ID = int(getenv("OWNER_ID", 7473021518))
-OWNER_USERNAME = getenv("OWNER_USERNAME", "TheSigmaCoder")
+OWNER_USERNAME = getenv("OWNER_USERNAME", "brahix")
 
-BOT_USERNAME = getenv("BOT_USERNAME", "Sonali_Music_Bot")
+BOT_USERNAME = getenv("BOT_USERNAME", "saregama_musics_bot")
 BOT_NAME = getenv("BOT_NAME", "˹sᴏɴᴧʟɪ ꭙ ᴍᴜsɪᴄ˼ ♪")
 ASSUSERNAME = getenv("ASSUSERNAME", "Sonali")
 
@@ -29,7 +29,7 @@ MONGO_DB_URI = getenv("MONGO_DB_URI", None)
 HEROKU_APP_NAME = getenv("HEROKU_APP_NAME")
 HEROKU_API_KEY = getenv("HEROKU_API_KEY")
 
-UPSTREAM_REPO = getenv("UPSTREAM_REPO", "https://github.com/Im-Notcoder/SonaliV2")
+UPSTREAM_REPO = getenv("UPSTREAM_REPO", "https://github.com/Suraj08832/brahix_music ")
 UPSTREAM_BRANCH = getenv("UPSTREAM_BRANCH", "main")
 
 GIT_TOKEN = getenv("GIT_TOKEN", "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")
@@ -39,8 +39,8 @@ GIT_TOKEN = getenv("GIT_TOKEN", "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")
 LOGGER_ID = int(getenv("LOGGER_ID", -1002141133985))
 
 PRIVACY_LINK = getenv("PRIVACY_LINK", "https://telegra.ph/Privacy-Policy-for-YukkiMusic-08-30")
-SUPPORT_CHANNEL = getenv("SUPPORT_CHANNEL", "https://t.me/PURVI_BOTS")
-SUPPORT_CHAT = getenv("SUPPORT_CHAT", "https://t.me/PURVI_UPDATES")
+SUPPORT_CHANNEL = getenv("SUPPORT_CHANNEL", "https://t.me/about_brahix")
+SUPPORT_CHAT = getenv("SUPPORT_CHAT", "https://t.me/brahix_support")
 
 # -------------------- [ LIMITS & TIME SETTINGS ] --------------------
 

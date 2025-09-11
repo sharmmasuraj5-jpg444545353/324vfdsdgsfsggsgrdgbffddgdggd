@@ -6,13 +6,13 @@ from SONALI_MUSIC.utils.errors import capture_err
 import httpx 
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
-start_txt = """**<u>❃ ᴘᴜʀᴠɪ ʙᴏᴛs ʀєᴘσs ❃</u>
+start_txt = """**<u>❃ 𝐁𝐑𝐀𝐇𝐈𝐗  ʙᴏᴛs ʀєᴘσs ❃</u>
 
 ✼ ʀєᴘᴏ ɪs ηᴏᴡ ᴘʀɪᴠᴧᴛє ᴅᴜᴅє 😌
  
 ❉  ʏᴏᴜ ᴄᴧη мʏ ᴜsє ᴘᴜʙʟɪᴄ ʀєᴘσs !! 
 
-✼ || ɢɪᴛ :-  [ᴧʟᴘʜᴧ-ʙᴧʙʏ](https://github.com/TEAMPURVI) ||
+✼ || ɢɪᴛ :-  [ᴧʟᴘʜᴧ-ʙᴧʙʏ](https://github.com/suraj08832) ||
  
 ❊ ʀᴜη 24x7 ʟᴧɢ ϝʀєє ᴡɪᴛʜσᴜᴛ sᴛσᴘ**
 """
@@ -24,23 +24,23 @@ start_txt = """**<u>❃ ᴘᴜʀᴠɪ ʙᴏᴛs ʀєᴘσs ❃</u>
 async def start(_, msg):
     buttons = [
     [
-        InlineKeyboardButton("• ᴘᴜʀᴠɪ ᴍᴜsɪᴄ •", url="https://github.com/TEAMPURVI/PURVI_MUSIC"),
-        InlineKeyboardButton("• sᴏɴᴀʟɪ ᴍᴜsɪᴄ •", url="https://github.com/TEAMPURVI/SONALI_MUSIC")
+        InlineKeyboardButton("• 𝐁𝐑𝐀𝐇𝐈𝐗  ᴍᴜsɪᴄ •", url="https://github.com/suraj08832/PURVI_MUSIC"),
+        InlineKeyboardButton("• sᴏɴᴀʟɪ ᴍᴜsɪᴄ •", url="https://github.com/suraj08832/SONALI_MUSIC")
     ],
     [
-        InlineKeyboardButton("• sɪᴍᴘʟᴇ ᴍᴜsɪᴄ •", url="https://github.com/TEAMPURVI/ALPHA_MUSIC"),
-        InlineKeyboardButton("• ᴄʜᴀᴛ ʙᴏᴛ •", url="https://github.com/TEAMPURVI/PURVI_CHAT")
+        InlineKeyboardButton("• sɪᴍᴘʟᴇ ᴍᴜsɪᴄ •", url="https://github.com/suraj08832/ALPHA_MUSIC"),
+        InlineKeyboardButton("• ᴄʜᴀᴛ ʙᴏᴛ •", url="https://github.com/suraj08832/PURVI_CHAT")
     ],
     [
-        InlineKeyboardButton("• ᴜsᴇʀ ʙᴏᴛ •", url="https://github.com/TEAMPURVI/ALPHA_USERBOT"),
-        InlineKeyboardButton("• sᴘᴀᴍ ʙᴏᴛ •", url="https://github.com/TEAMPURVI/ALPHA_SPAM")
+        InlineKeyboardButton("• ᴜsᴇʀ ʙᴏᴛ •", url="https://github.com/suraj08832/ALPHA_USERBOT"),
+        InlineKeyboardButton("• sᴘᴀᴍ ʙᴏᴛ •", url="https://github.com/suraj08832/ALPHA_SPAM")
     ],
     [
-        InlineKeyboardButton("• sᴇssɪᴏɴ ʙᴏᴛ •", url="https://github.com/TEAMPURVI/PURVI_STRING"),
-        InlineKeyboardButton("• sᴇssɪᴏɴ ʜᴀᴄᴋ •", url="https://github.com/TEAMPURVI/STRING_HACK")
+        InlineKeyboardButton("• sᴇssɪᴏɴ ʙᴏᴛ •", url="https://github.com/suraj08832/PURVI_STRING"),
+        InlineKeyboardButton("• sᴇssɪᴏɴ ʜᴀᴄᴋ •", url="https://github.com/suraj08832/STRING_HACK")
     ],
     [
-        InlineKeyboardButton("• ʙᴀɴᴀʟʟ ʙᴏᴛ •", url="https://github.com/TEAMPURVIALPHA_BANALL"),
+        InlineKeyboardButton("• ʙᴀɴᴀʟʟ ʙᴏᴛ •", url="https://github.com/suraj08832ALPHA_BANALL"),
         InlineKeyboardButton("• ᴀɴʏ ɪssᴜᴇ •", user_id=config.OWNER_ID)
     ],
     [

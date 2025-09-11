@@ -27,7 +27,7 @@ def get_random_message(love_percentage):
 
 EVAA = [
     [
-        InlineKeyboardButton(text="ᴀᴅᴅ ᴍᴇ ʙᴀʙʏ", url="https://t.me/Sonali_Music_Bot?startgroup=true"),
+        InlineKeyboardButton(text="ᴀᴅᴅ ᴍᴇ ʙᴀʙʏ", url="https://t.me/saregama_musics_bot?startgroup=true"),
     ],
 ]
 

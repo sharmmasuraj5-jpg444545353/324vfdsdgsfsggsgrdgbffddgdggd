@@ -6,7 +6,7 @@ from SONALI_MUSIC import app
 async def privacy_command(client: Client, message: Message):
     await message.reply_photo(
         photo="https://files.catbox.moe/0jpf7u.jpg",
-        caption="**➻ ᴡᴇʟᴄᴏᴍᴇ ᴛᴏ ᴘᴜʀᴠɪ ʙᴏᴛꜱ ᴘʀɪᴠᴀᴄʏ ᴘᴏʟɪᴄʏ.**\n\n**⊚ ᴄʟɪᴄᴋ ᴛʜᴇ ʙᴇʟᴏᴡ ʙᴜᴛᴛᴏɴ ᴛʜᴇɴ ꜱᴇᴇ ᴘʀɪᴠᴀᴄʏ ᴘᴏʟɪᴄʏ 🔏**",
+        caption="**➻ ᴡᴇʟᴄᴏᴍᴇ ᴛᴏ 𝐁𝐑𝐀𝐇𝐈𝐗  ʙᴏᴛꜱ ᴘʀɪᴠᴀᴄʏ ᴘᴏʟɪᴄʏ.**\n\n**⊚ ᴄʟɪᴄᴋ ᴛʜᴇ ʙᴇʟᴏᴡ ʙᴜᴛᴛᴏɴ ᴛʜᴇɴ ꜱᴇᴇ ᴘʀɪᴠᴀᴄʏ ᴘᴏʟɪᴄʏ 🔏**",
         reply_markup=InlineKeyboardMarkup(
             [
                 [InlineKeyboardButton("˹ ᴘʀɪᴠᴀᴄʏ ˼", url="https://telegra.ph/Privacy-Policy--Purvi-Bots-by-ALPHA-BABY-08-06")]
