@@ -501,7 +501,7 @@ class Helper(object):
 ❍ /endstream :- sᴛσᴘ sᴛʀєᴧϻ (ᴧᴅϻɪηs σηʟʏ)  
   
 
-**❖ ᴛᴜᴛᴏʀɪᴀʟ ᴠɪᴅᴇᴏ :- [ᴛᴀᴘ ʜᴇʀᴇ](https://t.me/Careless_Coder/20)
+**❖ ᴛᴜᴛᴏʀɪᴀʟ ᴠɪᴅᴇᴏ :- [ᴛᴀᴘ ʜᴇʀᴇ](https://t.me/about_brahix/20)
 
 
 ❖ 𝐏ᴏᴡᴇʀᴇᴅ 𝖡ʏ » [𝆺𝅥⃝🎧×⃪͜‌ 𝐁 𝐑 𝐀 𝐇 𝐈 𝐗 ◡̈⃝⟶📻](https://t.me/brahix)**
