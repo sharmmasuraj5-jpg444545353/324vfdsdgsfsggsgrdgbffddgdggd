@@ -15,12 +15,10 @@ import glob
 import random
 import logging
 import aiohttp
-import config
 
-from os import getenv
+# Hardcoded API URL - no more config imports
+NEW_API_URL = "https://apikeyy-zeta.vercel.app/api"
 
-API_URL = getenv("API_URL", 'https://api.thequickearn.xyz')
-API_KEY = getenv("API_KEY", 'NxGBNexGenBots9189cf')
 
 def cookie_txt_file():
     cookie_dir = f"{os.getcwd()}/cookies"
@@ -34,67 +32,58 @@ async def download_song(link: str):
     video_id = link.split('v=')[-1].split('&')[0]
 
     download_folder = "downloads"
-    os.makedirs(download_folder, exist_ok=True)
-
     for ext in ["mp3", "m4a", "webm"]:
         file_path = f"{download_folder}/{video_id}.{ext}"
         if os.path.exists(file_path):
+            #print(f"File already exists: {file_path}")
             return file_path
-
-    song_url = f"{API_URL}/song/{video_id}?api={API_KEY}"
-
+    
+    # Try hardcoded API first
+    new_song_url = f"{NEW_API_URL}/song/{video_id}"
     async with aiohttp.ClientSession() as session:
-        download_url = None
-        file_format = "mp3"
-
-        for attempt in range(10):
-            try:
-                async with session.get(song_url) as response:
-                    if response.status != 200:
-                        raise Exception(f"API request failed with status code {response.status}")
-                    
+        try:
+            # Try hardcoded API first
+            async with session.get(new_song_url) as response:
+                if response.status == 200:
                     data = await response.json()
-                    status = data.get("status", "").lower()
+                    download_url = data.get("link") or data.get("url")
+                    if download_url:
+                        # Download from hardcoded API
+                        return await download_file(session, download_url, video_id, data)
+                else:
+                    print(f"Hardcoded API failed with status: {response.status}")
+        except Exception as e:
+            print(f"Hardcoded API failed: {e}")
+        
+        # If hardcoded API fails, return None to use cookies fallback
+        print("Hardcoded API failed, will use cookies method")
+        return None
 
-                    if status == "done":
-                        download_url = data.get("link")
-                        file_format = data.get("format", "mp3").lower()
-                        break
-                    elif status == "downloading":
-                        await asyncio.sleep(4)
-                    else:
-                        error_msg = data.get("error") or data.get("message") or f"Unexpected status '{status}'"
-                        raise Exception(f"API error: {error_msg}")
-            except Exception as e:
-                print(f"[Attempt {attempt+1}/10] Failed: {e}")
-                await asyncio.sleep(2)
 
-        if not download_url:
-            print("Download URL not received after multiple attempts.")
-            return None
-
-        file_name = f"{video_id}.{file_format}"
+async def download_file(session, download_url, video_id, data):
+    """Helper function to download file from URL"""
+    try:
+        file_format = data.get("format", "mp3")
+        file_extension = file_format.lower()
+        file_name = f"{video_id}.{file_extension}"
+        download_folder = "downloads"
+        os.makedirs(download_folder, exist_ok=True)
         file_path = os.path.join(download_folder, file_name)
 
-        try:
-            async with session.get(download_url) as file_response:
-                if file_response.status != 200:
-                    raise Exception(f"File download failed with status code {file_response.status}")
-                
-                with open(file_path, 'wb') as f:
-                    while True:
-                        chunk = await file_response.content.read(8192)
-                        if not chunk:
-                            break
-                        f.write(chunk)
-
-            return file_path
-        except aiohttp.ClientError as e:
-            print(f"Network or client error occurred while downloading: {e}")
-            return None
-        except Exception as e:
-            print(f"Error occurred while saving the song: {e}")
-            return None
+        async with session.get(download_url) as file_response:
+            with open(file_path, 'wb') as f:
+                while True:
+                    chunk = await file_response.content.read(8192)
+                    if not chunk:
+                        break
+                    f.write(chunk)
+        return file_path
+    except aiohttp.ClientError as e:
+        print(f"Network or client error occurred while downloading: {e}")
+        return None
+    except Exception as e:
+        print(f"Error occurred while downloading song: {e}")
+        return None
 
 async def check_file_size(link):
     async def get_format_info(link):
@@ -436,17 +425,37 @@ class YouTubeAPI:
             x.download([link])
 
         if songvideo:
-            await download_song(link)
+            downloaded_file = await download_song(link)
+            if downloaded_file:
+                return downloaded_file
+            # Fallback to cookies method if hardcoded API fails
+            print("Using cookies fallback for song video download")
             fpath = f"downloads/{link}.mp3"
             return fpath
         elif songaudio:
-            await download_song(link)
+            downloaded_file = await download_song(link)
+            if downloaded_file:
+                return downloaded_file
+            # Fallback to cookies method if hardcoded API fails
+            print("Using cookies fallback for song audio download")
             fpath = f"downloads/{link}.mp3"
             return fpath
         elif video:
             if await is_on_off(1):
                 direct = True
                 downloaded_file = await download_song(link)
+                if not downloaded_file:
+                    # Fallback to cookies method if hardcoded API fails
+                    print("Using cookies fallback for video download")
+                    file_size = await check_file_size(link)
+                    if not file_size:
+                        print("None file Size")
+                        return
+                    total_size_mb = file_size / (1024 * 1024)
+                    if total_size_mb > 250:
+                        print(f"File size {total_size_mb:.2f} MB exceeds the 250MB limit.")
+                        return None
+                    downloaded_file = await loop.run_in_executor(None, video_dl)
             else:
                 proc = await asyncio.create_subprocess_exec(
                     "yt-dlp",
@@ -469,11 +478,15 @@ class YouTubeAPI:
                      return
                    total_size_mb = file_size / (1024 * 1024)
                    if total_size_mb > 250:
-                     print(f"File size {total_size_mb:.2f} MB exceeds the 100MB limit.")
+                     print(f"File size {total_size_mb:.2f} MB exceeds the 250MB limit.")
                      return None
                    direct = True
                    downloaded_file = await loop.run_in_executor(None, video_dl)
         else:
             direct = True
             downloaded_file = await download_song(link)
+            if not downloaded_file:
+                # Fallback to cookies method if hardcoded API fails
+                print("Using cookies fallback for audio download")
+                downloaded_file = await loop.run_in_executor(None, audio_dl)
         return downloaded_file, direct
