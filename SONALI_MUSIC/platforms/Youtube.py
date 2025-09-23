@@ -26,48 +26,55 @@ def cookie_txt_file():
     cookie_file = os.path.join(cookie_dir, random.choice(cookies_files))
     return cookie_file
 
-async def download_song(link: str):
-    """Try NEW_API_URL first, else fallback to cookies + yt-dlp."""
-    video_id = link.split('v=')[-1].split('&')[0]
+async def download_song(link: str, query: str = None, video: bool = False):
+    """Try EYAPI first (when query provided), then NEW_API_URL, else fallback to cookies + yt-dlp."""
+    # 1. Prefer EYAPI when we have a query (your domain first)
+    if query:
+        async with aiohttp.ClientSession() as session:
+            params = {"query": query, "video": "true" if video else "false"}
+            try:
+                async with session.get(EYAPI_URL, params=params) as resp:
+                    if resp.status == 200:
+                        data = await resp.json()
+                        download_url = data.get("link") or data.get("url")
+                        if download_url:
+                            # Use a stable name based on query
+                            return await download_file(session, download_url, "eyapi_" + str(hash((query, video))), data)
+                    else:
+                        logging.warning(f"EYAPI responded {resp.status} for query {query}")
+            except Exception:
+                logging.exception("Error calling EYAPI")
 
-    # Check if already downloaded
-    download_folder = "downloads"
-    for ext in ["mp3", "m4a", "webm"]:
-        file_path = os.path.join(download_folder, f"{video_id}.{ext}")
-        if os.path.exists(file_path):
-            return file_path
+    # 2. Try NEW_API_URL when we have a direct YouTube link
+    video_id = link.split('v=')[-1].split('&')[0] if link else None
+    if video_id:
+        # Check if already downloaded
+        download_folder = "downloads"
+        for ext in ["mp3", "m4a", "webm", "mp4", "mkv"]:
+            file_path = os.path.join(download_folder, f"{video_id}.{ext}")
+            if os.path.exists(file_path):
+                return file_path
 
-    # 1. Try your hardcoded NEW_API_URL
-    async with aiohttp.ClientSession() as session:
-        try:
-            new_song_url = f"{NEW_API_URL}/song/{video_id}"
-            async with session.get(new_song_url) as resp:
-                if resp.status == 200:
-                    data = await resp.json()
-                    download_url = data.get("link") or data.get("url")
-                    if download_url:
-                        file_path = await download_file(session, download_url, video_id, data)
-                        if file_path:
-                            return file_path
-                else:
-                    logging.warning(f"NEW_API_URL failed with status {resp.status}")
-        except Exception as e:
-            logging.exception("Error in NEW_API_URL download attempt")
-
-    # 2. Try the Eyapi endpoint, if we consider that for direct query. 
-    #    Note: this works when we have a “query” string (song name or video name),
-    #    not raw YouTube link. So usage depends on context.
-    #    If `link` is actually a query, or you'll need to convert link -> query.
-    #    Here assuming you might have a query, e.g., title + “video=false/true”.
-
-    # For example only: if link is “song NAME” or video NAME
-    # Or you might want another method to call this with a query instead of link.
-
-    # Skipping this unless you explicitly pass a query. 
+        async with aiohttp.ClientSession() as session:
+            try:
+                new_song_url = f"{NEW_API_URL}/song/{video_id}"
+                async with session.get(new_song_url) as resp:
+                    if resp.status == 200:
+                        data = await resp.json()
+                        download_url = data.get("link") or data.get("url")
+                        if download_url:
+                            file_path = await download_file(session, download_url, video_id, data)
+                            if file_path:
+                                return file_path
+                    else:
+                        logging.warning(f"NEW_API_URL failed with status {resp.status}")
+            except Exception:
+                logging.exception("Error in NEW_API_URL download attempt")
 
     # 3. Fallback: use yt-dlp + cookies
     logging.info("Falling back to yt‑dlp + cookies method")
-    # Using existing logic: download audio version
+    if video:
+        return await asyncio.get_event_loop().run_in_executor(None, lambda: yt_video_download_with_audio(link))
     return await asyncio.get_event_loop().run_in_executor(None, lambda: yt_audio_download(link))
 
 
@@ -246,7 +253,7 @@ class YouTubeAPI:
             # Depending on your config flag is_on_off(1)
             if await is_on_off(1):
                 # Try your custom APIs first
-                file_from_custom = await download_song(link)
+                file_from_custom = await download_song(link, query=query, video=True)
                 if file_from_custom:
                     return file_from_custom
                 # Fallback to checking file size / streaming link etc
@@ -288,7 +295,7 @@ class YouTubeAPI:
 
         elif songaudio or songvideo:
             # First attempt custom API download
-            file_from_custom = await download_song(link)
+            file_from_custom = await download_song(link, query=query, video=songvideo)
             if file_from_custom:
                 return file_from_custom
             # Fallback: download via yt‑dlp with appropriate options
