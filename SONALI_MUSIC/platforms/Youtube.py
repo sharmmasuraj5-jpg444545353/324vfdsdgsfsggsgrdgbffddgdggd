@@ -19,29 +19,67 @@ NEW_API_URL = "https://apikeyy-zeta.vercel.app/api"
 EYAPI_URL = "https://eyapi001-c4f7b52ccfc4.herokuapp.com/query"
 
 def cookie_txt_file():
+    # Prefer ./cookies/*.txt if present, else fall back to repo asset cookies.txt
     cookie_dir = os.path.join(os.getcwd(), "cookies")
-    cookies_files = [f for f in os.listdir(cookie_dir) if f.endswith(".txt")]
-    if not cookies_files:
-        raise FileNotFoundError("No cookie .txt files found in cookies directory")
-    cookie_file = os.path.join(cookie_dir, random.choice(cookies_files))
-    return cookie_file
+    if os.path.isdir(cookie_dir):
+        cookies_files = [f for f in os.listdir(cookie_dir) if f.endswith(".txt")]
+        if cookies_files:
+            return os.path.join(cookie_dir, random.choice(cookies_files))
+    # fallback to bundled asset
+    asset_cookie = os.path.join(os.getcwd(), "SONALI_MUSIC", "assets", "cookies.txt")
+    if os.path.exists(asset_cookie):
+        return asset_cookie
+    raise FileNotFoundError("No cookie .txt found. Provide ./cookies/*.txt or SONALI_MUSIC/assets/cookies.txt")
 
 async def download_song(link: str, query: str = None, video: bool = False):
     """Try EYAPI first (when query provided), then NEW_API_URL, else fallback to cookies + yt-dlp."""
     # 1. Prefer EYAPI when we have a query (your domain first)
     if query:
-        async with aiohttp.ClientSession() as session:
+        timeout = aiohttp.ClientTimeout(total=20)
+        async with aiohttp.ClientSession(timeout=timeout) as session:
             params = {"query": query, "video": "true" if video else "false"}
             try:
                 async with session.get(EYAPI_URL, params=params) as resp:
                     if resp.status == 200:
-                        data = await resp.json()
-                        download_url = data.get("link") or data.get("url")
+                        # EYAPI may return different shapes; be flexible
+                        try:
+                            data = await resp.json(content_type=None)
+                        except Exception:
+                            text = await resp.text()
+                            logging.error(f"EYAPI returned non-JSON: {text[:200]}")
+                            data = None
+                        def extract_url(payload):
+                            if not payload:
+                                return None
+                            if isinstance(payload, str) and payload.startswith("http"):
+                                return payload
+                            if isinstance(payload, dict):
+                                for key in ("link", "url", "download_url", "audio", "video", "mp3", "mp4"):
+                                    val = payload.get(key)
+                                    if isinstance(val, str) and val.startswith("http"):
+                                        return val
+                                # look into nested common keys
+                                for key in ("result", "data"):
+                                    val = payload.get(key)
+                                    url = extract_url(val)
+                                    if url:
+                                        return url
+                            if isinstance(payload, list) and payload:
+                                # find first url-ish string or dict entry
+                                for item in payload:
+                                    url = extract_url(item)
+                                    if url:
+                                        return url
+                            return None
+                        download_url = extract_url(data)
                         if download_url:
-                            # Use a stable name based on query
-                            return await download_file(session, download_url, "eyapi_" + str(hash((query, video))), data)
+                            # Use a stable name based on query (avoid randomized hash seed)
+                            safe_id = re.sub(r"[^a-zA-Z0-9_-]", "_", f"eyapi_{'vid' if video else 'aud'}_{query}")[:64]
+                            return await download_file(session, download_url, safe_id, data if isinstance(data, dict) else {})
+                        logging.warning(f"EYAPI succeeded but no download URL parsed for query: {query}")
                     else:
-                        logging.warning(f"EYAPI responded {resp.status} for query {query}")
+                        body = await resp.text()
+                        logging.warning(f"EYAPI {resp.status} for query {query}: {body[:200]}")
             except Exception:
                 logging.exception("Error calling EYAPI")
 
