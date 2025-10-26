@@ -853,11 +853,11 @@ class YouTubeAPI:
                    direct = True
                    downloaded_file = await loop.run_in_executor(None, video_dl)
         else:
-            # === MAIN LOGIC: SAAVN FIRST, THEN YOUTUBE FALLBACK ===
+            # === MAIN LOGIC: YOUTUBE SEARCH + SAAVN PLAY ===
             # Extract query from link or use as-is
             query = link
             
-            # If it's a YouTube URL, try to get title first for better Saavn search
+            # If it's a YouTube URL, try to get title first
             if "youtube.com" in link or "youtu.be" in link:
                 try:
                     print(f"🎬 Extracting title from YouTube URL: {link}")
@@ -874,83 +874,134 @@ class YouTubeAPI:
                 except:
                     query = link
             
-            # Try Saavn first with enhanced search
-            print(f"🔍 Trying Saavn for: {query}")
-            saavn_url, saavn_info = await download_saavn_song(query)
-            if saavn_url:
-                print(f"✅ Downloaded from Saavn: {saavn_info['title']} by {saavn_info['artist']}")
-                return saavn_url, True
+            # Use hybrid search: YouTube search + Saavn play
+            print(f"🔍 Using hybrid search for: {query}")
+            download_url, song_info, is_saavn = await youtube_search_saavn_play(query)
             
-            # Fallback to YouTube
-            print(f"🔄 Saavn failed, trying YouTube for: {query}")
-            direct = True
-            downloaded_file = await download_song(link)
-            return downloaded_file, direct
+            if download_url:
+                if is_saavn:
+                    print(f"✅ Downloaded from Saavn: {song_info['title']} by {song_info['artist']}")
+                    return download_url, True
+                else:
+                    print(f"✅ Downloaded from YouTube: {song_info['title']}")
+                    return download_url, True
+            else:
+                print(f"❌ All methods failed for: {query}")
+                return None, None
             
         return None, None
 
-# === NEW FUNCTION FOR SAAVN-FIRST DOWNLOAD ===
-async def download_with_saavn_priority(query: str):
+# === HYBRID SEARCH: YOUTUBE SEARCH + SAAVN PLAY ===
+async def youtube_search_saavn_play(query: str):
     """
-    Download function that tries Saavn first with enhanced search, then falls back to YouTube
+    Use YouTube search to find songs, then play from Saavn API for better quality
     """
-    print(f"🎵 Starting download process for: {query}")
+    print(f"🎵 Starting hybrid search: YouTube → Saavn for: {query}")
     
-    # Try Saavn first with enhanced search
-    print(f"🔍 Trying Saavn for: {query}")
-    saavn_url, saavn_info = await download_saavn_song(query)
-    if saavn_url:
-        print(f"✅ Successfully downloaded from Saavn: {saavn_info['title']} by {saavn_info['artist']}")
-        return saavn_url, saavn_info, True
-    
-    # Fallback to YouTube search
-    print(f"🔄 Saavn failed, trying YouTube for: {query}")
     try:
+        # Step 1: Search YouTube to find the song
         print(f"🔍 Searching YouTube for: {query}")
-        results = VideosSearch(query, limit=3)  # Get more results for better matching
+        results = VideosSearch(query, limit=5)  # Get multiple results for better matching
         search_results = await results.next()
         
         if not search_results.get("result"):
             print("❌ No YouTube results found")
             return None, None, False
         
-        # Try to find best match from YouTube results
-        best_result = None
-        query_lower = query.lower()
+        # Step 2: Extract song titles from YouTube results
+        youtube_results = search_results["result"]
+        print(f"📺 Found {len(youtube_results)} YouTube results")
         
-        for result in search_results["result"]:
-            title = result["title"].lower()
-            if query_lower in title or any(word in title for word in query_lower.split()):
-                best_result = result
-                break
+        # Step 3: Try each YouTube result with Saavn
+        for i, result in enumerate(youtube_results, 1):
+            youtube_title = result["title"]
+            youtube_artist = result.get("channel", {}).get("name", "Unknown")
+            youtube_duration = result.get("duration", "Unknown")
+            
+            print(f"\n🎯 Trying result {i}: {youtube_title}")
+            
+            # Clean the YouTube title for Saavn search
+            saavn_query = clean_youtube_title_for_saavn(youtube_title)
+            print(f"🧹 Cleaned title for Saavn: {saavn_query}")
+            
+            # Search Saavn with cleaned title
+            saavn_url, saavn_info = await download_saavn_song(saavn_query)
+            
+            if saavn_url:
+                print(f"✅ SUCCESS! Found on Saavn: {saavn_info['title']} by {saavn_info['artist']}")
+                return saavn_url, saavn_info, True
+            else:
+                print(f"❌ Not found on Saavn: {saavn_query}")
         
-        if not best_result:
-            best_result = search_results["result"][0]  # Use first result if no match
-        
-        print(f"📺 Selected YouTube video: {best_result['title']}")
+        # Step 4: If no Saavn match found, fallback to YouTube download
+        print(f"🔄 No Saavn matches found, falling back to YouTube")
+        best_result = youtube_results[0]  # Use first result
         video_url = best_result["link"]
         
-        # Download from YouTube
-        print(f"⬇️ Downloading from YouTube: {video_url}")
+        print(f"⬇️ Downloading from YouTube: {best_result['title']}")
         downloaded_file = await download_song(video_url)
+        
         if downloaded_file:
             youtube_info = {
                 "title": best_result["title"],
-                "artist": "YouTube",
+                "artist": best_result.get("channel", {}).get("name", "YouTube"),
                 "source": "YouTube",
                 "quality": "Variable",
                 "duration": best_result.get("duration", "Unknown")
             }
-            print(f"✅ Successfully downloaded from YouTube: {best_result['title']}")
+            print(f"✅ Downloaded from YouTube: {best_result['title']}")
             return downloaded_file, youtube_info, False
         else:
             print("❌ Failed to download from YouTube")
             
     except Exception as e:
-        print(f"❌ YouTube fallback error: {e}")
+        print(f"❌ Hybrid search error: {e}")
     
-    print(f"❌ All download methods failed for: {query}")
+    print(f"❌ All methods failed for: {query}")
     return None, None, False
+
+def clean_youtube_title_for_saavn(youtube_title: str):
+    """Clean YouTube title to make it suitable for Saavn search"""
+    # Remove common YouTube suffixes
+    suffixes_to_remove = [
+        "official video", "official music video", "official", "music video", 
+        "lyrics", "lyric video", "lyrics video", "hd", "4k", "full song",
+        "song", "video", "audio", "cover", "remix", "version", "mix",
+        "official audio", "official lyric video", "official hd", "official 4k"
+    ]
+    
+    title = youtube_title.lower().strip()
+    
+    # Remove suffixes
+    for suffix in suffixes_to_remove:
+        if title.endswith(suffix):
+            title = title[:-len(suffix)].strip()
+    
+    # Remove extra words in parentheses or brackets
+    title = re.sub(r'\([^)]*\)', '', title)  # Remove (Official Video)
+    title = re.sub(r'\[[^\]]*\]', '', title)  # Remove [HD]
+    
+    # Remove special characters and extra spaces
+    title = re.sub(r'[^\w\s]', '', title)
+    title = re.sub(r'\s+', ' ', title).strip()
+    
+    # Remove common prefixes
+    prefixes_to_remove = ["watch:", "listen:", "play:"]
+    for prefix in prefixes_to_remove:
+        if title.startswith(prefix):
+            title = title[len(prefix):].strip()
+    
+    return title
+
+# === NEW FUNCTION FOR HYBRID DOWNLOAD ===
+async def download_with_saavn_priority(query: str):
+    """
+    Download function using hybrid approach: YouTube search + Saavn play
+    """
+    print(f"🎵 Starting hybrid download process for: {query}")
+    
+    # Use the new hybrid search function
+    return await youtube_search_saavn_play(query)
 
  # ======================================================
 # ©️ 2025-26 All Rights Reserved by Purvi Bots (suraj08832) 😎
