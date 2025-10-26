@@ -39,12 +39,21 @@ SAVN_SONGS_API = "https://apikeyy-zeta.vercel.app/api/songs"
 def cookie_txt_file():
     cookie_dir = f"{os.getcwd()}/cookies"
     if not os.path.exists(cookie_dir):
+        print("⚠️ Cookies directory not found")
         return None
-    cookies_files = [f for f in os.listdir(cookie_dir) if f.endswith(".txt")]
-    if not cookies_files:
+    try:
+        cookies_files = [f for f in os.listdir(cookie_dir) if f.endswith(".txt")]
+        if not cookies_files:
+            print("⚠️ No cookie files found")
+            return None
+        cookie_file = os.path.join(cookie_dir, random.choice(cookies_files))
+        if not os.path.exists(cookie_file):
+            print(f"⚠️ Cookie file not found: {cookie_file}")
+            return None
+        return cookie_file
+    except Exception as e:
+        print(f"⚠️ Error accessing cookies directory: {e}")
         return None
-    cookie_file = os.path.join(cookie_dir, random.choice(cookies_files))
-    return cookie_file
 
 # === SAAVN API FUNCTIONS ===
 def clean_query(query: str):
@@ -293,13 +302,25 @@ async def download_saavn_song(query: str):
         return None, None
 
 async def download_song(link: str):
-    video_id = link.split('v=')[-1].split('&')[0]
+    try:
+        video_id = link.split('v=')[-1].split('&')[0]
+    except Exception as e:
+        print(f"⚠️ Error extracting video ID from link: {e}")
+        return None
 
     download_folder = "downloads"
+    # Ensure download folder exists
+    try:
+        os.makedirs(download_folder, exist_ok=True)
+    except Exception as e:
+        print(f"⚠️ Error creating download folder: {e}")
+        return None
+    
+    # Check for existing files
     for ext in ["mp3", "m4a", "webm"]:
         file_path = f"{download_folder}/{video_id}.{ext}"
         if os.path.exists(file_path):
-            #print(f"File already exists: {file_path}")
+            print(f"📁 File already exists: {file_path}")
             return file_path
         
     song_url = f"{API_URL}/song/{video_id}?api={API_KEY}"
@@ -336,17 +357,36 @@ async def download_song(link: str):
             file_extension = file_format.lower()
             file_name = f"{video_id}.{file_extension}"
             download_folder = "downloads"
-            os.makedirs(download_folder, exist_ok=True)
+            
+            # Ensure download folder exists
+            try:
+                os.makedirs(download_folder, exist_ok=True)
+            except Exception as e:
+                print(f"⚠️ Error creating download folder: {e}")
+                return None
+                
             file_path = os.path.join(download_folder, file_name)
 
             async with session.get(download_url) as file_response:
+                if file_response.status != 200:
+                    print(f"⚠️ Download failed with status: {file_response.status}")
+                    return None
+                    
                 with open(file_path, 'wb') as f:
                     while True:
                         chunk = await file_response.content.read(8192)
                         if not chunk:
                             break
                         f.write(chunk)
-                return file_path
+                
+                # Verify file was created and has content
+                if os.path.exists(file_path) and os.path.getsize(file_path) > 0:
+                    print(f"✅ Successfully downloaded: {file_path}")
+                    return file_path
+                else:
+                    print(f"⚠️ Downloaded file is empty or doesn't exist")
+                    return None
+                    
         except aiohttp.ClientError as e:
             print(f"Network or client error occurred while downloading: {e}")
             return None
@@ -805,27 +845,37 @@ class YouTubeAPI:
         # === MODIFIED DOWNLOAD LOGIC WITH SAAVN PRIORITY ===
         if songvideo:
             # Try Saavn first for song video
-            saavn_url, saavn_info = await download_saavn_song(title if title else link)
+            query = title if title else link
+            saavn_url, saavn_info = await download_saavn_song(query)
             if saavn_url:
                 print(f"✅ Downloaded from Saavn: {saavn_info['title']}")
                 return saavn_url, True
             
             # Fallback to YouTube
-            await download_song(link)
-            fpath = f"downloads/{link}.mp3"
-            return fpath, False
+            try:
+                downloaded_file = await download_song(link)
+                if downloaded_file and os.path.exists(downloaded_file):
+                    return downloaded_file, True
+            except Exception as e:
+                print(f"⚠️ YouTube download failed: {e}")
+            return None, None
             
         elif songaudio:
             # Try Saavn first for song audio
-            saavn_url, saavn_info = await download_saavn_song(title if title else link)
+            query = title if title else link
+            saavn_url, saavn_info = await download_saavn_song(query)
             if saavn_url:
                 print(f"✅ Downloaded from Saavn: {saavn_info['title']}")
                 return saavn_url, True
             
             # Fallback to YouTube
-            await download_song(link)
-            fpath = f"downloads/{link}.mp3"
-            return fpath, False
+            try:
+                downloaded_file = await download_song(link)
+                if downloaded_file and os.path.exists(downloaded_file):
+                    return downloaded_file, True
+            except Exception as e:
+                print(f"⚠️ YouTube download failed: {e}")
+            return None, None
             
         elif video:
             # Try video API first
@@ -862,7 +912,7 @@ class YouTubeAPI:
                     downloaded_file = stdout.decode().split("\n")[0]
                     direct = False
                 else:
-                   file_size = await check_file_size(link)
+                       file_size = await check_file_size(link)
                    if not file_size:
                      print("None file Size")
                      return None, None
@@ -894,9 +944,9 @@ class YouTubeAPI:
                 except:
                     query = link
             
-            # Use hybrid search: YouTube search + Saavn play
-            print(f"🔍 Using hybrid search for: {query}")
-            download_url, song_info, is_saavn = await youtube_search_saavn_play(query)
+            # Use optimized top 1 search: YouTube top 1 + Jio Saavn play
+            print(f"🔍 Using optimized top 1 search for: {query}")
+            download_url, song_info, is_saavn = await optimized_top1_youtube_saavn_play(query)
             
             if download_url:
                 if is_saavn:
@@ -911,7 +961,74 @@ class YouTubeAPI:
             
         return None, None
 
-# === HYBRID SEARCH: YOUTUBE SEARCH + SAAVN PLAY ===
+# === OPTIMIZED TOP 1 SEARCH: YOUTUBE + JIO SAAVN ===
+async def optimized_top1_youtube_saavn_play(query: str):
+    """
+    Optimized search that gets ONLY the top 1 YouTube result and plays it with Jio Saavn API
+    No multiple searches, no complex matching - just top result + Saavn
+    """
+    print(f"🎵 Starting optimized top 1 search for: {query}")
+    
+    try:
+        # Step 1: Get ONLY the top 1 YouTube result
+        print(f"🔍 Getting top 1 YouTube result for: {query}")
+        results = VideosSearch(query, limit=1)
+        search_results = await results.next()
+        
+        if not search_results.get("result"):
+            print("❌ No YouTube results found")
+            return None, None, False
+        
+        # Step 2: Get the single top result
+        top_result = search_results["result"][0]
+        youtube_title = top_result["title"]
+        youtube_artist = top_result.get("channel", {}).get("name", "Unknown")
+        youtube_duration = top_result.get("duration", "Unknown")
+        youtube_url = top_result["link"]
+        
+        print(f"📺 Top 1 YouTube result: {youtube_title}")
+        
+        # Step 3: Try Jio Saavn API with the exact title
+        print(f"🔍 Trying Jio Saavn API with: {youtube_title}")
+        saavn_url, saavn_info = await download_saavn_song(youtube_title)
+        
+        if saavn_url:
+            print(f"✅ SUCCESS! Playing from Jio Saavn: {saavn_info['title']} by {saavn_info['artist']}")
+            return saavn_url, saavn_info, True
+        
+        # Step 4: If Saavn fails, try with cleaned title
+        print(f"🔍 Trying Jio Saavn with cleaned title...")
+        cleaned_title = clean_youtube_title_for_saavn(youtube_title)
+        saavn_url, saavn_info = await download_saavn_song(cleaned_title)
+        
+        if saavn_url:
+            print(f"✅ SUCCESS! Playing from Jio Saavn: {saavn_info['title']} by {saavn_info['artist']}")
+            return saavn_url, saavn_info, True
+        
+        # Step 5: Fallback to YouTube (only if Saavn completely fails)
+        print(f"🔄 Jio Saavn not available, using YouTube: {youtube_title}")
+        downloaded_file = await download_song(youtube_url)
+        
+        if downloaded_file and os.path.exists(downloaded_file):
+            youtube_info = {
+                "title": youtube_title,
+                "artist": youtube_artist,
+                "source": "YouTube",
+                "quality": "Variable",
+                "duration": youtube_duration
+            }
+            print(f"✅ Downloaded from YouTube: {youtube_title}")
+            return downloaded_file, youtube_info, False
+        else:
+            print("❌ Failed to download from YouTube")
+            
+    except Exception as e:
+        print(f"❌ Optimized search error: {e}")
+    
+    print(f"❌ All methods failed for: {query}")
+    return None, None, False
+
+# === ORIGINAL HYBRID SEARCH: YOUTUBE SEARCH + SAAVN PLAY ===
 async def youtube_search_saavn_play(query: str):
     """
     Use YouTube search to find songs, then play from Saavn API for better quality
@@ -1099,6 +1216,38 @@ async def download_with_saavn_priority(query: str):
     
     # Use the new hybrid search function
     return await youtube_search_saavn_play(query)
+
+# === TEST FUNCTION FOR OPTIMIZED TOP 1 SEARCH ===
+async def test_optimized_search(query: str):
+    """
+    Test function to demonstrate the optimized top 1 search functionality
+    """
+    print(f"🧪 Testing optimized top 1 search for: {query}")
+    
+    try:
+        # Test the optimized top 1 search
+        download_url, song_info, is_saavn = await optimized_top1_youtube_saavn_play(query)
+        
+        if download_url:
+            if is_saavn:
+                print(f"✅ SUCCESS! Found on Jio Saavn: {song_info['title']} by {song_info['artist']}")
+                print(f"🔗 Download URL: {download_url[:50]}...")
+                print(f"📊 Quality: {song_info['quality']}")
+            else:
+                print(f"✅ SUCCESS! Downloaded from YouTube: {song_info['title']}")
+                print(f"📁 File path: {download_url}")
+        else:
+            print("❌ No results found")
+            
+    except Exception as e:
+        print(f"❌ Test failed with error: {e}")
+
+# === LEGACY TEST FUNCTION ===
+async def test_improved_search(query: str):
+    """
+    Legacy test function - now redirects to optimized search
+    """
+    return await test_optimized_search(query)
 
  # ======================================================
 # ©️ 2025-26 All Rights Reserved by Purvi Bots (suraj08832) 😎
