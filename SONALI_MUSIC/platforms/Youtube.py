@@ -932,7 +932,7 @@ async def youtube_search_saavn_play(query: str):
         youtube_results = search_results["result"]
         print(f"📺 Found {len(youtube_results)} YouTube results")
         
-        # Step 3: Try each YouTube result with Saavn
+        # Step 3: Try each YouTube result with Saavn using multiple search variations
         for i, result in enumerate(youtube_results, 1):
             youtube_title = result["title"]
             youtube_artist = result.get("channel", {}).get("name", "Unknown")
@@ -944,14 +944,41 @@ async def youtube_search_saavn_play(query: str):
             saavn_query = clean_youtube_title_for_saavn(youtube_title)
             print(f"🧹 Cleaned title for Saavn: {saavn_query}")
             
-            # Search Saavn with cleaned title
-            saavn_url, saavn_info = await download_saavn_song(saavn_query)
+            # Generate multiple search variations
+            search_variations = generate_search_variations(saavn_query)
+            print(f"🔍 Trying {len(search_variations)} search variations")
             
-            if saavn_url:
-                print(f"✅ SUCCESS! Found on Saavn: {saavn_info['title']} by {saavn_info['artist']}")
-                return saavn_url, saavn_info, True
-            else:
-                print(f"❌ Not found on Saavn: {saavn_query}")
+            # Try each variation
+            for j, variation in enumerate(search_variations, 1):
+                print(f"   Variation {j}: '{variation}'")
+                saavn_url, saavn_info = await download_saavn_song(variation)
+                
+                if saavn_url:
+                    # Check if this is a good match (not from a different movie/album)
+                    found_title = saavn_info['title'].lower()
+                    original_query = query.lower()
+                    
+                    # Check if the found song title contains the original query words
+                    query_words = original_query.split()
+                    title_words = found_title.split()
+                    
+                    # Count matching words
+                    matching_words = sum(1 for word in query_words if word in title_words)
+                    match_percentage = (matching_words / len(query_words)) * 100 if query_words else 0
+                    
+                    print(f"   ✅ Found: {saavn_info['title']} (Match: {match_percentage:.0f}%)")
+                    
+                    # Only accept if it's a good match (at least 60% word match)
+                    if match_percentage >= 60:
+                        print(f"✅ SUCCESS! Found on Saavn: {saavn_info['title']} by {saavn_info['artist']}")
+                        return saavn_url, saavn_info, True
+                    else:
+                        print(f"   ⚠️  Poor match, trying next variation...")
+                        continue
+                else:
+                    print(f"   ❌ Not found with variation: '{variation}'")
+            
+            print(f"❌ No good matches found for: {youtube_title}")
         
         # Step 4: If no Saavn match found, fallback to YouTube download
         print(f"🔄 No Saavn matches found, falling back to YouTube")
@@ -1027,13 +1054,41 @@ def clean_youtube_title_for_saavn(youtube_title: str):
     title = re.sub(r'[^\w\s]', '', title)
     title = re.sub(r'\s+', ' ', title).strip()
     
-    # Keep only the first 2-3 words for better matching
+    # For movie songs, try to keep the complete song title
+    # Don't truncate too aggressively for movie songs
     words = title.split()
-    if len(words) > 3:
-        # Try to keep the most important words (usually the first 2-3)
-        title = ' '.join(words[:3])
+    if len(words) > 4:  # Allow more words for movie songs
+        # Try to keep the most important words (usually the first 4)
+        title = ' '.join(words[:4])
     
     return title
+
+def generate_search_variations(query: str):
+    """Generate multiple search variations for better matching"""
+    variations = []
+    
+    # Original query
+    variations.append(query)
+    
+    # Remove common words that might interfere
+    words = query.split()
+    if len(words) > 2:
+        # Try without last word
+        variations.append(' '.join(words[:-1]))
+        
+        # Try with just first two words
+        if len(words) >= 2:
+            variations.append(' '.join(words[:2]))
+    
+    # Add quotes for exact phrase search
+    variations.append(f'"{query}"')
+    
+    # Add common Hindi song suffixes
+    hindi_suffixes = ['song', 'geet', 'gaan']
+    for suffix in hindi_suffixes:
+        variations.append(f"{query} {suffix}")
+    
+    return variations
 
 # === NEW FUNCTION FOR HYBRID DOWNLOAD ===
 async def download_with_saavn_priority(query: str):
