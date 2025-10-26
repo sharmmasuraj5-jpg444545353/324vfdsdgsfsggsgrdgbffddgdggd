@@ -67,12 +67,15 @@ def clean_query(query: str):
     return cleaned_query
 
 def find_best_match(songs: list, original_query: str):
-    """Find the best matching song from search results"""
+    """Find the best matching song from search results with improved matching"""
     if not songs:
         return None
         
     original_query = original_query.lower().strip()
     cleaned_query = clean_query(original_query)
+    
+    # Extract key words from the query (first 2-3 words)
+    query_words = cleaned_query.split()[:3]  # Only use first 3 words
     
     # Score each song based on title similarity
     scored_songs = []
@@ -88,33 +91,50 @@ def find_best_match(songs: list, original_query: str):
         if cleaned_query in title:
             score += 100
             
-        # Partial title match
-        query_words = cleaned_query.split()
+        # Check if all query words are in the title
         title_words = title.split()
-        
-        # Count matching words
         matching_words = sum(1 for word in query_words if word in title_words)
-        score += matching_words * 10
         
-        # Artist match bonus
+        # If most query words match, give high score
+        if matching_words >= len(query_words) * 0.7:  # 70% of words match
+            score += 80
+        
+        # Partial word matching
+        score += matching_words * 15
+        
+        # Exact word order match bonus
+        if len(query_words) >= 2:
+            # Check if first two words appear in order
+            if query_words[0] in title and query_words[1] in title:
+                if title.find(query_words[0]) < title.find(query_words[1]):
+                    score += 30
+        
+        # Artist match bonus (but not too high to avoid wrong matches)
         if any(word in artist for word in query_words):
-            score += 5
+            score += 10
             
         # Length similarity bonus (prefer similar length titles)
         length_diff = abs(len(cleaned_query) - len(title))
-        if length_diff < 10:
-            score += 5
+        if length_diff < 15:
+            score += 10
+        elif length_diff > 30:  # Penalize very different lengths
+            score -= 20
+            
+        # Penalize if title contains too many extra words
+        if len(title_words) > len(query_words) * 2:
+            score -= 15
             
         scored_songs.append((score, song))
     
     # Sort by score and return best match
     scored_songs.sort(key=lambda x: x[0], reverse=True)
     
-    if scored_songs and scored_songs[0][0] > 0:
+    # Only return if we have a reasonable match (score > 20)
+    if scored_songs and scored_songs[0][0] > 20:
         return scored_songs[0][1]
     
-    # If no good match found, return first song
-    return songs[0] if songs else None
+    # If no good match found, return None instead of first song
+    return None
 
 async def search_saavn_song(query: str):
     """Search for songs using Saavn API with multiple strategies"""
@@ -962,12 +982,20 @@ async def youtube_search_saavn_play(query: str):
 
 def clean_youtube_title_for_saavn(youtube_title: str):
     """Clean YouTube title to make it suitable for Saavn search"""
-    # Remove common YouTube suffixes
+    # Remove common YouTube suffixes and extra words
     suffixes_to_remove = [
         "official video", "official music video", "official", "music video", 
         "lyrics", "lyric video", "lyrics video", "hd", "4k", "full song",
         "song", "video", "audio", "cover", "remix", "version", "mix",
-        "official audio", "official lyric video", "official hd", "official 4k"
+        "official audio", "official lyric video", "official hd", "official 4k",
+        "full 4k video", "full hd", "full song hd", "full song 4k"
+    ]
+    
+    # Remove common actor/artist names that might interfere
+    actor_names = [
+        "amitabh bachchan", "jaya prada", "kishore kumar", "lata mangeshkar",
+        "mohammed rafi", "asha bhosle", "kumar sanu", "udit narayan",
+        "alisha chinai", "anuradha paudwal", "sonu nigam", "shreya ghoshal"
     ]
     
     title = youtube_title.lower().strip()
@@ -981,15 +1009,29 @@ def clean_youtube_title_for_saavn(youtube_title: str):
     title = re.sub(r'\([^)]*\)', '', title)  # Remove (Official Video)
     title = re.sub(r'\[[^\]]*\]', '', title)  # Remove [HD]
     
+    # Remove pipe separators and everything after them
+    if '|' in title:
+        title = title.split('|')[0].strip()
+    
+    # Remove common prefixes
+    prefixes_to_remove = ["watch:", "listen:", "play:", "song:"]
+    for prefix in prefixes_to_remove:
+        if title.startswith(prefix):
+            title = title[len(prefix):].strip()
+    
+    # Remove actor names that might interfere with search
+    for actor in actor_names:
+        title = title.replace(actor, '').strip()
+    
     # Remove special characters and extra spaces
     title = re.sub(r'[^\w\s]', '', title)
     title = re.sub(r'\s+', ' ', title).strip()
     
-    # Remove common prefixes
-    prefixes_to_remove = ["watch:", "listen:", "play:"]
-    for prefix in prefixes_to_remove:
-        if title.startswith(prefix):
-            title = title[len(prefix):].strip()
+    # Keep only the first 2-3 words for better matching
+    words = title.split()
+    if len(words) > 3:
+        # Try to keep the most important words (usually the first 2-3)
+        title = ' '.join(words[:3])
     
     return title
 
