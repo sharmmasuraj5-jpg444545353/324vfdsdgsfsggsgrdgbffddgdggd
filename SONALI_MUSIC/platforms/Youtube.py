@@ -47,31 +47,153 @@ def cookie_txt_file():
     return cookie_file
 
 # === SAAVN API FUNCTIONS ===
+def clean_query(query: str):
+    """Clean and optimize search query"""
+    # Remove common words that might interfere with search
+    stop_words = ['song', 'music', 'video', 'official', 'lyrics', 'hd', '4k', 'full']
+    query = query.lower().strip()
+    
+    # Remove stop words
+    words = query.split()
+    cleaned_words = [word for word in words if word not in stop_words]
+    
+    # Join back and clean
+    cleaned_query = ' '.join(cleaned_words)
+    
+    # Remove extra spaces and special characters
+    cleaned_query = re.sub(r'[^\w\s]', '', cleaned_query)
+    cleaned_query = re.sub(r'\s+', ' ', cleaned_query).strip()
+    
+    return cleaned_query
+
+def find_best_match(songs: list, original_query: str):
+    """Find the best matching song from search results"""
+    if not songs:
+        return None
+        
+    original_query = original_query.lower().strip()
+    cleaned_query = clean_query(original_query)
+    
+    # Score each song based on title similarity
+    scored_songs = []
+    
+    for song in songs:
+        title = song.get("title", "").lower()
+        artist = song.get("primaryArtists", "").lower()
+        
+        # Calculate similarity score
+        score = 0
+        
+        # Exact title match gets highest score
+        if cleaned_query in title:
+            score += 100
+            
+        # Partial title match
+        query_words = cleaned_query.split()
+        title_words = title.split()
+        
+        # Count matching words
+        matching_words = sum(1 for word in query_words if word in title_words)
+        score += matching_words * 10
+        
+        # Artist match bonus
+        if any(word in artist for word in query_words):
+            score += 5
+            
+        # Length similarity bonus (prefer similar length titles)
+        length_diff = abs(len(cleaned_query) - len(title))
+        if length_diff < 10:
+            score += 5
+            
+        scored_songs.append((score, song))
+    
+    # Sort by score and return best match
+    scored_songs.sort(key=lambda x: x[0], reverse=True)
+    
+    if scored_songs and scored_songs[0][0] > 0:
+        return scored_songs[0][1]
+    
+    # If no good match found, return first song
+    return songs[0] if songs else None
+
 async def search_saavn_song(query: str):
-    """Search for songs using Saavn API"""
+    """Search for songs using Saavn API with multiple strategies"""
     try:
+        # Strategy 1: Original query
+        print(f"🔍 Searching Saavn with original query: {query}")
         response = requests.get(SAVN_API_BASE, params={"query": query})
-        print(f"Saavn API Response Status: {response.status_code}")
         
-        if response.status_code != 200:
-            return None
-            
-        data = response.json()
-        print(f"Saavn API Data: {data}")
+        if response.status_code == 200:
+            data = response.json()
+            if data.get("success") and "data" in data:
+                songs = []
+                if "songs" in data["data"] and "results" in data["data"]["songs"]:
+                    songs = data["data"]["songs"]["results"]
+                elif "topQuery" in data["data"] and "results" in data["data"]["topQuery"]:
+                    songs = data["data"]["topQuery"]["results"]
+                elif isinstance(data["data"], list):
+                    songs = data["data"]
+                
+                if songs:
+                    best_match = find_best_match(songs, query)
+                    if best_match:
+                        print(f"✅ Found match with original query: {best_match.get('title')}")
+                        return [best_match]
         
-        if not data.get("success") or "data" not in data:
-            return None
+        # Strategy 2: Cleaned query
+        cleaned_query = clean_query(query)
+        if cleaned_query != query.lower():
+            print(f"🔍 Trying cleaned query: {cleaned_query}")
+            response = requests.get(SAVN_API_BASE, params={"query": cleaned_query})
             
-        # Get songs from the response
-        songs = []
-        if "songs" in data["data"] and "results" in data["data"]["songs"]:
-            songs = data["data"]["songs"]["results"]
-        elif "topQuery" in data["data"] and "results" in data["data"]["topQuery"]:
-            songs = data["data"]["topQuery"]["results"]
-        elif isinstance(data["data"], list):
-            songs = data["data"]
-            
-        return songs if songs else None
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("success") and "data" in data:
+                    songs = []
+                    if "songs" in data["data"] and "results" in data["data"]["songs"]:
+                        songs = data["data"]["songs"]["results"]
+                    elif "topQuery" in data["data"] and "results" in data["data"]["topQuery"]:
+                        songs = data["data"]["topQuery"]["results"]
+                    elif isinstance(data["data"], list):
+                        songs = data["data"]
+                    
+                    if songs:
+                        best_match = find_best_match(songs, query)
+                        if best_match:
+                            print(f"✅ Found match with cleaned query: {best_match.get('title')}")
+                            return [best_match]
+        
+        # Strategy 3: Try with different variations
+        query_variations = [
+            query.replace(" ", ""),  # Remove spaces
+            query.split()[0] if len(query.split()) > 1 else query,  # First word only
+            query.split()[-1] if len(query.split()) > 1 else query,  # Last word only
+        ]
+        
+        for variation in query_variations:
+            if variation != query and variation != cleaned_query:
+                print(f"🔍 Trying variation: {variation}")
+                response = requests.get(SAVN_API_BASE, params={"query": variation})
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    if data.get("success") and "data" in data:
+                        songs = []
+                        if "songs" in data["data"] and "results" in data["data"]["songs"]:
+                            songs = data["data"]["songs"]["results"]
+                        elif "topQuery" in data["data"] and "results" in data["data"]["topQuery"]:
+                            songs = data["data"]["topQuery"]["results"]
+                        elif isinstance(data["data"], list):
+                            songs = data["data"]
+                        
+                        if songs:
+                            best_match = find_best_match(songs, query)
+                            if best_match:
+                                print(f"✅ Found match with variation '{variation}': {best_match.get('title')}")
+                                return [best_match]
+        
+        print(f"❌ No matches found for query: {query}")
+        return None
         
     except Exception as e:
         print(f"Saavn search error: {e}")
@@ -106,11 +228,14 @@ async def get_saavn_download_url(song_id: str, song_url: str):
         return None
 
 async def download_saavn_song(query: str):
-    """Download song from Saavn API"""
+    """Download song from Saavn API with enhanced matching"""
     try:
-        # Search for the song
+        print(f"🎵 Starting Saavn download for: {query}")
+        
+        # Search for the song with multiple strategies
         songs = await search_saavn_song(query)
         if not songs:
+            print(f"❌ No songs found for query: {query}")
             return None, None
             
         song = songs[0]
@@ -119,24 +244,32 @@ async def download_saavn_song(query: str):
         song_id = song.get("id")
         song_url = song.get("url")
         
+        print(f"📀 Selected song: {title} by {artist}")
+        print(f"🆔 Song ID: {song_id}")
+        
         if not song_id:
+            print("❌ No song ID found")
             return None, None
             
         # Get download URL
+        print(f"🔗 Getting download URL for song ID: {song_id}")
         download_url = await get_saavn_download_url(song_id, song_url)
         
         if not download_url:
+            print("❌ Failed to get download URL")
             return None, None
             
+        print(f"✅ Successfully got download URL: {download_url[:50]}...")
         return download_url, {
             "title": title,
             "artist": artist,
             "source": "Saavn",
-            "quality": "320kbps"
+            "quality": "320kbps",
+            "song_id": song_id
         }
         
     except Exception as e:
-        print(f"Saavn download error: {e}")
+        print(f"❌ Saavn download error: {e}")
         return None, None
 
 async def download_song(link: str):
@@ -723,22 +856,25 @@ class YouTubeAPI:
             # === MAIN LOGIC: SAAVN FIRST, THEN YOUTUBE FALLBACK ===
             # Extract query from link or use as-is
             query = link
+            
+            # If it's a YouTube URL, try to get title first for better Saavn search
             if "youtube.com" in link or "youtu.be" in link:
-                # If it's a YouTube URL, try to get title first
                 try:
+                    print(f"🎬 Extracting title from YouTube URL: {link}")
                     title_result = await self.title(link)
                     query = title_result
-                except:
+                    print(f"📝 Extracted title: {title_result}")
+                except Exception as e:
+                    print(f"⚠️ Could not extract YouTube title: {e}")
                     query = link
             elif "watch?v=" in link:
-                # Extract video ID and try to get title
                 try:
                     video_id = link.split('v=')[-1].split('&')[0]
                     query = f"youtube video {video_id}"
                 except:
                     query = link
             
-            # Try Saavn first
+            # Try Saavn first with enhanced search
             print(f"🔍 Trying Saavn for: {query}")
             saavn_url, saavn_info = await download_saavn_song(query)
             if saavn_url:
@@ -756,41 +892,64 @@ class YouTubeAPI:
 # === NEW FUNCTION FOR SAAVN-FIRST DOWNLOAD ===
 async def download_with_saavn_priority(query: str):
     """
-    Download function that tries Saavn first, then falls back to YouTube
+    Download function that tries Saavn first with enhanced search, then falls back to YouTube
     """
-    # Try Saavn first
+    print(f"🎵 Starting download process for: {query}")
+    
+    # Try Saavn first with enhanced search
     print(f"🔍 Trying Saavn for: {query}")
     saavn_url, saavn_info = await download_saavn_song(query)
     if saavn_url:
-        print(f"✅ Downloaded from Saavn: {saavn_info['title']} by {saavn_info['artist']}")
+        print(f"✅ Successfully downloaded from Saavn: {saavn_info['title']} by {saavn_info['artist']}")
         return saavn_url, saavn_info, True
     
     # Fallback to YouTube search
     print(f"🔄 Saavn failed, trying YouTube for: {query}")
     try:
-        results = VideosSearch(query, limit=1)
+        print(f"🔍 Searching YouTube for: {query}")
+        results = VideosSearch(query, limit=3)  # Get more results for better matching
         search_results = await results.next()
         
         if not search_results.get("result"):
+            print("❌ No YouTube results found")
             return None, None, False
-            
-        result = search_results["result"][0]
-        video_url = result["link"]
+        
+        # Try to find best match from YouTube results
+        best_result = None
+        query_lower = query.lower()
+        
+        for result in search_results["result"]:
+            title = result["title"].lower()
+            if query_lower in title or any(word in title for word in query_lower.split()):
+                best_result = result
+                break
+        
+        if not best_result:
+            best_result = search_results["result"][0]  # Use first result if no match
+        
+        print(f"📺 Selected YouTube video: {best_result['title']}")
+        video_url = best_result["link"]
         
         # Download from YouTube
+        print(f"⬇️ Downloading from YouTube: {video_url}")
         downloaded_file = await download_song(video_url)
         if downloaded_file:
             youtube_info = {
-                "title": result["title"],
+                "title": best_result["title"],
                 "artist": "YouTube",
                 "source": "YouTube",
-                "quality": "Variable"
+                "quality": "Variable",
+                "duration": best_result.get("duration", "Unknown")
             }
+            print(f"✅ Successfully downloaded from YouTube: {best_result['title']}")
             return downloaded_file, youtube_info, False
+        else:
+            print("❌ Failed to download from YouTube")
             
     except Exception as e:
-        print(f"YouTube fallback error: {e}")
+        print(f"❌ YouTube fallback error: {e}")
     
+    print(f"❌ All download methods failed for: {query}")
     return None, None, False
 
  # ======================================================
