@@ -47,20 +47,61 @@ def cookie_txt_file():
             print("💡 You can add YouTube cookie files (.txt) to this directory for better quality downloads")
         except Exception as e:
             print(f"⚠️ Could not create cookies directory: {e}")
-        return None
+        return create_hardcoded_cookie_file()
     try:
         cookies_files = [f for f in os.listdir(cookie_dir) if f.endswith(".txt")]
         if not cookies_files:
             print("⚠️ No cookie files found")
             print(f"💡 Add YouTube cookie files (.txt) to: {cookie_dir}")
-            return None
+            return create_hardcoded_cookie_file()
         cookie_file = os.path.join(cookie_dir, random.choice(cookies_files))
         if not os.path.exists(cookie_file):
             print(f"⚠️ Cookie file not found: {cookie_file}")
-            return None
+            return create_hardcoded_cookie_file()
         return cookie_file
     except Exception as e:
         print(f"⚠️ Error accessing cookies directory: {e}")
+        return create_hardcoded_cookie_file()
+
+def create_hardcoded_cookie_file():
+    """Create a hardcoded cookie file when no external cookies are found"""
+    try:
+        # Hardcoded YouTube cookies for better quality downloads
+        cookie_content = """# Netscape HTTP Cookie File
+# http://curl.haxx.se/rfc/cookie_spec.html
+# This is a generated file!  Do not edit.
+
+.youtube.com	TRUE	/	TRUE	1794632634	PREF	f6=40000000&f7=100&tz=Asia.Calcutta&f5=20000
+.youtube.com	TRUE	/	FALSE	1793529529	SID	g.a0001wi6wSDBfsN6vcJLr0MX2kS5AG6CDqm9fCkb22kCzGmOdRbREFX0M7G-9tGb0gPi1XBEHQACgYKAQASARYSFQHGX2MiiBdj1JxWjjI5KhfrU2_bgBoVAUF8yKpHYS2sXDhgy8-wqQGdO66Y0076
+.youtube.com	TRUE	/	TRUE	1790505529	__Secure-1PSIDTS	sidts-CjQBmkD5S0Tr41iJg43xhzU_a2Rb57BplSDRMIoGc6m2q8SphoMEjii1RgkfDyU9ahIS_7guEAA
+.youtube.com	TRUE	/	TRUE	1790505529	__Secure-3PSIDTS	sidts-CjQBmkD5S0Tr41iJg43xhzU_a2Rb57BplSDRMIoGc6m2q8SphoMEjii1RgkfDyU9ahIS_7guEAA
+.youtube.com	TRUE	/	TRUE	1793529529	__Secure-1PSID	g.a0001wi6wSDBfsN6vcJLr0MX2kS5AG6CDqm9fCkb22kCzGmOdRbR-xZc3oK8TgxZV6S1xmu84QACgYKAYESARYSFQHGX2Mi9ccw8lD91Mrzx4NHV_uz6BoVAUF8yKqLNVFcv4fUN9d5-aAV4i4u0076
+.youtube.com	TRUE	/	TRUE	1793529529	__Secure-3PSID	g.a0001wi6wSDBfsN6vcJLr0MX2kS5AG6CDqm9fCkb22kCzGmOdRbRMRwmhTfQy-35oV7JTif1xgACgYKAXcSARYSFQHGX2Mih8w9IZV8MAwMrFlWI16csBoVAUF8yKoo55dnJiqtNY1vxh1vyvyY0076
+.youtube.com	TRUE	/	FALSE	1793529529	HSID	A8tIMy1pL2zsiUr3W
+.youtube.com	TRUE	/	TRUE	1793529529	SSID	AjyQy9ZZ8206bls-Z
+.youtube.com	TRUE	/	FALSE	1793529529	APISID	YxaNUiE1o8pWzd0I/AEtYQR5dgiwScw3Z7
+.youtube.com	TRUE	/	TRUE	1793529529	SAPISID	y-Gb9C-0HOYskEXh/AWzDC741JiiNu3f0b
+.youtube.com	TRUE	/	TRUE	1793529529	__Secure-1PAPISID	y-Gb9C-0HOYskEXh/AWzDC741JiiNu3f0b
+.youtube.com	TRUE	/	TRUE	1793529529	__Secure-3PAPISID	y-Gb9C-0HOYskEXh/AWzDC741JiiNu3f0b
+.youtube.com	TRUE	/	TRUE	1794632626	LOGIN_INFO	AFmmF2swRQIhAJWsuoWEjADYflK6-W7gZBe13y1bjjfbfKjaPpTw_BYRAiBe5vjjWnZNW5nRrFapAwJzHxVyZphPW1BaefvLTEWQxw:QUQ3MjNmeVIxMmx1Z3lqWVJnYVllTkxZRmt2MWJRWktTbFBENUZEazhMS0pmNy0xWHFIeXgtZ2lqOGZsUXhMc0x2OV9sZHhHQWlyeUw0M3pWajFOcklPTDdKRGxtZFJtbnl3d1R6TFNmTGstbEx2RjVKVkVTTTZqOHMzbXJONjA4TFRHOU8zT2tOQlQ2LW9lTWZoVDVpOHhWbUlHeGdVOGR3
+.youtube.com	TRUE	/	FALSE	1791608631	SIDCC	AKEyXzWTMZr4AMyVXEwg6JStjCBoEcfi4odZpk1vsn6mpujYFyApVARFz1pvpOM0wFIJMYqi
+.youtube.com	TRUE	/	TRUE	1791608631	__Secure-1PSIDCC	AKEyXzUD77bZQkqggckam6dWAqiWtdNsSZGWxIwMy9d0stJVQ2CIml_hjMraLfBKQYD7FDNtZA
+.youtube.com	TRUE	/	TRUE	1791608631	__Secure-3PSIDCC	AKEyXzUdw7dVlMWay_bEDjQT9rasPnIX2OY1Gt6ABVGyJhktqREEdGNG0pdcgz7TDgbPUlQMeg"""
+        
+        # Create cookies directory if it doesn't exist
+        cookie_dir = f"{os.getcwd()}/cookies"
+        os.makedirs(cookie_dir, exist_ok=True)
+        
+        # Save hardcoded cookies to file
+        cookie_file_path = os.path.join(cookie_dir, "hardcoded_cookies.txt")
+        with open(cookie_file_path, 'w', encoding='utf-8') as f:
+            f.write(cookie_content)
+        
+        print(f"🍪 Created hardcoded cookie file: {cookie_file_path}")
+        return cookie_file_path
+        
+    except Exception as e:
+        print(f"⚠️ Error creating hardcoded cookie file: {e}")
         return None
 
 # === SAAVN API FUNCTIONS ===
