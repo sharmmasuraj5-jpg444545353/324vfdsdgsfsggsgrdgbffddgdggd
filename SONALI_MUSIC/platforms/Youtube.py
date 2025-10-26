@@ -37,10 +37,42 @@ SAVN_API_BASE = "https://apikeyy-zeta.vercel.app/api/search"
 SAVN_SONGS_API = "https://apikeyy-zeta.vercel.app/api/songs"
 
 def cookie_txt_file():
-    cookie_dir = f"{os.getcwd()}/cookies"
-    cookies_files = [f for f in os.listdir(cookie_dir) if f.endswith(".txt")]
-    cookie_file = os.path.join(cookie_dir, random.choice(cookies_files))
-    return cookie_file
+    """Get a random cookie file from the cookies directory"""
+    try:
+        cookie_dir = f"{os.getcwd()}/cookies"
+        
+        # Check if cookies directory exists
+        if not os.path.exists(cookie_dir):
+            print(f"⚠️ Cookies directory not found: {cookie_dir}")
+            # Try to create hardcoded cookie file
+            return create_hardcoded_cookie_file()
+        
+        # Get all .txt files in cookies directory
+        txt_files = glob.glob(os.path.join(cookie_dir, '*.txt'))
+        
+        if not txt_files:
+            print(f"⚠️ No .txt files found in cookies directory")
+            # Try to create hardcoded cookie file
+            return create_hardcoded_cookie_file()
+        
+        # Randomly select a cookie file
+        cookie_file = random.choice(txt_files)
+        
+        # Log the chosen file
+        log_file = os.path.join(cookie_dir, "logs.csv")
+        try:
+            with open(log_file, 'a', encoding='utf-8') as file:
+                file.write(f'Choosen File : {cookie_file}\n')
+        except Exception as e:
+            print(f"Could not write to log file: {e}")
+        
+        print(f"🍪 Using cookie file: {cookie_file}")
+        return cookie_file
+        
+    except Exception as e:
+        print(f"⚠️ Error getting cookie file: {e}")
+        # Fallback to hardcoded cookies
+        return create_hardcoded_cookie_file()
 
 def create_hardcoded_cookie_file():
     """Create a hardcoded cookie file when no external cookies are found"""
@@ -336,14 +368,23 @@ async def download_with_cookies(link: str, cookie_file: str):
     try:
         print(f"🍪 Downloading with cookies: {link}")
         
+        # Check if cookie file exists
+        if not cookie_file or not os.path.exists(cookie_file):
+            print(f"⚠️ Cookie file not found: {cookie_file}")
+            return None
+        
         # Extract video ID for file naming
-        video_id = link.split('v=')[-1].split('&')[0]
+        try:
+            video_id = link.split('v=')[-1].split('&')[0]
+        except Exception as e:
+            print(f"⚠️ Error extracting video ID: {e}")
+            return None
         
         # Check if file already exists
         download_folder = "downloads"
         os.makedirs(download_folder, exist_ok=True)
         
-        for ext in ["mp3", "m4a", "webm"]:
+        for ext in ["mp3", "m4a", "webm", "opus"]:
             file_path = f"{download_folder}/{video_id}.{ext}"
             if os.path.exists(file_path):
                 print(f"📁 File already exists: {file_path}")
@@ -358,31 +399,44 @@ async def download_with_cookies(link: str, cookie_file: str):
             "quiet": True,
             "cookiefile": cookie_file,
             "no_warnings": True,
+            "extract_flat": False,
         }
         
-        ydl = yt_dlp.YoutubeDL(ydl_opts)
+        loop = asyncio.get_running_loop()
         
-        # Extract info first
-        info = ydl.extract_info(link, download=False)
-        if not info:
-            print("❌ Could not extract video info")
-            return None
-            
-        # Download the file
-        ydl.download([link])
+        def _download():
+            try:
+                ydl = yt_dlp.YoutubeDL(ydl_opts)
+                # Extract info first
+                info = ydl.extract_info(link, download=False)
+                if not info:
+                    print("❌ Could not extract video info")
+                    return None
+                
+                # Download the file
+                ydl.download([link])
+                
+                # Find the downloaded file
+                info_id = info.get('id', video_id)
+                info_ext = info.get('ext', 'mp3')
+                return os.path.join(download_folder, f"{info_id}.{info_ext}")
+            except Exception as e:
+                print(f"❌ Download error: {e}")
+                return None
         
-        # Find the downloaded file
-        for ext in ["mp3", "m4a", "webm"]:
-            file_path = f"{download_folder}/{video_id}.{ext}"
-            if os.path.exists(file_path):
-                print(f"✅ Successfully downloaded with cookies: {file_path}")
-                return file_path
+        downloaded_file = await loop.run_in_executor(None, _download)
+        
+        if downloaded_file and os.path.exists(downloaded_file):
+            print(f"✅ Successfully downloaded with cookies: {downloaded_file}")
+            return downloaded_file
         
         print("❌ Downloaded file not found")
         return None
         
     except Exception as e:
         print(f"❌ Cookies download error: {e}")
+        import traceback
+        traceback.print_exc()
         return None
 
 async def download_saavn_song(query: str):
@@ -432,7 +486,7 @@ async def download_saavn_song(query: str):
 
 async def download_song(link: str):
     try:
-        video_id = link.split('v=')[-1].split('&')[0]
+    video_id = link.split('v=')[-1].split('&')[0]
     except Exception as e:
         print(f"⚠️ Error extracting video ID from link: {e}")
         return None
@@ -489,7 +543,7 @@ async def download_song(link: str):
             
             # Ensure download folder exists
             try:
-                os.makedirs(download_folder, exist_ok=True)
+            os.makedirs(download_folder, exist_ok=True)
             except Exception as e:
                 print(f"⚠️ Error creating download folder: {e}")
                 return None
@@ -511,7 +565,7 @@ async def download_song(link: str):
                 # Verify file was created and has content
                 if os.path.exists(file_path) and os.path.getsize(file_path) > 0:
                     print(f"✅ Successfully downloaded: {file_path}")
-                    return file_path
+                return file_path
                 else:
                     print(f"⚠️ Downloaded file is empty or doesn't exist")
                     return None
@@ -1063,16 +1117,16 @@ class YouTubeAPI:
                     downloaded_file = stdout.decode().split("\n")[0]
                     direct = False
                 else:
-                    file_size = await check_file_size(link)
-                    if not file_size:
-                        print("None file Size")
-                        return None, None
-                    total_size_mb = file_size / (1024 * 1024)
-                    if total_size_mb > 250:
-                        print(f"File size {total_size_mb:.2f} MB exceeds the 100MB limit.")
-                        return None, None
-                    direct = True
-                    downloaded_file = await loop.run_in_executor(None, video_dl)
+                   file_size = await check_file_size(link)
+                   if not file_size:
+                     print("None file Size")
+                     return None, None
+                   total_size_mb = file_size / (1024 * 1024)
+                   if total_size_mb > 250:
+                     print(f"File size {total_size_mb:.2f} MB exceeds the 100MB limit.")
+                     return None, None
+                   direct = True
+                   downloaded_file = await loop.run_in_executor(None, video_dl)
         else:
             # === MAIN LOGIC: YOUTUBE SEARCH + SAAVN PLAY ===
             # Extract query from link or use as-is
@@ -1157,45 +1211,59 @@ async def optimized_top1_youtube_saavn_play(query: str):
             return saavn_url, saavn_info, True
         
         # Step 5: Fallback to cookies (yt-dlp with cookies)
-        print(f"🔄 Jio Saavn not available, trying cookies fallback: {youtube_title}")
-        cookie_file = cookie_txt_file()
+        print(f"🔄 Jio Saavn not available, trying cookies fallback for: {youtube_title}")
+        print(f"📺 YouTube URL: {youtube_url}")
         
-        if cookie_file:
-            print(f"🍪 Using cookies file: {cookie_file}")
-            try:
-                # Try to download using yt-dlp with cookies
-                downloaded_file = await download_with_cookies(youtube_url, cookie_file)
-                if downloaded_file and os.path.exists(downloaded_file):
-                    youtube_info = {
-                        "title": youtube_title,
-                        "artist": youtube_artist,
-                        "source": "YouTube (Cookies)",
-                        "quality": "High",
-                        "duration": youtube_duration
-                    }
-                    print(f"✅ Downloaded with cookies: {youtube_title}")
-                    return downloaded_file, youtube_info, False
-            except Exception as e:
-                print(f"⚠️ Cookies download failed: {e}")
-        else:
-            print("⚠️ No cookies found, trying regular YouTube download")
+        try:
+            cookie_file = cookie_txt_file()
+            
+            if cookie_file:
+                print(f"🍪 Using cookies file: {cookie_file}")
+                try:
+                    # Try to download using yt-dlp with cookies
+                    downloaded_file = await download_with_cookies(youtube_url, cookie_file)
+                    if downloaded_file and os.path.exists(downloaded_file):
+                        youtube_info = {
+                            "title": youtube_title,
+                            "artist": youtube_artist,
+                            "source": "YouTube (Cookies)",
+                            "quality": "High",
+                            "duration": youtube_duration
+                        }
+                        print(f"✅ Downloaded with cookies: {youtube_title}")
+                        return downloaded_file, youtube_info, False
+                    else:
+                        print("⚠️ Cookies download returned no file")
+                except Exception as e:
+                    print(f"⚠️ Cookies download failed: {e}")
+                    import traceback
+                    traceback.print_exc()
+            else:
+                print("⚠️ No cookies found, trying regular YouTube download")
+        except Exception as e:
+            print(f"⚠️ Error getting cookie file: {e}")
         
         # Step 6: Final fallback to regular YouTube download
         print(f"🔄 Final fallback to regular YouTube download: {youtube_title}")
-        downloaded_file = await download_song(youtube_url)
-        
-        if downloaded_file and os.path.exists(downloaded_file):
-            youtube_info = {
-                "title": youtube_title,
-                "artist": youtube_artist,
-                "source": "YouTube",
-                "quality": "Variable",
-                "duration": youtube_duration
-            }
-            print(f"✅ Downloaded from YouTube: {youtube_title}")
-            return downloaded_file, youtube_info, False
-        else:
-            print("❌ Failed to download from YouTube")
+        try:
+            downloaded_file = await download_song(youtube_url)
+            
+            if downloaded_file and os.path.exists(downloaded_file):
+                youtube_info = {
+                    "title": youtube_title,
+                    "artist": youtube_artist,
+                    "source": "YouTube",
+                    "quality": "Variable",
+                    "duration": youtube_duration
+                }
+                print(f"✅ Downloaded from YouTube: {youtube_title}")
+                return downloaded_file, youtube_info, False
+            else:
+                print("❌ Failed to download from YouTube")
+        except Exception as e:
+            print(f"❌ Regular YouTube download failed: {e}")
+            import traceback
+            traceback.print_exc()
             
     except Exception as e:
         print(f"❌ Optimized search error: {e}")
