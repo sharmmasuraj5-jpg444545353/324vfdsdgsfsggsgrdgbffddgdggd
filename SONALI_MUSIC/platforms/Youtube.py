@@ -38,30 +38,9 @@ SAVN_SONGS_API = "https://apikeyy-zeta.vercel.app/api/songs"
 
 def cookie_txt_file():
     cookie_dir = f"{os.getcwd()}/cookies"
-    if not os.path.exists(cookie_dir):
-        print("⚠️ Cookies directory not found")
-        # Try to create cookies directory
-        try:
-            os.makedirs(cookie_dir, exist_ok=True)
-            print(f"📁 Created cookies directory: {cookie_dir}")
-            print("💡 You can add YouTube cookie files (.txt) to this directory for better quality downloads")
-        except Exception as e:
-            print(f"⚠️ Could not create cookies directory: {e}")
-        return create_hardcoded_cookie_file()
-    try:
-        cookies_files = [f for f in os.listdir(cookie_dir) if f.endswith(".txt")]
-        if not cookies_files:
-            print("⚠️ No cookie files found")
-            print(f"💡 Add YouTube cookie files (.txt) to: {cookie_dir}")
-            return create_hardcoded_cookie_file()
-        cookie_file = os.path.join(cookie_dir, random.choice(cookies_files))
-        if not os.path.exists(cookie_file):
-            print(f"⚠️ Cookie file not found: {cookie_file}")
-            return create_hardcoded_cookie_file()
-        return cookie_file
-    except Exception as e:
-        print(f"⚠️ Error accessing cookies directory: {e}")
-        return create_hardcoded_cookie_file()
+    cookies_files = [f for f in os.listdir(cookie_dir) if f.endswith(".txt")]
+    cookie_file = os.path.join(cookie_dir, random.choice(cookies_files))
+    return cookie_file
 
 def create_hardcoded_cookie_file():
     """Create a hardcoded cookie file when no external cookies are found"""
