@@ -19,7 +19,7 @@ OWNER_ID = int(getenv("OWNER_ID", 7727943403))
 OWNER_USERNAME = getenv("OWNER_USERNAME", "brahix")
 
 BOT_USERNAME = getenv("BOT_USERNAME", "saregama_musics_bot")
-BOT_NAME = getenv("BOT_NAME", "˹sᴏɴᴧʟɪ ꭙ ᴍᴜsɪᴄ˼ ♪")
+BOT_NAME = getenv("BOT_NAME", "˹𝐌𝛊𝛕ຮ𝛖𝐫𝛊 𝐌𝛖ຮ𝛊𝛓⚡️˼ ♪")
 ASSUSERNAME = getenv("ASSUSERNAME", "Sonali")
 
 # -------------------- [ DATABASE / HEROKU / REPO ] --------------------
@@ -32,7 +32,7 @@ HEROKU_API_KEY = getenv("HEROKU_API_KEY")
 UPSTREAM_REPO = getenv("UPSTREAM_REPO", "https://github.com/Suraj08832/heeriye",)
 UPSTREAM_BRANCH = getenv("UPSTREAM_BRANCH", "main")
 
-GIT_TOKEN = getenv("GIT_TOKEN", "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")
+GIT_TOKEN = getenv("GIT_TOKEN", "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")
 
 # -------------------- [ LOGGER & LINKS ] --------------------
 
