@@ -67,12 +67,15 @@ def clean_query(query: str):
     return cleaned_query
 
 def find_best_match(songs: list, original_query: str):
-    """Find the best matching song from search results"""
+    """Find the best matching song from search results with improved matching"""
     if not songs:
         return None
         
     original_query = original_query.lower().strip()
     cleaned_query = clean_query(original_query)
+    
+    # Extract key words from the query (first 2-3 words)
+    query_words = cleaned_query.split()[:3]  # Only use first 3 words
     
     # Score each song based on title similarity
     scored_songs = []
@@ -88,33 +91,50 @@ def find_best_match(songs: list, original_query: str):
         if cleaned_query in title:
             score += 100
             
-        # Partial title match
-        query_words = cleaned_query.split()
+        # Check if all query words are in the title
         title_words = title.split()
-        
-        # Count matching words
         matching_words = sum(1 for word in query_words if word in title_words)
-        score += matching_words * 10
         
-        # Artist match bonus
+        # If most query words match, give high score
+        if matching_words >= len(query_words) * 0.7:  # 70% of words match
+            score += 80
+        
+        # Partial word matching
+        score += matching_words * 15
+        
+        # Exact word order match bonus
+        if len(query_words) >= 2:
+            # Check if first two words appear in order
+            if query_words[0] in title and query_words[1] in title:
+                if title.find(query_words[0]) < title.find(query_words[1]):
+                    score += 30
+        
+        # Artist match bonus (but not too high to avoid wrong matches)
         if any(word in artist for word in query_words):
-            score += 5
+            score += 10
             
         # Length similarity bonus (prefer similar length titles)
         length_diff = abs(len(cleaned_query) - len(title))
-        if length_diff < 10:
-            score += 5
+        if length_diff < 15:
+            score += 10
+        elif length_diff > 30:  # Penalize very different lengths
+            score -= 20
+            
+        # Penalize if title contains too many extra words
+        if len(title_words) > len(query_words) * 2:
+            score -= 15
             
         scored_songs.append((score, song))
     
     # Sort by score and return best match
     scored_songs.sort(key=lambda x: x[0], reverse=True)
     
-    if scored_songs and scored_songs[0][0] > 0:
+    # Only return if we have a reasonable match (score > 20)
+    if scored_songs and scored_songs[0][0] > 20:
         return scored_songs[0][1]
     
-    # If no good match found, return first song
-    return songs[0] if songs else None
+    # If no good match found, return None instead of first song
+    return None
 
 async def search_saavn_song(query: str):
     """Search for songs using Saavn API with multiple strategies"""
@@ -853,11 +873,11 @@ class YouTubeAPI:
                    direct = True
                    downloaded_file = await loop.run_in_executor(None, video_dl)
         else:
-            # === MAIN LOGIC: SAAVN FIRST, THEN YOUTUBE FALLBACK ===
+            # === MAIN LOGIC: YOUTUBE SEARCH + SAAVN PLAY ===
             # Extract query from link or use as-is
             query = link
             
-            # If it's a YouTube URL, try to get title first for better Saavn search
+            # If it's a YouTube URL, try to get title first
             if "youtube.com" in link or "youtu.be" in link:
                 try:
                     print(f"🎬 Extracting title from YouTube URL: {link}")
@@ -874,83 +894,211 @@ class YouTubeAPI:
                 except:
                     query = link
             
-            # Try Saavn first with enhanced search
-            print(f"🔍 Trying Saavn for: {query}")
-            saavn_url, saavn_info = await download_saavn_song(query)
-            if saavn_url:
-                print(f"✅ Downloaded from Saavn: {saavn_info['title']} by {saavn_info['artist']}")
-                return saavn_url, True
+            # Use hybrid search: YouTube search + Saavn play
+            print(f"🔍 Using hybrid search for: {query}")
+            download_url, song_info, is_saavn = await youtube_search_saavn_play(query)
             
-            # Fallback to YouTube
-            print(f"🔄 Saavn failed, trying YouTube for: {query}")
-            direct = True
-            downloaded_file = await download_song(link)
-            return downloaded_file, direct
+            if download_url:
+                if is_saavn:
+                    print(f"✅ Downloaded from Saavn: {song_info['title']} by {song_info['artist']}")
+                    return download_url, True
+                else:
+                    print(f"✅ Downloaded from YouTube: {song_info['title']}")
+                    return download_url, True
+            else:
+                print(f"❌ All methods failed for: {query}")
+                return None, None
             
         return None, None
 
-# === NEW FUNCTION FOR SAAVN-FIRST DOWNLOAD ===
-async def download_with_saavn_priority(query: str):
+# === HYBRID SEARCH: YOUTUBE SEARCH + SAAVN PLAY ===
+async def youtube_search_saavn_play(query: str):
     """
-    Download function that tries Saavn first with enhanced search, then falls back to YouTube
+    Use YouTube search to find songs, then play from Saavn API for better quality
     """
-    print(f"🎵 Starting download process for: {query}")
+    print(f"🎵 Starting hybrid search: YouTube → Saavn for: {query}")
     
-    # Try Saavn first with enhanced search
-    print(f"🔍 Trying Saavn for: {query}")
-    saavn_url, saavn_info = await download_saavn_song(query)
-    if saavn_url:
-        print(f"✅ Successfully downloaded from Saavn: {saavn_info['title']} by {saavn_info['artist']}")
-        return saavn_url, saavn_info, True
-    
-    # Fallback to YouTube search
-    print(f"🔄 Saavn failed, trying YouTube for: {query}")
     try:
+        # Step 1: Search YouTube to find the song
         print(f"🔍 Searching YouTube for: {query}")
-        results = VideosSearch(query, limit=3)  # Get more results for better matching
+        results = VideosSearch(query, limit=5)  # Get multiple results for better matching
         search_results = await results.next()
         
         if not search_results.get("result"):
             print("❌ No YouTube results found")
             return None, None, False
         
-        # Try to find best match from YouTube results
-        best_result = None
-        query_lower = query.lower()
+        # Step 2: Extract song titles from YouTube results
+        youtube_results = search_results["result"]
+        print(f"📺 Found {len(youtube_results)} YouTube results")
         
-        for result in search_results["result"]:
-            title = result["title"].lower()
-            if query_lower in title or any(word in title for word in query_lower.split()):
-                best_result = result
-                break
+        # Step 3: Try each YouTube result with Saavn using multiple search variations
+        for i, result in enumerate(youtube_results, 1):
+            youtube_title = result["title"]
+            youtube_artist = result.get("channel", {}).get("name", "Unknown")
+            youtube_duration = result.get("duration", "Unknown")
+            
+            print(f"\n🎯 Trying result {i}: {youtube_title}")
+            
+            # Clean the YouTube title for Saavn search
+            saavn_query = clean_youtube_title_for_saavn(youtube_title)
+            print(f"🧹 Cleaned title for Saavn: {saavn_query}")
+            
+            # Generate multiple search variations
+            search_variations = generate_search_variations(saavn_query)
+            print(f"🔍 Trying {len(search_variations)} search variations")
+            
+            # Try each variation
+            for j, variation in enumerate(search_variations, 1):
+                print(f"   Variation {j}: '{variation}'")
+                saavn_url, saavn_info = await download_saavn_song(variation)
+                
+                if saavn_url:
+                    # Check if this is a good match (not from a different movie/album)
+                    found_title = saavn_info['title'].lower()
+                    original_query = query.lower()
+                    
+                    # Check if the found song title contains the original query words
+                    query_words = original_query.split()
+                    title_words = found_title.split()
+                    
+                    # Count matching words
+                    matching_words = sum(1 for word in query_words if word in title_words)
+                    match_percentage = (matching_words / len(query_words)) * 100 if query_words else 0
+                    
+                    print(f"   ✅ Found: {saavn_info['title']} (Match: {match_percentage:.0f}%)")
+                    
+                    # Only accept if it's a good match (at least 60% word match)
+                    if match_percentage >= 60:
+                        print(f"✅ SUCCESS! Found on Saavn: {saavn_info['title']} by {saavn_info['artist']}")
+                        return saavn_url, saavn_info, True
+                    else:
+                        print(f"   ⚠️  Poor match, trying next variation...")
+                        continue
+                else:
+                    print(f"   ❌ Not found with variation: '{variation}'")
+            
+            print(f"❌ No good matches found for: {youtube_title}")
         
-        if not best_result:
-            best_result = search_results["result"][0]  # Use first result if no match
-        
-        print(f"📺 Selected YouTube video: {best_result['title']}")
+        # Step 4: If no Saavn match found, fallback to YouTube download
+        print(f"🔄 No Saavn matches found, falling back to YouTube")
+        best_result = youtube_results[0]  # Use first result
         video_url = best_result["link"]
         
-        # Download from YouTube
-        print(f"⬇️ Downloading from YouTube: {video_url}")
+        print(f"⬇️ Downloading from YouTube: {best_result['title']}")
         downloaded_file = await download_song(video_url)
+        
         if downloaded_file:
             youtube_info = {
                 "title": best_result["title"],
-                "artist": "YouTube",
+                "artist": best_result.get("channel", {}).get("name", "YouTube"),
                 "source": "YouTube",
                 "quality": "Variable",
                 "duration": best_result.get("duration", "Unknown")
             }
-            print(f"✅ Successfully downloaded from YouTube: {best_result['title']}")
+            print(f"✅ Downloaded from YouTube: {best_result['title']}")
             return downloaded_file, youtube_info, False
         else:
             print("❌ Failed to download from YouTube")
             
     except Exception as e:
-        print(f"❌ YouTube fallback error: {e}")
+        print(f"❌ Hybrid search error: {e}")
     
-    print(f"❌ All download methods failed for: {query}")
+    print(f"❌ All methods failed for: {query}")
     return None, None, False
+
+def clean_youtube_title_for_saavn(youtube_title: str):
+    """Clean YouTube title to make it suitable for Saavn search"""
+    # Remove common YouTube suffixes and extra words
+    suffixes_to_remove = [
+        "official video", "official music video", "official", "music video", 
+        "lyrics", "lyric video", "lyrics video", "hd", "4k", "full song",
+        "song", "video", "audio", "cover", "remix", "version", "mix",
+        "official audio", "official lyric video", "official hd", "official 4k",
+        "full 4k video", "full hd", "full song hd", "full song 4k"
+    ]
+    
+    # Remove common actor/artist names that might interfere
+    actor_names = [
+        "amitabh bachchan", "jaya prada", "kishore kumar", "lata mangeshkar",
+        "mohammed rafi", "asha bhosle", "kumar sanu", "udit narayan",
+        "alisha chinai", "anuradha paudwal", "sonu nigam", "shreya ghoshal"
+    ]
+    
+    title = youtube_title.lower().strip()
+    
+    # Remove suffixes
+    for suffix in suffixes_to_remove:
+        if title.endswith(suffix):
+            title = title[:-len(suffix)].strip()
+    
+    # Remove extra words in parentheses or brackets
+    title = re.sub(r'\([^)]*\)', '', title)  # Remove (Official Video)
+    title = re.sub(r'\[[^\]]*\]', '', title)  # Remove [HD]
+    
+    # Remove pipe separators and everything after them
+    if '|' in title:
+        title = title.split('|')[0].strip()
+    
+    # Remove common prefixes
+    prefixes_to_remove = ["watch:", "listen:", "play:", "song:"]
+    for prefix in prefixes_to_remove:
+        if title.startswith(prefix):
+            title = title[len(prefix):].strip()
+    
+    # Remove actor names that might interfere with search
+    for actor in actor_names:
+        title = title.replace(actor, '').strip()
+    
+    # Remove special characters and extra spaces
+    title = re.sub(r'[^\w\s]', '', title)
+    title = re.sub(r'\s+', ' ', title).strip()
+    
+    # For movie songs, try to keep the complete song title
+    # Don't truncate too aggressively for movie songs
+    words = title.split()
+    if len(words) > 4:  # Allow more words for movie songs
+        # Try to keep the most important words (usually the first 4)
+        title = ' '.join(words[:4])
+    
+    return title
+
+def generate_search_variations(query: str):
+    """Generate multiple search variations for better matching"""
+    variations = []
+    
+    # Original query
+    variations.append(query)
+    
+    # Remove common words that might interfere
+    words = query.split()
+    if len(words) > 2:
+        # Try without last word
+        variations.append(' '.join(words[:-1]))
+        
+        # Try with just first two words
+        if len(words) >= 2:
+            variations.append(' '.join(words[:2]))
+    
+    # Add quotes for exact phrase search
+    variations.append(f'"{query}"')
+    
+    # Add common Hindi song suffixes
+    hindi_suffixes = ['song', 'geet', 'gaan']
+    for suffix in hindi_suffixes:
+        variations.append(f"{query} {suffix}")
+    
+    return variations
+
+# === NEW FUNCTION FOR HYBRID DOWNLOAD ===
+async def download_with_saavn_priority(query: str):
+    """
+    Download function using hybrid approach: YouTube search + Saavn play
+    """
+    print(f"🎵 Starting hybrid download process for: {query}")
+    
+    # Use the new hybrid search function
+    return await youtube_search_saavn_play(query)
 
  # ======================================================
 # ©️ 2025-26 All Rights Reserved by Purvi Bots (suraj08832) 😎
