@@ -256,6 +256,62 @@ async def get_saavn_download_url(song_id: str, song_url: str):
         print(f"Saavn download URL error: {e}")
         return None
 
+async def download_with_cookies(link: str, cookie_file: str):
+    """
+    Download song using yt-dlp with cookies for better quality and access
+    """
+    try:
+        print(f"🍪 Downloading with cookies: {link}")
+        
+        # Extract video ID for file naming
+        video_id = link.split('v=')[-1].split('&')[0]
+        
+        # Check if file already exists
+        download_folder = "downloads"
+        os.makedirs(download_folder, exist_ok=True)
+        
+        for ext in ["mp3", "m4a", "webm"]:
+            file_path = f"{download_folder}/{video_id}.{ext}"
+            if os.path.exists(file_path):
+                print(f"📁 File already exists: {file_path}")
+                return file_path
+        
+        # Use yt-dlp with cookies
+        ydl_opts = {
+            "format": "bestaudio/best",
+            "outtmpl": f"{download_folder}/%(id)s.%(ext)s",
+            "geo_bypass": True,
+            "nocheckcertificate": True,
+            "quiet": True,
+            "cookiefile": cookie_file,
+            "no_warnings": True,
+        }
+        
+        ydl = yt_dlp.YoutubeDL(ydl_opts)
+        
+        # Extract info first
+        info = ydl.extract_info(link, download=False)
+        if not info:
+            print("❌ Could not extract video info")
+            return None
+            
+        # Download the file
+        ydl.download([link])
+        
+        # Find the downloaded file
+        for ext in ["mp3", "m4a", "webm"]:
+            file_path = f"{download_folder}/{video_id}.{ext}"
+            if os.path.exists(file_path):
+                print(f"✅ Successfully downloaded with cookies: {file_path}")
+                return file_path
+        
+        print("❌ Downloaded file not found")
+        return None
+        
+    except Exception as e:
+        print(f"❌ Cookies download error: {e}")
+        return None
+
 async def download_saavn_song(query: str):
     """Download song from Saavn API with enhanced matching"""
     try:
@@ -851,7 +907,18 @@ class YouTubeAPI:
                 print(f"✅ Downloaded from Saavn: {saavn_info['title']}")
                 return saavn_url, True
             
-            # Fallback to YouTube
+            # Fallback to cookies first, then YouTube
+            cookie_file = cookie_txt_file()
+            if cookie_file:
+                try:
+                    print(f"🍪 Trying cookies fallback for: {query}")
+                    downloaded_file = await download_with_cookies(link, cookie_file)
+                    if downloaded_file and os.path.exists(downloaded_file):
+                        return downloaded_file, True
+                except Exception as e:
+                    print(f"⚠️ Cookies download failed: {e}")
+            
+            # Final fallback to regular YouTube
             try:
                 downloaded_file = await download_song(link)
                 if downloaded_file and os.path.exists(downloaded_file):
@@ -868,7 +935,18 @@ class YouTubeAPI:
                 print(f"✅ Downloaded from Saavn: {saavn_info['title']}")
                 return saavn_url, True
             
-            # Fallback to YouTube
+            # Fallback to cookies first, then YouTube
+            cookie_file = cookie_txt_file()
+            if cookie_file:
+                try:
+                    print(f"🍪 Trying cookies fallback for: {query}")
+                    downloaded_file = await download_with_cookies(link, cookie_file)
+                    if downloaded_file and os.path.exists(downloaded_file):
+                        return downloaded_file, True
+                except Exception as e:
+                    print(f"⚠️ Cookies download failed: {e}")
+            
+            # Final fallback to regular YouTube
             try:
                 downloaded_file = await download_song(link)
                 if downloaded_file and os.path.exists(downloaded_file):
@@ -1005,8 +1083,32 @@ async def optimized_top1_youtube_saavn_play(query: str):
             print(f"✅ SUCCESS! Playing from Jio Saavn: {saavn_info['title']} by {saavn_info['artist']}")
             return saavn_url, saavn_info, True
         
-        # Step 5: Fallback to YouTube (only if Saavn completely fails)
-        print(f"🔄 Jio Saavn not available, using YouTube: {youtube_title}")
+        # Step 5: Fallback to cookies (yt-dlp with cookies)
+        print(f"🔄 Jio Saavn not available, trying cookies fallback: {youtube_title}")
+        cookie_file = cookie_txt_file()
+        
+        if cookie_file:
+            print(f"🍪 Using cookies file: {cookie_file}")
+            try:
+                # Try to download using yt-dlp with cookies
+                downloaded_file = await download_with_cookies(youtube_url, cookie_file)
+                if downloaded_file and os.path.exists(downloaded_file):
+                    youtube_info = {
+                        "title": youtube_title,
+                        "artist": youtube_artist,
+                        "source": "YouTube (Cookies)",
+                        "quality": "High",
+                        "duration": youtube_duration
+                    }
+                    print(f"✅ Downloaded with cookies: {youtube_title}")
+                    return downloaded_file, youtube_info, False
+            except Exception as e:
+                print(f"⚠️ Cookies download failed: {e}")
+        else:
+            print("⚠️ No cookies found, trying regular YouTube download")
+        
+        # Step 6: Final fallback to regular YouTube download
+        print(f"🔄 Final fallback to regular YouTube download: {youtube_title}")
         downloaded_file = await download_song(youtube_url)
         
         if downloaded_file and os.path.exists(downloaded_file):
