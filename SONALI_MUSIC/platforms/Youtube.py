@@ -486,7 +486,7 @@ async def download_saavn_song(query: str):
 
 async def download_song(link: str):
     try:
-    video_id = link.split('v=')[-1].split('&')[0]
+        video_id = link.split('v=')[-1].split('&')[0]
     except Exception as e:
         print(f"⚠️ Error extracting video ID from link: {e}")
         return None
@@ -533,8 +533,7 @@ async def download_song(link: str):
         else:
             print("⏱️ Max retries reached. Still downloading...")
             return None
-    
-
+        
         try:
             file_format = data.get("format", "mp3")
             file_extension = file_format.lower()
@@ -543,7 +542,7 @@ async def download_song(link: str):
             
             # Ensure download folder exists
             try:
-            os.makedirs(download_folder, exist_ok=True)
+                os.makedirs(download_folder, exist_ok=True)
             except Exception as e:
                 print(f"⚠️ Error creating download folder: {e}")
                 return None
@@ -565,7 +564,7 @@ async def download_song(link: str):
                 # Verify file was created and has content
                 if os.path.exists(file_path) and os.path.getsize(file_path) > 0:
                     print(f"✅ Successfully downloaded: {file_path}")
-                return file_path
+                    return file_path
                 else:
                     print(f"⚠️ Downloaded file is empty or doesn't exist")
                     return None
