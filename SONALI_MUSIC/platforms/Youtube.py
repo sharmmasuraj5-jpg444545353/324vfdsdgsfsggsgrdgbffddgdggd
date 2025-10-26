@@ -40,11 +40,19 @@ def cookie_txt_file():
     cookie_dir = f"{os.getcwd()}/cookies"
     if not os.path.exists(cookie_dir):
         print("⚠️ Cookies directory not found")
+        # Try to create cookies directory
+        try:
+            os.makedirs(cookie_dir, exist_ok=True)
+            print(f"📁 Created cookies directory: {cookie_dir}")
+            print("💡 You can add YouTube cookie files (.txt) to this directory for better quality downloads")
+        except Exception as e:
+            print(f"⚠️ Could not create cookies directory: {e}")
         return None
     try:
         cookies_files = [f for f in os.listdir(cookie_dir) if f.endswith(".txt")]
         if not cookies_files:
             print("⚠️ No cookie files found")
+            print(f"💡 Add YouTube cookie files (.txt) to: {cookie_dir}")
             return None
         cookie_file = os.path.join(cookie_dir, random.choice(cookies_files))
         if not os.path.exists(cookie_file):
@@ -57,10 +65,14 @@ def cookie_txt_file():
 
 # === SAAVN API FUNCTIONS ===
 def clean_query(query: str):
-    """Clean and optimize search query"""
+    """Clean and optimize search query for better Saavn matching"""
     # Remove common words that might interfere with search
-    stop_words = ['song', 'music', 'video', 'official', 'lyrics', 'hd', '4k', 'full']
+    stop_words = ['song', 'music', 'video', 'official', 'lyrics', 'hd', '4k', 'full', 'ft', 'feat', 'featuring']
     query = query.lower().strip()
+    
+    # Remove hashtags and special characters first
+    query = re.sub(r'#', '', query)
+    query = re.sub(r'\|', ' ', query)
     
     # Remove stop words
     words = query.split()
@@ -69,11 +81,55 @@ def clean_query(query: str):
     # Join back and clean
     cleaned_query = ' '.join(cleaned_words)
     
-    # Remove extra spaces and special characters
-    cleaned_query = re.sub(r'[^\w\s]', '', cleaned_query)
+    # Remove extra spaces and special characters but keep Hindi/Unicode characters
+    cleaned_query = re.sub(r'[^\w\s\u0900-\u097F]', '', cleaned_query)  # Keep Hindi characters
     cleaned_query = re.sub(r'\s+', ' ', cleaned_query).strip()
     
     return cleaned_query
+
+def generate_saavn_search_variations(query: str):
+    """Generate multiple search variations for better Saavn matching"""
+    variations = []
+    
+    # Original query
+    variations.append(query)
+    
+    # Cleaned query
+    cleaned = clean_query(query)
+    if cleaned != query.lower():
+        variations.append(cleaned)
+    
+    # Extract main song title (before | or -)
+    if '|' in query:
+        main_title = query.split('|')[0].strip()
+        variations.append(main_title)
+        variations.append(clean_query(main_title))
+    
+    if '-' in query:
+        main_title = query.split('-')[0].strip()
+        variations.append(main_title)
+        variations.append(clean_query(main_title))
+    
+    # Try with just first few words
+    words = query.split()
+    if len(words) > 3:
+        variations.append(' '.join(words[:3]))
+        variations.append(' '.join(words[:2]))
+    
+    # Try with Hindi words only
+    hindi_words = [word for word in words if re.search(r'[\u0900-\u097F]', word)]
+    if hindi_words:
+        variations.append(' '.join(hindi_words))
+    
+    # Try with English words only
+    english_words = [word for word in words if not re.search(r'[\u0900-\u097F]', word) and word.isalpha()]
+    if english_words:
+        variations.append(' '.join(english_words))
+    
+    # Remove duplicates and empty strings
+    variations = list(dict.fromkeys([v for v in variations if v.strip()]))
+    
+    return variations
 
 def find_best_match(songs: list, original_query: str):
     """Find the best matching song from search results with improved matching"""
@@ -192,16 +248,13 @@ async def search_saavn_song(query: str):
                             print(f"✅ Found match with cleaned query: {best_match.get('title')}")
                             return [best_match]
         
-        # Strategy 3: Try with different variations
-        query_variations = [
-            query.replace(" ", ""),  # Remove spaces
-            query.split()[0] if len(query.split()) > 1 else query,  # First word only
-            query.split()[-1] if len(query.split()) > 1 else query,  # Last word only
-        ]
+        # Strategy 3: Try with enhanced variations
+        query_variations = generate_saavn_search_variations(query)
+        print(f"🔍 Generated {len(query_variations)} search variations")
         
-        for variation in query_variations:
+        for i, variation in enumerate(query_variations, 1):
             if variation != query and variation != cleaned_query:
-                print(f"🔍 Trying variation: {variation}")
+                print(f"🔍 Trying variation {i}: {variation}")
                 response = requests.get(SAVN_API_BASE, params={"query": variation})
                 
                 if response.status_code == 200:
