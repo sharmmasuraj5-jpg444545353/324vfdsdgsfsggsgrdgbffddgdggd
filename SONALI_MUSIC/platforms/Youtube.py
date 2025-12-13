@@ -159,6 +159,12 @@ async def save_to_channel_cache(query: str, file_path: str, video_id: str = None
     """Upload file to channel and save to MongoDB"""
     try:
         if songs_db is None:
+            print("⚠️ MongoDB not connected, cannot save to cache")
+            return None
+        
+        # Check if file exists
+        if not os.path.exists(file_path):
+            print(f"⚠️ File not found: {file_path}")
             return None
             
         channel_id = VIDEO_CHANNEL_ID if is_video else AUDIO_CHANNEL_ID
@@ -171,6 +177,8 @@ async def save_to_channel_cache(query: str, file_path: str, video_id: str = None
             # Fallback to query hash if no video_id provided
             cache_key = await get_song_hash(query, is_video)
             search_field = "query_hash"
+        
+        print(f"📤 Uploading to channel {channel_id}: {query} (File: {file_path})")
         
         # Upload to channel
         try:
@@ -187,7 +195,12 @@ async def save_to_channel_cache(query: str, file_path: str, video_id: str = None
                     caption=f"🎵 {query}\n#Cached"
                 )
             
+            if not message:
+                print(f"⚠️ Failed to upload: Message is None")
+                return None
+                
             message_id = message.id
+            print(f"✅ Uploaded to channel: Message ID {message_id}")
             
             # Get file_id - refresh message to get updated file_id
             try:
@@ -196,7 +209,8 @@ async def save_to_channel_cache(query: str, file_path: str, video_id: str = None
                     file_id = message.video.file_id if message.video else (message.document.file_id if message.document else None)
                 else:
                     file_id = message.audio.file_id if message.audio else (message.voice.file_id if message.voice else (message.document.file_id if message.document else None))
-            except:
+            except Exception as e:
+                print(f"⚠️ Could not get file_id: {e}")
                 file_id = None
             
             if message_id:
@@ -217,21 +231,34 @@ async def save_to_channel_cache(query: str, file_path: str, video_id: str = None
                         # Fallback: use query_hash if no video_id available
                         update_data["query_hash"] = cache_key
                     
-                    await songs_db.update_one(
-                        {search_field: cache_key},
-                        {"$set": update_data},
-                        upsert=True
-                    )
-                    print(f"✅ Saved to channel cache: {query} (ID: {cache_key}, Message ID: {message_id})")
-                    return file_id
+                    try:
+                        await songs_db.update_one(
+                            {search_field: cache_key},
+                            {"$set": update_data},
+                            upsert=True
+                        )
+                        print(f"✅ Saved to MongoDB cache: {query} (ID: {cache_key}, Message ID: {message_id}, Channel: {channel_id})")
+                        return file_id if file_id else message_id
+                    except Exception as e:
+                        print(f"⚠️ Error saving to MongoDB: {e}")
+                        import traceback
+                        traceback.print_exc()
+                        return None
+            else:
+                print(f"⚠️ No message_id received after upload")
+                return None
             
         except Exception as e:
             print(f"⚠️ Error uploading to channel: {e}")
+            import traceback
+            traceback.print_exc()
             return None
         
         return None
     except Exception as e:
         print(f"⚠️ Error saving to channel cache: {e}")
+        import traceback
+        traceback.print_exc()
         return None
 
 async def get_channel_file(file_id: str):
@@ -1268,7 +1295,7 @@ class YouTubeAPI:
                     downloaded_file = await download_with_cookies(link, cookie_file)
                     if downloaded_file and os.path.exists(downloaded_file):
                         # Upload to channel cache
-                        cached_file_id = await save_to_channel_cache(query, downloaded_file, is_video)
+                        cached_file_id = await save_to_channel_cache(query, downloaded_file, video_id, is_video)
                         if cached_file_id:
                             try:
                                 os.remove(downloaded_file)
@@ -1466,10 +1493,16 @@ class YouTubeAPI:
             download_url, song_info, is_saavn = await optimized_top1_youtube_saavn_play(query)
             
             if download_url:
+                # Extract video_id from song_info if available (from optimized function)
+                if song_info and isinstance(song_info, dict):
+                    cached_video_id = song_info.get("video_id") or video_id
+                else:
+                    cached_video_id = video_id
+                
                 # If it's a file path (downloaded file), upload to channel
                 if isinstance(download_url, str) and os.path.exists(download_url):
-                    print(f"📤 Uploading to channel cache: {query}")
-                    cached_file_id = await save_to_channel_cache(query, download_url, video_id, is_video)
+                    print(f"📤 Uploading to channel cache: {query} (Video ID: {cached_video_id})")
+                    cached_file_id = await save_to_channel_cache(query, download_url, cached_video_id, is_video)
                     if cached_file_id:
                         print(f"✅ Uploaded to channel cache: {query}")
                         # Clean up local file after upload
@@ -1522,8 +1555,19 @@ async def optimized_top1_youtube_saavn_play(query: str):
         youtube_artist = top_result.get("channel", {}).get("name", "Unknown")
         youtube_duration = top_result.get("duration", "Unknown")
         youtube_url = top_result["link"]
+        youtube_video_id = top_result.get("id", "")
         
-        print(f"📺 Top 1 YouTube result: {youtube_title}")
+        # Extract video_id from URL if not in result
+        if not youtube_video_id and "youtube.com" in youtube_url:
+            try:
+                if "v=" in youtube_url:
+                    youtube_video_id = youtube_url.split('v=')[-1].split('&')[0]
+                elif "youtu.be/" in youtube_url:
+                    youtube_video_id = youtube_url.split('youtu.be/')[-1].split('?')[0]
+            except:
+                pass
+        
+        print(f"📺 Top 1 YouTube result: {youtube_title} (ID: {youtube_video_id})")
         
         # Step 3: Try yt-dlp with cookies FIRST (priority)
         print(f"🍪 Trying yt-dlp with cookies (FIRST PRIORITY) for: {youtube_title}")
@@ -1543,9 +1587,10 @@ async def optimized_top1_youtube_saavn_play(query: str):
                             "artist": youtube_artist,
                             "source": "YouTube (yt-dlp)",
                             "quality": "High",
-                            "duration": youtube_duration
+                            "duration": youtube_duration,
+                            "video_id": youtube_video_id
                         }
-                        print(f"✅ Downloaded with yt-dlp: {youtube_title}")
+                        print(f"✅ Downloaded with yt-dlp: {youtube_title} (ID: {youtube_video_id})")
                         return downloaded_file, youtube_info, False
                     else:
                         print("⚠️ yt-dlp download returned no file")
@@ -1586,9 +1631,10 @@ async def optimized_top1_youtube_saavn_play(query: str):
                     "artist": youtube_artist,
                     "source": "YouTube",
                     "quality": "Variable",
-                    "duration": youtube_duration
+                    "duration": youtube_duration,
+                    "video_id": youtube_video_id
                 }
-                print(f"✅ Downloaded from YouTube: {youtube_title}")
+                print(f"✅ Downloaded from YouTube: {youtube_title} (ID: {youtube_video_id})")
                 return downloaded_file, youtube_info, False
             else:
                 print("❌ Failed to download from YouTube")
