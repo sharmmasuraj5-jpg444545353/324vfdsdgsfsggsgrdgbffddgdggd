@@ -155,6 +155,22 @@ async def check_channel_cache(query: str, video_id: str = None, is_video: bool =
         traceback.print_exc()
         return None
 
+async def verify_channel_access(channel_id: int):
+    """Verify if bot can access the channel"""
+    try:
+        channel_info = await app.get_chat(channel_id)
+        # Try to get bot's member status
+        try:
+            bot_member = await app.get_chat_member(channel_id, app.id)
+            print(f"✅ Bot is member of channel: {channel_info.title} (Status: {bot_member.status})")
+            return True, channel_info
+        except Exception as e:
+            print(f"⚠️ Bot is not a member of channel {channel_id}: {e}")
+            return False, channel_info
+    except Exception as e:
+        print(f"⚠️ Cannot access channel {channel_id}: {e}")
+        return False, None
+
 async def save_to_channel_cache(query: str, file_path: str, video_id: str = None, is_video: bool = False):
     """Upload file to channel and save to MongoDB"""
     try:
@@ -180,6 +196,15 @@ async def save_to_channel_cache(query: str, file_path: str, video_id: str = None
         
         print(f"📤 Uploading to channel {channel_id}: {query} (File: {file_path})")
         
+        # First, verify bot can access the channel
+        can_access, channel_info = await verify_channel_access(channel_id)
+        if not can_access:
+            print(f"⚠️ Bot cannot access channel {channel_id}")
+            print(f"⚠️ To fix: Add bot @{app.username} to channel as admin with 'Post Messages' permission")
+            print(f"⚠️ Skipping upload but file is ready for playback")
+            # Return file path even if upload fails, so song can still play
+            return file_path
+        
         # Upload to channel
         try:
             if is_video:
@@ -197,7 +222,8 @@ async def save_to_channel_cache(query: str, file_path: str, video_id: str = None
             
             if not message:
                 print(f"⚠️ Failed to upload: Message is None")
-                return None
+                # Return file path so song can still play
+                return file_path
                 
             message_id = message.id
             print(f"✅ Uploaded to channel: Message ID {message_id}")
@@ -249,10 +275,19 @@ async def save_to_channel_cache(query: str, file_path: str, video_id: str = None
                 return None
             
         except Exception as e:
-            print(f"⚠️ Error uploading to channel: {e}")
-            import traceback
-            traceback.print_exc()
-            return None
+            error_msg = str(e)
+            if "CHANNEL_INVALID" in error_msg or "ChannelInvalid" in error_msg:
+                print(f"⚠️ Channel {channel_id} is invalid or bot is not a member")
+                print(f"⚠️ Please add the bot to the channel as admin. Skipping upload but file is ready.")
+            elif "CHAT_ADMIN_REQUIRED" in error_msg or "ChatAdminRequired" in error_msg:
+                print(f"⚠️ Bot needs admin rights in channel {channel_id}")
+                print(f"⚠️ Skipping upload but file is ready.")
+            else:
+                print(f"⚠️ Error uploading to channel: {e}")
+                import traceback
+                traceback.print_exc()
+            # Return file path even if upload fails, so song can still play
+            return file_path
         
         return None
     except Exception as e:
