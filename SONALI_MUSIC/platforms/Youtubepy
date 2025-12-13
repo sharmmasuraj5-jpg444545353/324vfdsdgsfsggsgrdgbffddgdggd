@@ -1,42 +1,654 @@
+# =======================================================
+# ©️ 2025-26 All Rights Reserved by Purvi Bots (suraj08832) 🚀
+
+# This source code is under MIT License 📜 Unauthorized forking, importing, or using this code without giving proper credit will result in legal action ⚠️
+ 
+# 📩 DM for permission : @brahix
+# =======================================================
+
+
 import asyncio
 import os
 import re
 import json
 from typing import Union
-
+import requests
 import yt_dlp
 from pyrogram.enums import MessageEntityType
 from pyrogram.types import Message
 from youtubesearchpython.__future__ import VideosSearch
-
 from SONALI_MUSIC.utils.database import is_on_off
 from SONALI_MUSIC.utils.formatters import time_to_seconds
-
-
-
 import os
 import glob
 import random
 import logging
+import aiohttp
+import config
+#from config import API_URL, VIDEO_API_URL, API_KEY
+from os import getenv
+
+API_URL = getenv("API_URL", 'https://api.thequickearn.xyz')
+API_KEY = getenv("API_KEY", 'NxGBNexGenBotsa02f5a')
+VIDEO_API_URL = getenv("VIDEO_API_URL", 'https://api.video.thequickearn.xyz')
+
+# === SAAVN API CONFIGURATION ===
+SAVN_API_BASE = "https://apikeyy-zeta.vercel.app/api/search"
+SAVN_SONGS_API = "https://apikeyy-zeta.vercel.app/api/songs"
 
 def cookie_txt_file():
-    folder_path = f"{os.getcwd()}/cookies"
-    filename = f"{os.getcwd()}/cookies/logs.csv"
-    txt_files = glob.glob(os.path.join(folder_path, '*.txt'))
-    if not txt_files:
-        raise FileNotFoundError("No .txt files found in the specified folder.")
-    cookie_txt_file = random.choice(txt_files)
-    with open(filename, 'a') as file:
-        file.write(f'Choosen File : {cookie_txt_file}\n')
-    return f"""cookies/{str(cookie_txt_file).split("/")[-1]}"""
+    """Get a random cookie file from the cookies directory"""
+    try:
+        cookie_dir = f"{os.getcwd()}/cookies"
+        
+        # Check if cookies directory exists
+        if not os.path.exists(cookie_dir):
+            print(f"⚠️ Cookies directory not found: {cookie_dir}")
+            # Try to create hardcoded cookie file
+            return create_hardcoded_cookie_file()
+        
+        # Get all .txt files in cookies directory
+        txt_files = glob.glob(os.path.join(cookie_dir, '*.txt'))
+        
+        if not txt_files:
+            print(f"⚠️ No .txt files found in cookies directory")
+            # Try to create hardcoded cookie file
+            return create_hardcoded_cookie_file()
+        
+        # Randomly select a cookie file
+        cookie_file = random.choice(txt_files)
+        
+        # Log the chosen file
+        log_file = os.path.join(cookie_dir, "logs.csv")
+        try:
+            with open(log_file, 'a', encoding='utf-8') as file:
+                file.write(f'Choosen File : {cookie_file}\n')
+        except Exception as e:
+            print(f"Could not write to log file: {e}")
+        
+        print(f"🍪 Using cookie file: {cookie_file}")
+        return cookie_file
+        
+    except Exception as e:
+        print(f"⚠️ Error getting cookie file: {e}")
+        # Fallback to hardcoded cookies
+        return create_hardcoded_cookie_file()
 
+def create_hardcoded_cookie_file():
+    """Create a hardcoded cookie file when no external cookies are found"""
+    try:
+        # Hardcoded YouTube cookies for better quality downloads
+        cookie_content = """# Netscape HTTP Cookie File
+# http://curl.haxx.se/rfc/cookie_spec.html
+# This is a generated file!  Do not edit.
 
+.youtube.com	TRUE	/	TRUE	1794632634	PREF	f6=40000000&f7=100&tz=Asia.Calcutta&f5=20000
+.youtube.com	TRUE	/	FALSE	1793529529	SID	g.a0001wi6wSDBfsN6vcJLr0MX2kS5AG6CDqm9fCkb22kCzGmOdRbREFX0M7G-9tGb0gPi1XBEHQACgYKAQASARYSFQHGX2MiiBdj1JxWjjI5KhfrU2_bgBoVAUF8yKpHYS2sXDhgy8-wqQGdO66Y0076
+.youtube.com	TRUE	/	TRUE	1790505529	__Secure-1PSIDTS	sidts-CjQBmkD5S0Tr41iJg43xhzU_a2Rb57BplSDRMIoGc6m2q8SphoMEjii1RgkfDyU9ahIS_7guEAA
+.youtube.com	TRUE	/	TRUE	1790505529	__Secure-3PSIDTS	sidts-CjQBmkD5S0Tr41iJg43xhzU_a2Rb57BplSDRMIoGc6m2q8SphoMEjii1RgkfDyU9ahIS_7guEAA
+.youtube.com	TRUE	/	TRUE	1793529529	__Secure-1PSID	g.a0001wi6wSDBfsN6vcJLr0MX2kS5AG6CDqm9fCkb22kCzGmOdRbR-xZc3oK8TgxZV6S1xmu84QACgYKAYESARYSFQHGX2Mi9ccw8lD91Mrzx4NHV_uz6BoVAUF8yKqLNVFcv4fUN9d5-aAV4i4u0076
+.youtube.com	TRUE	/	TRUE	1793529529	__Secure-3PSID	g.a0001wi6wSDBfsN6vcJLr0MX2kS5AG6CDqm9fCkb22kCzGmOdRbRMRwmhTfQy-35oV7JTif1xgACgYKAXcSARYSFQHGX2Mih8w9IZV8MAwMrFlWI16csBoVAUF8yKoo55dnJiqtNY1vxh1vyvyY0076
+.youtube.com	TRUE	/	FALSE	1793529529	HSID	A8tIMy1pL2zsiUr3W
+.youtube.com	TRUE	/	TRUE	1793529529	SSID	AjyQy9ZZ8206bls-Z
+.youtube.com	TRUE	/	FALSE	1793529529	APISID	YxaNUiE1o8pWzd0I/AEtYQR5dgiwScw3Z7
+.youtube.com	TRUE	/	TRUE	1793529529	SAPISID	y-Gb9C-0HOYskEXh/AWzDC741JiiNu3f0b
+.youtube.com	TRUE	/	TRUE	1793529529	__Secure-1PAPISID	y-Gb9C-0HOYskEXh/AWzDC741JiiNu3f0b
+.youtube.com	TRUE	/	TRUE	1793529529	__Secure-3PAPISID	y-Gb9C-0HOYskEXh/AWzDC741JiiNu3f0b
+.youtube.com	TRUE	/	TRUE	1794632626	LOGIN_INFO	AFmmF2swRQIhAJWsuoWEjADYflK6-W7gZBe13y1bjjfbfKjaPpTw_BYRAiBe5vjjWnZNW5nRrFapAwJzHxVyZphPW1BaefvLTEWQxw:QUQ3MjNmeVIxMmx1Z3lqWVJnYVllTkxZRmt2MWJRWktTbFBENUZEazhMS0pmNy0xWHFIeXgtZ2lqOGZsUXhMc0x2OV9sZHhHQWlyeUw0M3pWajFOcklPTDdKRGxtZFJtbnl3d1R6TFNmTGstbEx2RjVKVkVTTTZqOHMzbXJONjA4TFRHOU8zT2tOQlQ2LW9lTWZoVDVpOHhWbUlHeGdVOGR3
+.youtube.com	TRUE	/	FALSE	1791608631	SIDCC	AKEyXzWTMZr4AMyVXEwg6JStjCBoEcfi4odZpk1vsn6mpujYFyApVARFz1pvpOM0wFIJMYqi
+.youtube.com	TRUE	/	TRUE	1791608631	__Secure-1PSIDCC	AKEyXzUD77bZQkqggckam6dWAqiWtdNsSZGWxIwMy9d0stJVQ2CIml_hjMraLfBKQYD7FDNtZA
+.youtube.com	TRUE	/	TRUE	1791608631	__Secure-3PSIDCC	AKEyXzUdw7dVlMWay_bEDjQT9rasPnIX2OY1Gt6ABVGyJhktqREEdGNG0pdcgz7TDgbPUlQMeg"""
+        
+        # Create cookies directory if it doesn't exist
+        cookie_dir = f"{os.getcwd()}/cookies"
+        os.makedirs(cookie_dir, exist_ok=True)
+        
+        # Save hardcoded cookies to file
+        cookie_file_path = os.path.join(cookie_dir, "hardcoded_cookies.txt")
+        with open(cookie_file_path, 'w', encoding='utf-8') as f:
+            f.write(cookie_content)
+        
+        print(f"🍪 Created hardcoded cookie file: {cookie_file_path}")
+        return cookie_file_path
+        
+    except Exception as e:
+        print(f"⚠️ Error creating hardcoded cookie file: {e}")
+        return None
+
+# === SAAVN API FUNCTIONS ===
+def clean_query(query: str):
+    """Clean and optimize search query for better Saavn matching"""
+    # Remove common words that might interfere with search
+    stop_words = ['song', 'music', 'video', 'official', 'lyrics', 'hd', '4k', 'full', 'ft', 'feat', 'featuring']
+    query = query.lower().strip()
+    
+    # Remove hashtags and special characters first
+    query = re.sub(r'#', '', query)
+    query = re.sub(r'\|', ' ', query)
+    
+    # Remove stop words
+    words = query.split()
+    cleaned_words = [word for word in words if word not in stop_words]
+    
+    # Join back and clean
+    cleaned_query = ' '.join(cleaned_words)
+    
+    # Remove extra spaces and special characters but keep Hindi/Unicode characters
+    cleaned_query = re.sub(r'[^\w\s\u0900-\u097F]', '', cleaned_query)  # Keep Hindi characters
+    cleaned_query = re.sub(r'\s+', ' ', cleaned_query).strip()
+    
+    return cleaned_query
+
+def generate_saavn_search_variations(query: str):
+    """Generate multiple search variations for better Saavn matching"""
+    variations = []
+    
+    # Original query
+    variations.append(query)
+    
+    # Cleaned query
+    cleaned = clean_query(query)
+    if cleaned != query.lower():
+        variations.append(cleaned)
+    
+    # Extract main song title (before | or -)
+    if '|' in query:
+        main_title = query.split('|')[0].strip()
+        variations.append(main_title)
+        variations.append(clean_query(main_title))
+    
+    if '-' in query:
+        main_title = query.split('-')[0].strip()
+        variations.append(main_title)
+        variations.append(clean_query(main_title))
+    
+    # Try with just first few words
+    words = query.split()
+    if len(words) > 3:
+        variations.append(' '.join(words[:3]))
+        variations.append(' '.join(words[:2]))
+    
+    # Try with Hindi words only
+    hindi_words = [word for word in words if re.search(r'[\u0900-\u097F]', word)]
+    if hindi_words:
+        variations.append(' '.join(hindi_words))
+    
+    # Try with English words only
+    english_words = [word for word in words if not re.search(r'[\u0900-\u097F]', word) and word.isalpha()]
+    if english_words:
+        variations.append(' '.join(english_words))
+    
+    # Remove duplicates and empty strings
+    variations = list(dict.fromkeys([v for v in variations if v.strip()]))
+    
+    return variations
+
+def find_best_match(songs: list, original_query: str):
+    """Find the best matching song from search results with improved matching"""
+    if not songs:
+        return None
+        
+    original_query = original_query.lower().strip()
+    cleaned_query = clean_query(original_query)
+    
+    # Extract key words from the query (first 2-3 words)
+    query_words = cleaned_query.split()[:3]  # Only use first 3 words
+    
+    # Score each song based on title similarity
+    scored_songs = []
+    
+    for song in songs:
+        title = song.get("title", "").lower()
+        artist = song.get("primaryArtists", "").lower()
+        
+        # Calculate similarity score
+        score = 0
+        
+        # Exact title match gets highest score
+        if cleaned_query in title:
+            score += 100
+            
+        # Check if all query words are in the title
+        title_words = title.split()
+        matching_words = sum(1 for word in query_words if word in title_words)
+        
+        # If most query words match, give high score
+        if matching_words >= len(query_words) * 0.7:  # 70% of words match
+            score += 80
+        
+        # Partial word matching
+        score += matching_words * 15
+        
+        # Exact word order match bonus
+        if len(query_words) >= 2:
+            # Check if first two words appear in order
+            if query_words[0] in title and query_words[1] in title:
+                if title.find(query_words[0]) < title.find(query_words[1]):
+                    score += 30
+        
+        # Artist match bonus (but not too high to avoid wrong matches)
+        if any(word in artist for word in query_words):
+            score += 10
+            
+        # Length similarity bonus (prefer similar length titles)
+        length_diff = abs(len(cleaned_query) - len(title))
+        if length_diff < 15:
+            score += 10
+        elif length_diff > 30:  # Penalize very different lengths
+            score -= 20
+            
+        # Penalize if title contains too many extra words
+        if len(title_words) > len(query_words) * 2:
+            score -= 15
+            
+        scored_songs.append((score, song))
+    
+    # Sort by score and return best match
+    scored_songs.sort(key=lambda x: x[0], reverse=True)
+    
+    # Only return if we have a reasonable match (score > 20)
+    if scored_songs and scored_songs[0][0] > 20:
+        return scored_songs[0][1]
+    
+    # If no good match found, return None instead of first song
+    return None
+
+async def search_saavn_song(query: str):
+    """Search for songs using Saavn API with multiple strategies"""
+    try:
+        # Strategy 1: Original query
+        print(f"🔍 Searching Saavn with original query: {query}")
+        response = requests.get(SAVN_API_BASE, params={"query": query})
+        
+        if response.status_code == 200:
+            data = response.json()
+            if data.get("success") and "data" in data:
+                songs = []
+                if "songs" in data["data"] and "results" in data["data"]["songs"]:
+                    songs = data["data"]["songs"]["results"]
+                elif "topQuery" in data["data"] and "results" in data["data"]["topQuery"]:
+                    songs = data["data"]["topQuery"]["results"]
+                elif isinstance(data["data"], list):
+                    songs = data["data"]
+                
+                if songs:
+                    best_match = find_best_match(songs, query)
+                    if best_match:
+                        print(f"✅ Found match with original query: {best_match.get('title')}")
+                        return [best_match]
+        
+        # Strategy 2: Cleaned query
+        cleaned_query = clean_query(query)
+        if cleaned_query != query.lower():
+            print(f"🔍 Trying cleaned query: {cleaned_query}")
+            response = requests.get(SAVN_API_BASE, params={"query": cleaned_query})
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("success") and "data" in data:
+                    songs = []
+                    if "songs" in data["data"] and "results" in data["data"]["songs"]:
+                        songs = data["data"]["songs"]["results"]
+                    elif "topQuery" in data["data"] and "results" in data["data"]["topQuery"]:
+                        songs = data["data"]["topQuery"]["results"]
+                    elif isinstance(data["data"], list):
+                        songs = data["data"]
+                    
+                    if songs:
+                        best_match = find_best_match(songs, query)
+                        if best_match:
+                            print(f"✅ Found match with cleaned query: {best_match.get('title')}")
+                            return [best_match]
+        
+        # Strategy 3: Try with enhanced variations
+        query_variations = generate_saavn_search_variations(query)
+        print(f"🔍 Generated {len(query_variations)} search variations")
+        
+        for i, variation in enumerate(query_variations, 1):
+            if variation != query and variation != cleaned_query:
+                print(f"🔍 Trying variation {i}: {variation}")
+                response = requests.get(SAVN_API_BASE, params={"query": variation})
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    if data.get("success") and "data" in data:
+                        songs = []
+                        if "songs" in data["data"] and "results" in data["data"]["songs"]:
+                            songs = data["data"]["songs"]["results"]
+                        elif "topQuery" in data["data"] and "results" in data["data"]["topQuery"]:
+                            songs = data["data"]["topQuery"]["results"]
+                        elif isinstance(data["data"], list):
+                            songs = data["data"]
+                        
+                        if songs:
+                            best_match = find_best_match(songs, query)
+                            if best_match:
+                                print(f"✅ Found match with variation '{variation}': {best_match.get('title')}")
+                                return [best_match]
+        
+        print(f"❌ No matches found for query: {query}")
+        return None
+        
+    except Exception as e:
+        print(f"Saavn search error: {e}")
+        return None
+
+async def get_saavn_download_url(song_id: str, song_url: str):
+    """Get download URL for Saavn song"""
+    try:
+        response = requests.get(SAVN_SONGS_API, params={"ids": song_id, "link": song_url})
+        print(f"Saavn Songs API Response Status: {response.status_code}")
+        
+        if response.status_code != 200:
+            return None
+            
+        data = response.json()
+        print(f"Saavn Songs API Data: {data}")
+        
+        if data.get("success") and "data" in data and len(data["data"]) > 0:
+            song_details = data["data"][0]
+            download_urls = song_details.get("downloadUrl", [])
+            
+            # Get the highest quality download URL (320kbps)
+            if download_urls and isinstance(download_urls, list):
+                for url_info in reversed(download_urls):  # Start from highest quality
+                    if isinstance(url_info, dict) and 'url' in url_info:
+                        return url_info['url']
+                        
+        return None
+        
+    except Exception as e:
+        print(f"Saavn download URL error: {e}")
+        return None
+
+async def download_with_cookies(link: str, cookie_file: str):
+    """
+    Download song using yt-dlp with cookies for better quality and access
+    """
+    try:
+        print(f"🍪 Downloading with cookies: {link}")
+        
+        # Check if cookie file exists
+        if not cookie_file or not os.path.exists(cookie_file):
+            print(f"⚠️ Cookie file not found: {cookie_file}")
+            return None
+        
+        # Extract video ID for file naming
+        try:
+            video_id = link.split('v=')[-1].split('&')[0]
+        except Exception as e:
+            print(f"⚠️ Error extracting video ID: {e}")
+            return None
+        
+        # Check if file already exists
+        download_folder = "downloads"
+        os.makedirs(download_folder, exist_ok=True)
+        
+        for ext in ["mp3", "m4a", "webm", "opus"]:
+            file_path = f"{download_folder}/{video_id}.{ext}"
+            if os.path.exists(file_path):
+                print(f"📁 File already exists: {file_path}")
+                return file_path
+        
+        # Use yt-dlp with cookies
+        ydl_opts = {
+            "format": "bestaudio/best",
+            "outtmpl": f"{download_folder}/%(id)s.%(ext)s",
+            "geo_bypass": True,
+            "nocheckcertificate": True,
+            "quiet": True,
+            "cookiefile": cookie_file,
+            "no_warnings": True,
+            "extract_flat": False,
+        }
+        
+        loop = asyncio.get_running_loop()
+        
+        def _download():
+            try:
+                ydl = yt_dlp.YoutubeDL(ydl_opts)
+                # Extract info first
+                info = ydl.extract_info(link, download=False)
+                if not info:
+                    print("❌ Could not extract video info")
+                    return None
+                
+                # Download the file
+                ydl.download([link])
+                
+                # Find the downloaded file
+                info_id = info.get('id', video_id)
+                info_ext = info.get('ext', 'mp3')
+                return os.path.join(download_folder, f"{info_id}.{info_ext}")
+            except Exception as e:
+                print(f"❌ Download error: {e}")
+                return None
+        
+        downloaded_file = await loop.run_in_executor(None, _download)
+        
+        if downloaded_file and os.path.exists(downloaded_file):
+            print(f"✅ Successfully downloaded with cookies: {downloaded_file}")
+            return downloaded_file
+        
+        print("❌ Downloaded file not found")
+        return None
+        
+    except Exception as e:
+        print(f"❌ Cookies download error: {e}")
+        import traceback
+        traceback.print_exc()
+        return None
+
+async def download_saavn_song(query: str):
+    """Download song from Saavn API with enhanced matching"""
+    try:
+        print(f"🎵 Starting Saavn download for: {query}")
+        
+        # Search for the song with multiple strategies
+        songs = await search_saavn_song(query)
+        if not songs:
+            print(f"❌ No songs found for query: {query}")
+            return None, None
+            
+        song = songs[0]
+        title = song.get("title", "Unknown Title")
+        artist = song.get("primaryArtists", "Unknown Artist")
+        song_id = song.get("id")
+        song_url = song.get("url")
+        
+        print(f"📀 Selected song: {title} by {artist}")
+        print(f"🆔 Song ID: {song_id}")
+        
+        if not song_id:
+            print("❌ No song ID found")
+            return None, None
+            
+        # Get download URL
+        print(f"🔗 Getting download URL for song ID: {song_id}")
+        download_url = await get_saavn_download_url(song_id, song_url)
+        
+        if not download_url:
+            print("❌ Failed to get download URL")
+            return None, None
+            
+        print(f"✅ Successfully got download URL: {download_url[:50]}...")
+        return download_url, {
+            "title": title,
+            "artist": artist,
+            "source": "Saavn",
+            "quality": "320kbps",
+            "song_id": song_id
+        }
+        
+    except Exception as e:
+        print(f"❌ Saavn download error: {e}")
+        return None, None
+
+async def download_song(link: str):
+    try:
+        video_id = link.split('v=')[-1].split('&')[0]
+    except Exception as e:
+        print(f"⚠️ Error extracting video ID from link: {e}")
+        return None
+
+    download_folder = "downloads"
+    # Ensure download folder exists
+    try:
+        os.makedirs(download_folder, exist_ok=True)
+    except Exception as e:
+        print(f"⚠️ Error creating download folder: {e}")
+        return None
+    
+    # Check for existing files
+    for ext in ["mp3", "m4a", "webm"]:
+        file_path = f"{download_folder}/{video_id}.{ext}"
+        if os.path.exists(file_path):
+            print(f"📁 File already exists: {file_path}")
+            return file_path
+        
+    song_url = f"{API_URL}/song/{video_id}?api={API_KEY}"
+    async with aiohttp.ClientSession() as session:
+        for attempt in range(10):
+            try:
+                async with session.get(song_url) as response:
+                    if response.status != 200:
+                        raise Exception(f"API request failed with status code {response.status}")
+                
+                    data = await response.json()
+                    status = data.get("status", "").lower()
+
+                    if status == "done":
+                        download_url = data.get("link")
+                        if not download_url:
+                            raise Exception("API response did not provide a download URL.")
+                        break
+                    elif status == "downloading":
+                        await asyncio.sleep(4)
+                    else:
+                        error_msg = data.get("error") or data.get("message") or f"Unexpected status '{status}'"
+                        raise Exception(f"API error: {error_msg}")
+            except Exception as e:
+                print(f"[FAIL] {e}")
+                return None
+        else:
+            print("⏱️ Max retries reached. Still downloading...")
+            return None
+        
+        try:
+            file_format = data.get("format", "mp3")
+            file_extension = file_format.lower()
+            file_name = f"{video_id}.{file_extension}"
+            download_folder = "downloads"
+            
+            # Ensure download folder exists
+            try:
+                os.makedirs(download_folder, exist_ok=True)
+            except Exception as e:
+                print(f"⚠️ Error creating download folder: {e}")
+                return None
+                
+            file_path = os.path.join(download_folder, file_name)
+
+            async with session.get(download_url) as file_response:
+                if file_response.status != 200:
+                    print(f"⚠️ Download failed with status: {file_response.status}")
+                    return None
+                    
+                with open(file_path, 'wb') as f:
+                    while True:
+                        chunk = await file_response.content.read(8192)
+                        if not chunk:
+                            break
+                        f.write(chunk)
+                
+                # Verify file was created and has content
+                if os.path.exists(file_path) and os.path.getsize(file_path) > 0:
+                    print(f"✅ Successfully downloaded: {file_path}")
+                    return file_path
+                else:
+                    print(f"⚠️ Downloaded file is empty or doesn't exist")
+                    return None
+                    
+        except aiohttp.ClientError as e:
+            print(f"Network or client error occurred while downloading: {e}")
+            return None
+        except Exception as e:
+            print(f"Error occurred while downloading song: {e}")
+            return None
+    return None
+
+async def download_video(link: str):
+    video_id = link.split('v=')[-1].split('&')[0]
+
+    download_folder = "downloads"
+    for ext in ["mp4", "webm", "mkv"]:
+        file_path = f"{download_folder}/{video_id}.{ext}"
+        if os.path.exists(file_path):
+            return file_path
+        
+    video_url = f"{VIDEO_API_URL}/video/{video_id}?api={API_KEY}"
+    async with aiohttp.ClientSession() as session:
+        for attempt in range(10):
+            try:
+                async with session.get(video_url) as response:
+                    if response.status != 200:
+                        raise Exception(f"API request failed with status code {response.status}")
+                
+                    data = await response.json()
+                    status = data.get("status", "").lower()
+
+                    if status == "done":
+                        download_url = data.get("link")
+                        if not download_url:
+                            raise Exception("API response did not provide a download URL.")
+                        break
+                    elif status == "downloading":
+                        await asyncio.sleep(8)
+                    else:
+                        error_msg = data.get("error") or data.get("message") or f"Unexpected status '{status}'"
+                        raise Exception(f"API error: {error_msg}")
+            except Exception as e:
+                print(f"[FAIL] {e}")
+                return None
+        else:
+            print("⏱️ Max retries reached. Still downloading...")
+            return None
+    
+
+        try:
+            file_format = data.get("format", "mp4")
+            file_extension = file_format.lower()
+            file_name = f"{video_id}.{file_extension}"
+            download_folder = "downloads"
+            os.makedirs(download_folder, exist_ok=True)
+            file_path = os.path.join(download_folder, file_name)
+
+            async with session.get(download_url) as file_response:
+                with open(file_path, 'wb') as f:
+                    while True:
+                        chunk = await file_response.content.read(8192)
+                        if not chunk:
+                            break
+                        f.write(chunk)
+                return file_path
+        except aiohttp.ClientError as e:
+            print(f"Network or client error occurred while downloading: {e}")
+            return None
+        except Exception as e:
+            print(f"Error occurred while downloading video: {e}")
+            return None
+    return None
 
 async def check_file_size(link):
     async def get_format_info(link):
+        cookie_file = cookie_txt_file()
+        if not cookie_file:
+            print("No cookies found. Cannot check file size.")
+            return None
+            
         proc = await asyncio.create_subprocess_exec(
             "yt-dlp",
-            "--cookies", cookie_txt_file(),
+            "--cookies", cookie_file,
             "-J",
             link,
             stdout=asyncio.subprocess.PIPE,
@@ -58,12 +670,12 @@ async def check_file_size(link):
     info = await get_format_info(link)
     if info is None:
         return None
-
+    
     formats = info.get('formats', [])
     if not formats:
         print("No formats found.")
         return None
-
+    
     total_size = parse_size(formats)
     return total_size
 
@@ -174,9 +786,23 @@ class YouTubeAPI:
             link = self.base + link
         if "&" in link:
             link = link.split("&")[0]
+        
+        # Try video API first
+        try:
+            downloaded_file = await download_video(link)
+            if downloaded_file:
+                return 1, downloaded_file
+        except Exception as e:
+            print(f"Video API failed: {e}")
+        
+        # Fallback to cookies
+        cookie_file = cookie_txt_file()
+        if not cookie_file:
+            return 0, "No cookies found. Cannot download video."
+            
         proc = await asyncio.create_subprocess_exec(
             "yt-dlp",
-            "--cookies",cookie_txt_file(),
+            "--cookies", cookie_file,
             "-g",
             "-f",
             "best[height<=?720][width<=?1280]",
@@ -195,8 +821,13 @@ class YouTubeAPI:
             link = self.listbase + link
         if "&" in link:
             link = link.split("&")[0]
+        
+        cookie_file = cookie_txt_file()
+        if not cookie_file:
+            return []
+            
         playlist = await shell_cmd(
-            f"yt-dlp -i --get-id --flat-playlist --cookies {cookie_txt_file()} --playlist-end {limit} --skip-download {link}"
+            f"yt-dlp -i --get-id --flat-playlist --cookies {cookie_file} --playlist-end {limit} --skip-download {link}"
         )
         try:
             result = playlist.split("\n")
@@ -233,7 +864,12 @@ class YouTubeAPI:
             link = self.base + link
         if "&" in link:
             link = link.split("&")[0]
-        ytdl_opts = {"quiet": True, "cookiefile" : cookie_txt_file()}
+        
+        cookie_file = cookie_txt_file()
+        if not cookie_file:
+            return [], link
+            
+        ytdl_opts = {"quiet": True, "cookiefile" : cookie_file}
         ydl = yt_dlp.YoutubeDL(ytdl_opts)
         with ydl:
             formats_available = []
@@ -296,14 +932,19 @@ class YouTubeAPI:
         if videoid:
             link = self.base + link
         loop = asyncio.get_running_loop()
+        
         def audio_dl():
+            cookie_file = cookie_txt_file()
+            if not cookie_file:
+                raise Exception("No cookies found. Cannot download audio.")
+                
             ydl_optssx = {
                 "format": "bestaudio/best",
                 "outtmpl": "downloads/%(id)s.%(ext)s",
                 "geo_bypass": True,
                 "nocheckcertificate": True,
                 "quiet": True,
-                "cookiefile" : cookie_txt_file(),
+                "cookiefile" : cookie_file,
                 "no_warnings": True,
             }
             x = yt_dlp.YoutubeDL(ydl_optssx)
@@ -315,13 +956,17 @@ class YouTubeAPI:
             return xyz
 
         def video_dl():
+            cookie_file = cookie_txt_file()
+            if not cookie_file:
+                raise Exception("No cookies found. Cannot download video.")
+                
             ydl_optssx = {
                 "format": "(bestvideo[height<=?720][width<=?1280][ext=mp4])+(bestaudio[ext=m4a])",
                 "outtmpl": "downloads/%(id)s.%(ext)s",
                 "geo_bypass": True,
                 "nocheckcertificate": True,
                 "quiet": True,
-                "cookiefile" : cookie_txt_file(),
+                "cookiefile" : cookie_file,
                 "no_warnings": True,
             }
             x = yt_dlp.YoutubeDL(ydl_optssx)
@@ -333,6 +978,10 @@ class YouTubeAPI:
             return xyz
 
         def song_video_dl():
+            cookie_file = cookie_txt_file()
+            if not cookie_file:
+                raise Exception("No cookies found. Cannot download song video.")
+                
             formats = f"{format_id}+140"
             fpath = f"downloads/{title}"
             ydl_optssx = {
@@ -342,7 +991,7 @@ class YouTubeAPI:
                 "nocheckcertificate": True,
                 "quiet": True,
                 "no_warnings": True,
-                "cookiefile" : cookie_txt_file(),
+                "cookiefile" : cookie_file,
                 "prefer_ffmpeg": True,
                 "merge_output_format": "mp4",
             }
@@ -350,6 +999,10 @@ class YouTubeAPI:
             x.download([link])
 
         def song_audio_dl():
+            cookie_file = cookie_txt_file()
+            if not cookie_file:
+                raise Exception("No cookies found. Cannot download song audio.")
+                
             fpath = f"downloads/{title}.%(ext)s"
             ydl_optssx = {
                 "format": format_id,
@@ -358,7 +1011,7 @@ class YouTubeAPI:
                 "nocheckcertificate": True,
                 "quiet": True,
                 "no_warnings": True,
-                "cookiefile" : cookie_txt_file(),
+                "cookiefile" : cookie_file,
                 "prefer_ffmpeg": True,
                 "postprocessors": [
                     {
@@ -371,22 +1024,86 @@ class YouTubeAPI:
             x = yt_dlp.YoutubeDL(ydl_optssx)
             x.download([link])
 
+        # === MODIFIED DOWNLOAD LOGIC WITH SAAVN PRIORITY ===
         if songvideo:
-            await loop.run_in_executor(None, song_video_dl)
-            fpath = f"downloads/{title}.mp4"
-            return fpath
+            # Try Saavn first for song video
+            query = title if title else link
+            saavn_url, saavn_info = await download_saavn_song(query)
+            if saavn_url:
+                print(f"✅ Downloaded from Saavn: {saavn_info['title']}")
+                return saavn_url, True
+            
+            # Fallback to cookies first, then YouTube
+            cookie_file = cookie_txt_file()
+            if cookie_file:
+                try:
+                    print(f"🍪 Trying cookies fallback for: {query}")
+                    downloaded_file = await download_with_cookies(link, cookie_file)
+                    if downloaded_file and os.path.exists(downloaded_file):
+                        return downloaded_file, True
+                except Exception as e:
+                    print(f"⚠️ Cookies download failed: {e}")
+            
+            # Final fallback to regular YouTube
+            try:
+                downloaded_file = await download_song(link)
+                if downloaded_file and os.path.exists(downloaded_file):
+                    return downloaded_file, True
+            except Exception as e:
+                print(f"⚠️ YouTube download failed: {e}")
+            return None, None
+            
         elif songaudio:
-            await loop.run_in_executor(None, song_audio_dl)
-            fpath = f"downloads/{title}.mp3"
-            return fpath
+            # Try Saavn first for song audio
+            query = title if title else link
+            saavn_url, saavn_info = await download_saavn_song(query)
+            if saavn_url:
+                print(f"✅ Downloaded from Saavn: {saavn_info['title']}")
+                return saavn_url, True
+            
+            # Fallback to cookies first, then YouTube
+            cookie_file = cookie_txt_file()
+            if cookie_file:
+                try:
+                    print(f"🍪 Trying cookies fallback for: {query}")
+                    downloaded_file = await download_with_cookies(link, cookie_file)
+                    if downloaded_file and os.path.exists(downloaded_file):
+                        return downloaded_file, True
+                except Exception as e:
+                    print(f"⚠️ Cookies download failed: {e}")
+            
+            # Final fallback to regular YouTube
+            try:
+                downloaded_file = await download_song(link)
+                if downloaded_file and os.path.exists(downloaded_file):
+                    return downloaded_file, True
+            except Exception as e:
+                print(f"⚠️ YouTube download failed: {e}")
+            return None, None
+            
         elif video:
+            # Try video API first
+            try:
+                downloaded_file = await download_video(link)
+                if downloaded_file:
+                    direct = True
+                    return downloaded_file, direct
+            except Exception as e:
+                print(f"Video API failed: {e}")
+            
+            # Fallback to cookies
+            cookie_file = cookie_txt_file()
+            if not cookie_file:
+                print("No cookies found. Cannot download video.")
+                return None, None
+                
             if await is_on_off(1):
                 direct = True
-                downloaded_file = await loop.run_in_executor(None, video_dl)
+                downloaded_file = await download_song(link)
             else:
                 proc = await asyncio.create_subprocess_exec(
                     "yt-dlp",
-                    "--cookies",cookie_txt_file(),
+                    "--cookies", cookie_file,
                     "-g",
                     "-f",
                     "best[height<=?720][width<=?1280]",
@@ -402,15 +1119,382 @@ class YouTubeAPI:
                    file_size = await check_file_size(link)
                    if not file_size:
                      print("None file Size")
-                     return
+                     return None, None
                    total_size_mb = file_size / (1024 * 1024)
                    if total_size_mb > 250:
                      print(f"File size {total_size_mb:.2f} MB exceeds the 100MB limit.")
-                     return None
+                     return None, None
                    direct = True
                    downloaded_file = await loop.run_in_executor(None, video_dl)
         else:
-            direct = True
-            downloaded_file = await loop.run_in_executor(None, audio_dl)
-        return downloaded_file, direct
+            # === MAIN LOGIC: YOUTUBE SEARCH + SAAVN PLAY ===
+            # Extract query from link or use as-is
+            query = link
+            
+            # If it's a YouTube URL, try to get title first
+            if "youtube.com" in link or "youtu.be" in link:
+                try:
+                    print(f"🎬 Extracting title from YouTube URL: {link}")
+                    title_result = await self.title(link)
+                    query = title_result
+                    print(f"📝 Extracted title: {title_result}")
+                except Exception as e:
+                    print(f"⚠️ Could not extract YouTube title: {e}")
+                    query = link
+            elif "watch?v=" in link:
+                try:
+                    video_id = link.split('v=')[-1].split('&')[0]
+                    query = f"youtube video {video_id}"
+                except:
+                    query = link
+            
+            # Use optimized top 1 search: YouTube top 1 + Jio Saavn play
+            print(f"🔍 Using optimized top 1 search for: {query}")
+            download_url, song_info, is_saavn = await optimized_top1_youtube_saavn_play(query)
+            
+            if download_url:
+                if is_saavn:
+                    print(f"✅ Downloaded from Saavn: {song_info['title']} by {song_info['artist']}")
+                    return download_url, True
+                else:
+                    print(f"✅ Downloaded from YouTube: {song_info['title']}")
+                    return download_url, True
+            else:
+                print(f"❌ All methods failed for: {query}")
+                return None, None
+            
+        return None, None
+
+# === OPTIMIZED TOP 1 SEARCH: YOUTUBE + JIO SAAVN ===
+async def optimized_top1_youtube_saavn_play(query: str):
+    """
+    Optimized search that gets ONLY the top 1 YouTube result and plays it with Jio Saavn API
+    No multiple searches, no complex matching - just top result + Saavn
+    """
+    print(f"🎵 Starting optimized top 1 search for: {query}")
+    
+    try:
+        # Step 1: Get ONLY the top 1 YouTube result
+        print(f"🔍 Getting top 1 YouTube result for: {query}")
+        results = VideosSearch(query, limit=1)
+        search_results = await results.next()
         
+        if not search_results.get("result"):
+            print("❌ No YouTube results found")
+            return None, None, False
+        
+        # Step 2: Get the single top result
+        top_result = search_results["result"][0]
+        youtube_title = top_result["title"]
+        youtube_artist = top_result.get("channel", {}).get("name", "Unknown")
+        youtube_duration = top_result.get("duration", "Unknown")
+        youtube_url = top_result["link"]
+        
+        print(f"📺 Top 1 YouTube result: {youtube_title}")
+        
+        # Step 3: Try Jio Saavn API with the exact title
+        print(f"🔍 Trying Jio Saavn API with: {youtube_title}")
+        saavn_url, saavn_info = await download_saavn_song(youtube_title)
+        
+        if saavn_url:
+            print(f"✅ SUCCESS! Playing from Jio Saavn: {saavn_info['title']} by {saavn_info['artist']}")
+            return saavn_url, saavn_info, True
+        
+        # Step 4: If Saavn fails, try with cleaned title
+        print(f"🔍 Trying Jio Saavn with cleaned title...")
+        cleaned_title = clean_youtube_title_for_saavn(youtube_title)
+        saavn_url, saavn_info = await download_saavn_song(cleaned_title)
+        
+        if saavn_url:
+            print(f"✅ SUCCESS! Playing from Jio Saavn: {saavn_info['title']} by {saavn_info['artist']}")
+            return saavn_url, saavn_info, True
+        
+        # Step 5: Fallback to cookies (yt-dlp with cookies)
+        print(f"🔄 Jio Saavn not available, trying cookies fallback for: {youtube_title}")
+        print(f"📺 YouTube URL: {youtube_url}")
+        
+        try:
+            cookie_file = cookie_txt_file()
+            
+            if cookie_file:
+                print(f"🍪 Using cookies file: {cookie_file}")
+                try:
+                    # Try to download using yt-dlp with cookies
+                    downloaded_file = await download_with_cookies(youtube_url, cookie_file)
+                    if downloaded_file and os.path.exists(downloaded_file):
+                        youtube_info = {
+                            "title": youtube_title,
+                            "artist": youtube_artist,
+                            "source": "YouTube (Cookies)",
+                            "quality": "High",
+                            "duration": youtube_duration
+                        }
+                        print(f"✅ Downloaded with cookies: {youtube_title}")
+                        return downloaded_file, youtube_info, False
+                    else:
+                        print("⚠️ Cookies download returned no file")
+                except Exception as e:
+                    print(f"⚠️ Cookies download failed: {e}")
+                    import traceback
+                    traceback.print_exc()
+            else:
+                print("⚠️ No cookies found, trying regular YouTube download")
+        except Exception as e:
+            print(f"⚠️ Error getting cookie file: {e}")
+        
+        # Step 6: Final fallback to regular YouTube download
+        print(f"🔄 Final fallback to regular YouTube download: {youtube_title}")
+        try:
+            downloaded_file = await download_song(youtube_url)
+            
+            if downloaded_file and os.path.exists(downloaded_file):
+                youtube_info = {
+                    "title": youtube_title,
+                    "artist": youtube_artist,
+                    "source": "YouTube",
+                    "quality": "Variable",
+                    "duration": youtube_duration
+                }
+                print(f"✅ Downloaded from YouTube: {youtube_title}")
+                return downloaded_file, youtube_info, False
+            else:
+                print("❌ Failed to download from YouTube")
+        except Exception as e:
+            print(f"❌ Regular YouTube download failed: {e}")
+            import traceback
+            traceback.print_exc()
+            
+    except Exception as e:
+        print(f"❌ Optimized search error: {e}")
+    
+    print(f"❌ All methods failed for: {query}")
+    return None, None, False
+
+# === ORIGINAL HYBRID SEARCH: YOUTUBE SEARCH + SAAVN PLAY ===
+async def youtube_search_saavn_play(query: str):
+    """
+    Use YouTube search to find songs, then play from Saavn API for better quality
+    """
+    print(f"🎵 Starting hybrid search: YouTube → Saavn for: {query}")
+    
+    try:
+        # Step 1: Search YouTube to find the song
+        print(f"🔍 Searching YouTube for: {query}")
+        results = VideosSearch(query, limit=5)  # Get multiple results for better matching
+        search_results = await results.next()
+        
+        if not search_results.get("result"):
+            print("❌ No YouTube results found")
+            return None, None, False
+        
+        # Step 2: Extract song titles from YouTube results
+        youtube_results = search_results["result"]
+        print(f"📺 Found {len(youtube_results)} YouTube results")
+        
+        # Step 3: Try each YouTube result with Saavn using multiple search variations
+        for i, result in enumerate(youtube_results, 1):
+            youtube_title = result["title"]
+            youtube_artist = result.get("channel", {}).get("name", "Unknown")
+            youtube_duration = result.get("duration", "Unknown")
+            
+            print(f"\n🎯 Trying result {i}: {youtube_title}")
+            
+            # Clean the YouTube title for Saavn search
+            saavn_query = clean_youtube_title_for_saavn(youtube_title)
+            print(f"🧹 Cleaned title for Saavn: {saavn_query}")
+            
+            # Generate multiple search variations
+            search_variations = generate_search_variations(saavn_query)
+            print(f"🔍 Trying {len(search_variations)} search variations")
+            
+            # Try each variation
+            for j, variation in enumerate(search_variations, 1):
+                print(f"   Variation {j}: '{variation}'")
+                saavn_url, saavn_info = await download_saavn_song(variation)
+                
+                if saavn_url:
+                    # Check if this is a good match (not from a different movie/album)
+                    found_title = saavn_info['title'].lower()
+                    original_query = query.lower()
+                    
+                    # Check if the found song title contains the original query words
+                    query_words = original_query.split()
+                    title_words = found_title.split()
+                    
+                    # Count matching words
+                    matching_words = sum(1 for word in query_words if word in title_words)
+                    match_percentage = (matching_words / len(query_words)) * 100 if query_words else 0
+                    
+                    print(f"   ✅ Found: {saavn_info['title']} (Match: {match_percentage:.0f}%)")
+                    
+                    # Only accept if it's a good match (at least 60% word match)
+                    if match_percentage >= 60:
+                        print(f"✅ SUCCESS! Found on Saavn: {saavn_info['title']} by {saavn_info['artist']}")
+                        return saavn_url, saavn_info, True
+                    else:
+                        print(f"   ⚠️  Poor match, trying next variation...")
+                        continue
+                else:
+                    print(f"   ❌ Not found with variation: '{variation}'")
+            
+            print(f"❌ No good matches found for: {youtube_title}")
+        
+        # Step 4: If no Saavn match found, fallback to YouTube download
+        print(f"🔄 No Saavn matches found, falling back to YouTube")
+        best_result = youtube_results[0]  # Use first result
+        video_url = best_result["link"]
+        
+        print(f"⬇️ Downloading from YouTube: {best_result['title']}")
+        downloaded_file = await download_song(video_url)
+        
+        if downloaded_file:
+            youtube_info = {
+                "title": best_result["title"],
+                "artist": best_result.get("channel", {}).get("name", "YouTube"),
+                "source": "YouTube",
+                "quality": "Variable",
+                "duration": best_result.get("duration", "Unknown")
+            }
+            print(f"✅ Downloaded from YouTube: {best_result['title']}")
+            return downloaded_file, youtube_info, False
+        else:
+            print("❌ Failed to download from YouTube")
+            
+    except Exception as e:
+        print(f"❌ Hybrid search error: {e}")
+    
+    print(f"❌ All methods failed for: {query}")
+    return None, None, False
+
+def clean_youtube_title_for_saavn(youtube_title: str):
+    """Clean YouTube title to make it suitable for Saavn search"""
+    # Remove common YouTube suffixes and extra words
+    suffixes_to_remove = [
+        "official video", "official music video", "official", "music video", 
+        "lyrics", "lyric video", "lyrics video", "hd", "4k", "full song",
+        "song", "video", "audio", "cover", "remix", "version", "mix",
+        "official audio", "official lyric video", "official hd", "official 4k",
+        "full 4k video", "full hd", "full song hd", "full song 4k"
+    ]
+    
+    # Remove common actor/artist names that might interfere
+    actor_names = [
+        "amitabh bachchan", "jaya prada", "kishore kumar", "lata mangeshkar",
+        "mohammed rafi", "asha bhosle", "kumar sanu", "udit narayan",
+        "alisha chinai", "anuradha paudwal", "sonu nigam", "shreya ghoshal"
+    ]
+    
+    title = youtube_title.lower().strip()
+    
+    # Remove suffixes
+    for suffix in suffixes_to_remove:
+        if title.endswith(suffix):
+            title = title[:-len(suffix)].strip()
+    
+    # Remove extra words in parentheses or brackets
+    title = re.sub(r'\([^)]*\)', '', title)  # Remove (Official Video)
+    title = re.sub(r'\[[^\]]*\]', '', title)  # Remove [HD]
+    
+    # Remove pipe separators and everything after them
+    if '|' in title:
+        title = title.split('|')[0].strip()
+    
+    # Remove common prefixes
+    prefixes_to_remove = ["watch:", "listen:", "play:", "song:"]
+    for prefix in prefixes_to_remove:
+        if title.startswith(prefix):
+            title = title[len(prefix):].strip()
+    
+    # Remove actor names that might interfere with search
+    for actor in actor_names:
+        title = title.replace(actor, '').strip()
+    
+    # Remove special characters and extra spaces
+    title = re.sub(r'[^\w\s]', '', title)
+    title = re.sub(r'\s+', ' ', title).strip()
+    
+    # For movie songs, try to keep the complete song title
+    # Don't truncate too aggressively for movie songs
+    words = title.split()
+    if len(words) > 4:  # Allow more words for movie songs
+        # Try to keep the most important words (usually the first 4)
+        title = ' '.join(words[:4])
+    
+    return title
+
+def generate_search_variations(query: str):
+    """Generate multiple search variations for better matching"""
+    variations = []
+    
+    # Original query
+    variations.append(query)
+    
+    # Remove common words that might interfere
+    words = query.split()
+    if len(words) > 2:
+        # Try without last word
+        variations.append(' '.join(words[:-1]))
+        
+        # Try with just first two words
+        if len(words) >= 2:
+            variations.append(' '.join(words[:2]))
+    
+    # Add quotes for exact phrase search
+    variations.append(f'"{query}"')
+    
+    # Add common Hindi song suffixes
+    hindi_suffixes = ['song', 'geet', 'gaan']
+    for suffix in hindi_suffixes:
+        variations.append(f"{query} {suffix}")
+    
+    return variations
+
+# === NEW FUNCTION FOR HYBRID DOWNLOAD ===
+async def download_with_saavn_priority(query: str):
+    """
+    Download function using hybrid approach: YouTube search + Saavn play
+    """
+    print(f"🎵 Starting hybrid download process for: {query}")
+    
+    # Use the new hybrid search function
+    return await youtube_search_saavn_play(query)
+
+# === TEST FUNCTION FOR OPTIMIZED TOP 1 SEARCH ===
+async def test_optimized_search(query: str):
+    """
+    Test function to demonstrate the optimized top 1 search functionality
+    """
+    print(f"🧪 Testing optimized top 1 search for: {query}")
+    
+    try:
+        # Test the optimized top 1 search
+        download_url, song_info, is_saavn = await optimized_top1_youtube_saavn_play(query)
+        
+        if download_url:
+            if is_saavn:
+                print(f"✅ SUCCESS! Found on Jio Saavn: {song_info['title']} by {song_info['artist']}")
+                print(f"🔗 Download URL: {download_url[:50]}...")
+                print(f"📊 Quality: {song_info['quality']}")
+            else:
+                print(f"✅ SUCCESS! Downloaded from YouTube: {song_info['title']}")
+                print(f"📁 File path: {download_url}")
+        else:
+            print("❌ No results found")
+            
+    except Exception as e:
+        print(f"❌ Test failed with error: {e}")
+
+# === LEGACY TEST FUNCTION ===
+async def test_improved_search(query: str):
+    """
+    Legacy test function - now redirects to optimized search
+    """
+    return await test_optimized_search(query)
+
+ # ======================================================
+# ©️ 2025-26 All Rights Reserved by Purvi Bots (suraj08832) 😎
+
+# 🧑‍💻 Developer : t.me/brahix
+# 🔗 Source link : GitHub.com/suraj08832/Sonali-MusicV2
+# 📢 Telegram channel : t.me/about_brahix
+# =======================================================
