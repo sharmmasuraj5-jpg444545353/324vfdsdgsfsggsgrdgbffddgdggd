@@ -388,11 +388,11 @@ def create_hardcoded_cookie_file():
 .youtube.com	TRUE	/	TRUE	1779360012	__Secure-1PAPISID	BSwotq3K_osWdRba/AJ07-3YcjI9m_ZicB
 .youtube.com	TRUE	/	TRUE	1779360012	__Secure-3PAPISID	BSwotq3K_osWdRba/AJ07-3YcjI9m_ZicB
 .youtube.com	TRUE	/	TRUE	0	wide	1
-.youtube.com	TRUE	/	TRUE	1781163800	__Secure-1PSIDTS	sidts-CjQBflaCdYn9JLEi6LXdQwDhBcYveuFuUWnaKc7Y1BZ1pqoXu9Xp5WNxu3H-GTwCYtceulaEEAA
-.youtube.com	TRUE	/	TRUE	1781163800	__Secure-3PSIDTS	sidts-CjQBflaCdYn9JLEi6LXdQwDhBcYveuFuUWnaKc7Y1BZ1pqoXu9Xp5WNxu3H-GTwCYtceulaEEAA
-.youtube.com	TRUE	/	FALSE	1781163800	SIDCC	AKEyXzWR62GQPM_5n6QMixrQINDsXNCH0a6OWNXZaiitYGV0A0Flb4KwT3uNRE5HUlC5FbATzg8
-.youtube.com	TRUE	/	TRUE	1781163800	__Secure-1PSIDCC	AKEyXzWQ45W87SFvQY9waV12Vk3IionsaZTyiumm9PUoOZa2nohcqYVlVDX8BP7uDFn-APbTkw
-.youtube.com	TRUE	/	TRUE	1781163800	__Secure-3PSIDCC	AKEyXzVkfWN_SfPYrxzm8XQ8YueiiuFXRzQfaBdKmqUOQ9Z8NOqEZIYK5l9Vp2QiPSxXFgxZKOI
+.youtube.com	TRUE	/	TRUE	1781165605	__Secure-1PSIDTS	sidts-CjQBflaCdXU8P1eZMPGMOzy-PL5tlPaf9s1H4lCYc3eINvNfnp5-NYWLEHwHnqcrQRqVMYKeEAA
+.youtube.com	TRUE	/	TRUE	1781165605	__Secure-3PSIDTS	sidts-CjQBflaCdXU8P1eZMPGMOzy-PL5tlPaf9s1H4lCYc3eINvNfnp5-NYWLEHwHnqcrQRqVMYKeEAA
+.youtube.com	TRUE	/	FALSE	1781165605	SIDCC	AKEyXzXo4VKm0B4TmsTpBT-AdXb6oH-VKFHsJIucIeFAMaud9dwvZ3SKjQQQ4M9_m3dio8idMIA
+.youtube.com	TRUE	/	TRUE	1781165605	__Secure-1PSIDCC	AKEyXzXgjlVV98S2YvN0If8j4ibOBCCnXvSy1WKApeyHLzpL7lp74GzqhsJFfz-cTGQmBUNB7A
+.youtube.com	TRUE	/	TRUE	1781165605	__Secure-3PSIDCC	AKEyXzXtrLYTAWwxjK41uhIiXAFouNCYzhH4h-87rnXDNHv8wtScX4e_zyKjK0RFN2IyK9oMO30
 .youtube.com	TRUE	/	TRUE	1781160562	VISITOR_INFO1_LIVE	bm_Jiq98kyw
 .youtube.com	TRUE	/	TRUE	1781160562	VISITOR_PRIVACY_METADATA	CgJJThIEGgAgTA%3D%3D
 .youtube.com	TRUE	/	TRUE	1781095671	__Secure-ROLLOUT_TOKEN	CO_2k4e6_-LopgEQ6dPNo5bzigMYs4y024q4kQM%3D
@@ -948,6 +948,7 @@ async def check_file_size(link):
         proc = await asyncio.create_subprocess_exec(
             "yt-dlp",
             "--cookies", cookie_file,
+            "--user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
             "-J",
             link,
             stdout=asyncio.subprocess.PIPE,
@@ -1102,6 +1103,7 @@ class YouTubeAPI:
         proc = await asyncio.create_subprocess_exec(
             "yt-dlp",
             "--cookies", cookie_file,
+            "--user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
             "-g",
             "-f",
             "best[height<=?720][width<=?1280]",
@@ -1126,7 +1128,7 @@ class YouTubeAPI:
             return []
             
         playlist = await shell_cmd(
-            f"yt-dlp -i --get-id --flat-playlist --cookies {cookie_file} --playlist-end {limit} --skip-download {link}"
+            f"yt-dlp -i --get-id --flat-playlist --cookies {cookie_file} --user-agent 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36' --playlist-end {limit} --skip-download {link}"
         )
         try:
             result = playlist.split("\n")
@@ -1168,7 +1170,13 @@ class YouTubeAPI:
         if not cookie_file:
             return [], link
             
-        ytdl_opts = {"quiet": True, "cookiefile" : cookie_file}
+            ytdl_opts = {
+                "quiet": True,
+                "cookiefile": cookie_file,
+                "http_headers": {
+                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+                }
+            }
         ydl = yt_dlp.YoutubeDL(ytdl_opts)
         with ydl:
             formats_available = []
@@ -1267,6 +1275,14 @@ class YouTubeAPI:
                 "quiet": True,
                 "cookiefile" : cookie_file,
                 "no_warnings": True,
+                "http_headers": {
+                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+                    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+                    "Accept-Language": "en-us,en;q=0.5",
+                    "Sec-Fetch-Mode": "navigate",
+                },
+                "sleep_interval": 1,
+                "max_sleep_interval": 5,
             }
             x = yt_dlp.YoutubeDL(ydl_optssx)
             info = x.extract_info(link, False)
