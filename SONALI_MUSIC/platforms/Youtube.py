@@ -11,6 +11,7 @@ import asyncio
 import os
 import re
 import json
+import time
 from typing import Union
 import requests
 import yt_dlp
@@ -27,14 +28,195 @@ import aiohttp
 import config
 #from config import API_URL, VIDEO_API_URL, API_KEY
 from os import getenv
+from motor.motor_asyncio import AsyncIOMotorClient
+from SONALI_MUSIC import app
+
+# === HARDCODED CONFIGURATION ===
+AUDIO_CHANNEL_ID = int("-1003472388712")
+VIDEO_CHANNEL_ID = int("-1003365514903")
+BOT_TOKEN = "8208037536:AAEXcEDC4__HJ63Vx7puXSUVswNv6wuhH0I"
+OWNER_ID = int("8115787127")
+MONGODB_URI = "mongodb+srv://sandeep:fpA5BAT3VqCq0THj@cluster0.bege5a8.mongodb.net/destinymusic?retryWrites=true&w=majority&appName=Cluster0"
+YOUTUBE_API_KEY = "AIzaSyDcJYgflcDs4vmrx8rlEjNdnwJQPds_978"
 
 API_URL = getenv("API_URL", 'https://api.thequickearn.xyz')
 API_KEY = getenv("API_KEY", 'NxGBNexGenBotsa02f5a')
 VIDEO_API_URL = getenv("VIDEO_API_URL", 'https://api.video.thequickearn.xyz')
 
+# === MONGODB CONNECTION ===
+try:
+    mongo_client = AsyncIOMotorClient(MONGODB_URI)
+    mongodb = mongo_client.destinymusic
+    songs_db = mongodb.songs_cache
+    print("✅ Connected to MongoDB for songs cache")
+except Exception as e:
+    print(f"⚠️ MongoDB connection error: {e}")
+    songs_db = None
+
 # === SAAVN API CONFIGURATION ===
 SAVN_API_BASE = "https://apikeyy-zeta.vercel.app/api/search"
 SAVN_SONGS_API = "https://apikeyy-zeta.vercel.app/api/songs"
+
+# === CHANNEL CACHE FUNCTIONS ===
+async def get_song_hash(query: str, is_video: bool = False):
+    """Generate a hash for the song query"""
+    import hashlib
+    query_lower = query.lower().strip()
+    query_hash = hashlib.md5(f"{query_lower}_{'video' if is_video else 'audio'}".encode()).hexdigest()
+    return query_hash
+
+async def check_channel_cache(query: str, is_video: bool = False):
+    """Check if song exists in MongoDB and Telegram channel, download and return file path"""
+    try:
+        if not songs_db:
+            return None
+        
+        query_hash = await get_song_hash(query, is_video)
+        
+        # Check MongoDB
+        song_data = await songs_db.find_one({"query_hash": query_hash})
+        
+        if song_data:
+            message_id = song_data.get("message_id")
+            channel_id = song_data.get("channel_id")
+            
+            if message_id and channel_id:
+                try:
+                    # Try to get the message from channel
+                    message = await app.get_messages(channel_id, message_id)
+                    if message:
+                        # Download the file to local path
+                        download_folder = "downloads"
+                        os.makedirs(download_folder, exist_ok=True)
+                        
+                        # Get file based on type
+                        file_to_download = None
+                        file_extension = None
+                        
+                        if is_video:
+                            if message.video:
+                                file_to_download = message.video
+                                file_extension = "mp4"
+                            elif message.document:
+                                file_to_download = message.document
+                                file_extension = message.document.file_name.split('.')[-1] if message.document.file_name else "mp4"
+                        else:
+                            if message.audio:
+                                file_to_download = message.audio
+                                file_extension = message.audio.file_name.split('.')[-1] if message.audio.file_name else "mp3"
+                            elif message.voice:
+                                file_to_download = message.voice
+                                file_extension = "ogg"
+                            elif message.document:
+                                file_to_download = message.document
+                                file_extension = message.document.file_name.split('.')[-1] if message.document.file_name else "mp3"
+                        
+                        if file_to_download:
+                            # Create unique file path
+                            file_path = os.path.join(download_folder, f"{query_hash}.{file_extension}")
+                            
+                            # Check if file already exists
+                            if os.path.exists(file_path):
+                                print(f"✅ File already exists in cache: {file_path}")
+                                return file_path
+                            
+                            # Download the file
+                            print(f"📥 Downloading from channel cache: {query}")
+                            await app.download_media(message, file_name=file_path)
+                            
+                            if os.path.exists(file_path):
+                                print(f"✅ Downloaded from channel cache: {file_path}")
+                                return file_path
+                            
+                except Exception as e:
+                    print(f"⚠️ Error getting/downloading message from channel: {e}")
+                    import traceback
+                    traceback.print_exc()
+                    # Message might be deleted, remove from DB
+                    try:
+                        await songs_db.delete_one({"query_hash": query_hash})
+                    except:
+                        pass
+        
+        return None
+    except Exception as e:
+        print(f"⚠️ Error checking channel cache: {e}")
+        import traceback
+        traceback.print_exc()
+        return None
+
+async def save_to_channel_cache(query: str, file_path: str, is_video: bool = False):
+    """Upload file to channel and save to MongoDB"""
+    try:
+        channel_id = VIDEO_CHANNEL_ID if is_video else AUDIO_CHANNEL_ID
+        query_hash = await get_song_hash(query, is_video)
+        
+        # Upload to channel
+        try:
+            if is_video:
+                message = await app.send_video(
+                    chat_id=channel_id,
+                    video=file_path,
+                    caption=f"🎵 {query}\n#Cached"
+                )
+            else:
+                message = await app.send_audio(
+                    chat_id=channel_id,
+                    audio=file_path,
+                    caption=f"🎵 {query}\n#Cached"
+                )
+            
+            message_id = message.id
+            
+            # Get file_id - refresh message to get updated file_id
+            try:
+                message = await app.get_messages(channel_id, message_id)
+                if is_video:
+                    file_id = message.video.file_id if message.video else (message.document.file_id if message.document else None)
+                else:
+                    file_id = message.audio.file_id if message.audio else (message.voice.file_id if message.voice else (message.document.file_id if message.document else None))
+            except:
+                file_id = None
+            
+            if message_id:
+                # Save to MongoDB
+                if songs_db:
+                    await songs_db.update_one(
+                        {"query_hash": query_hash},
+                        {
+                            "$set": {
+                                "query": query,
+                                "query_hash": query_hash,
+                                "message_id": message_id,
+                                "channel_id": channel_id,
+                                "file_id": file_id,
+                                "is_video": is_video,
+                                "created_at": time.time()
+                            }
+                        },
+                        upsert=True
+                    )
+                    print(f"✅ Saved to channel cache: {query} (Message ID: {message_id})")
+                    return file_id
+            
+        except Exception as e:
+            print(f"⚠️ Error uploading to channel: {e}")
+            return None
+        
+        return None
+    except Exception as e:
+        print(f"⚠️ Error saving to channel cache: {e}")
+        return None
+
+async def get_channel_file(file_id: str):
+    """Get file path from Telegram file_id"""
+    try:
+        # For Telegram files, we can use the file_id directly
+        # The file_id can be used in stream() function
+        return file_id
+    except Exception as e:
+        print(f"⚠️ Error getting channel file: {e}")
+        return None
 
 def cookie_txt_file():
     """Get a random cookie file from the cookies directory"""
@@ -1024,58 +1206,114 @@ class YouTubeAPI:
             x = yt_dlp.YoutubeDL(ydl_optssx)
             x.download([link])
 
-        # === MODIFIED DOWNLOAD LOGIC WITH SAAVN PRIORITY ===
+        # === MODIFIED DOWNLOAD LOGIC WITH CHANNEL CACHE PRIORITY ===
         if songvideo:
-            # Try Saavn first for song video
             query = title if title else link
-            saavn_url, saavn_info = await download_saavn_song(query)
-            if saavn_url:
-                print(f"✅ Downloaded from Saavn: {saavn_info['title']}")
-                return saavn_url, True
+            is_video = True
             
-            # Fallback to cookies first, then YouTube
+            # Step 1: Check channel cache first
+            print(f"🔍 Checking channel cache for video: {query}")
+            cached_file_id = await check_channel_cache(query, is_video)
+            if cached_file_id:
+                print(f"✅ Found in channel cache: {query}")
+                return cached_file_id, True
+            
+            # Step 2: Try yt-dlp with cookies FIRST (priority)
             cookie_file = cookie_txt_file()
             if cookie_file:
                 try:
-                    print(f"🍪 Trying cookies fallback for: {query}")
+                    print(f"🍪 Trying yt-dlp with cookies (FIRST PRIORITY) for: {query}")
                     downloaded_file = await download_with_cookies(link, cookie_file)
                     if downloaded_file and os.path.exists(downloaded_file):
+                        # Upload to channel cache
+                        cached_file_id = await save_to_channel_cache(query, downloaded_file, is_video)
+                        if cached_file_id:
+                            try:
+                                os.remove(downloaded_file)
+                            except:
+                                pass
+                            return cached_file_id, True
                         return downloaded_file, True
                 except Exception as e:
-                    print(f"⚠️ Cookies download failed: {e}")
+                    print(f"⚠️ yt-dlp cookies download failed: {e}")
             
-            # Final fallback to regular YouTube
+            # Step 3: Fallback to Saavn
+            print(f"📥 yt-dlp failed, trying Saavn for: {query}")
+            saavn_url, saavn_info = await download_saavn_song(query)
+            if saavn_url:
+                print(f"✅ Downloaded from Saavn: {saavn_info['title']}")
+                # If Saavn returns URL, return it (can't upload URL to channel)
+                return saavn_url, True
+            
+            # Step 4: Final fallback to regular YouTube download
             try:
+                print(f"📥 Saavn failed, trying regular YouTube download for: {query}")
                 downloaded_file = await download_song(link)
                 if downloaded_file and os.path.exists(downloaded_file):
+                    # Upload to channel cache
+                    cached_file_id = await save_to_channel_cache(query, downloaded_file, is_video)
+                    if cached_file_id:
+                        try:
+                            os.remove(downloaded_file)
+                        except:
+                            pass
+                        return cached_file_id, True
                     return downloaded_file, True
             except Exception as e:
                 print(f"⚠️ YouTube download failed: {e}")
             return None, None
             
         elif songaudio:
-            # Try Saavn first for song audio
             query = title if title else link
-            saavn_url, saavn_info = await download_saavn_song(query)
-            if saavn_url:
-                print(f"✅ Downloaded from Saavn: {saavn_info['title']}")
-                return saavn_url, True
+            is_video = False
             
-            # Fallback to cookies first, then YouTube
+            # Step 1: Check channel cache first
+            print(f"🔍 Checking channel cache for audio: {query}")
+            cached_file_id = await check_channel_cache(query, is_video)
+            if cached_file_id:
+                print(f"✅ Found in channel cache: {query}")
+                return cached_file_id, True
+            
+            # Step 2: Try yt-dlp with cookies FIRST (priority)
             cookie_file = cookie_txt_file()
             if cookie_file:
                 try:
-                    print(f"🍪 Trying cookies fallback for: {query}")
+                    print(f"🍪 Trying yt-dlp with cookies (FIRST PRIORITY) for: {query}")
                     downloaded_file = await download_with_cookies(link, cookie_file)
                     if downloaded_file and os.path.exists(downloaded_file):
+                        # Upload to channel cache
+                        cached_file_id = await save_to_channel_cache(query, downloaded_file, is_video)
+                        if cached_file_id:
+                            try:
+                                os.remove(downloaded_file)
+                            except:
+                                pass
+                            return cached_file_id, True
                         return downloaded_file, True
                 except Exception as e:
-                    print(f"⚠️ Cookies download failed: {e}")
+                    print(f"⚠️ yt-dlp cookies download failed: {e}")
             
-            # Final fallback to regular YouTube
+            # Step 3: Fallback to Saavn
+            print(f"📥 yt-dlp failed, trying Saavn for: {query}")
+            saavn_url, saavn_info = await download_saavn_song(query)
+            if saavn_url:
+                print(f"✅ Downloaded from Saavn: {saavn_info['title']}")
+                # If Saavn returns URL, return it (can't upload URL to channel)
+                return saavn_url, True
+            
+            # Step 4: Final fallback to regular YouTube download
             try:
+                print(f"📥 Saavn failed, trying regular YouTube download for: {query}")
                 downloaded_file = await download_song(link)
                 if downloaded_file and os.path.exists(downloaded_file):
+                    # Upload to channel cache
+                    cached_file_id = await save_to_channel_cache(query, downloaded_file, is_video)
+                    if cached_file_id:
+                        try:
+                            os.remove(downloaded_file)
+                        except:
+                            pass
+                        return cached_file_id, True
                     return downloaded_file, True
             except Exception as e:
                 print(f"⚠️ YouTube download failed: {e}")
@@ -1127,9 +1365,10 @@ class YouTubeAPI:
                    direct = True
                    downloaded_file = await loop.run_in_executor(None, video_dl)
         else:
-            # === MAIN LOGIC: YOUTUBE SEARCH + SAAVN PLAY ===
+            # === MAIN LOGIC: CHANNEL CACHE FIRST, THEN YOUTUBE SEARCH + SAAVN PLAY ===
             # Extract query from link or use as-is
             query = link
+            is_video = False  # Default to audio
             
             # If it's a YouTube URL, try to get title first
             if "youtube.com" in link or "youtu.be" in link:
@@ -1148,16 +1387,46 @@ class YouTubeAPI:
                 except:
                     query = link
             
-            # Use optimized top 1 search: YouTube top 1 + Jio Saavn play
+            # Step 1: Check channel cache first
+            print(f"🔍 Checking channel cache for: {query}")
+            cached_file_id = await check_channel_cache(query, is_video)
+            
+            if cached_file_id:
+                print(f"✅ Found in channel cache: {query}")
+                # Return file_id which can be used directly
+                return cached_file_id, True
+            
+            # Step 2: If not in cache, download and upload to channel
+            print(f"📥 Not in cache, downloading: {query}")
             print(f"🔍 Using optimized top 1 search for: {query}")
             download_url, song_info, is_saavn = await optimized_top1_youtube_saavn_play(query)
             
             if download_url:
-                if is_saavn:
-                    print(f"✅ Downloaded from Saavn: {song_info['title']} by {song_info['artist']}")
-                    return download_url, True
+                # If it's a file path (downloaded file), upload to channel
+                if isinstance(download_url, str) and os.path.exists(download_url):
+                    print(f"📤 Uploading to channel cache: {query}")
+                    cached_file_id = await save_to_channel_cache(query, download_url, is_video)
+                    if cached_file_id:
+                        print(f"✅ Uploaded to channel cache: {query}")
+                        # Clean up local file after upload
+                        try:
+                            os.remove(download_url)
+                        except:
+                            pass
+                        return cached_file_id, True
+                    else:
+                        # If upload failed, return local file
+                        if is_saavn:
+                            print(f"✅ Downloaded from Saavn: {song_info['title']} by {song_info['artist']}")
+                        else:
+                            print(f"✅ Downloaded from YouTube: {song_info['title']}")
+                        return download_url, True
                 else:
-                    print(f"✅ Downloaded from YouTube: {song_info['title']}")
+                    # If it's a URL (Saavn), return as is
+                    if is_saavn:
+                        print(f"✅ Downloaded from Saavn: {song_info['title']} by {song_info['artist']}")
+                    else:
+                        print(f"✅ Downloaded from YouTube: {song_info['title']}")
                     return download_url, True
             else:
                 print(f"❌ All methods failed for: {query}")
@@ -1192,25 +1461,8 @@ async def optimized_top1_youtube_saavn_play(query: str):
         
         print(f"📺 Top 1 YouTube result: {youtube_title}")
         
-        # Step 3: Try Jio Saavn API with the exact title
-        print(f"🔍 Trying Jio Saavn API with: {youtube_title}")
-        saavn_url, saavn_info = await download_saavn_song(youtube_title)
-        
-        if saavn_url:
-            print(f"✅ SUCCESS! Playing from Jio Saavn: {saavn_info['title']} by {saavn_info['artist']}")
-            return saavn_url, saavn_info, True
-        
-        # Step 4: If Saavn fails, try with cleaned title
-        print(f"🔍 Trying Jio Saavn with cleaned title...")
-        cleaned_title = clean_youtube_title_for_saavn(youtube_title)
-        saavn_url, saavn_info = await download_saavn_song(cleaned_title)
-        
-        if saavn_url:
-            print(f"✅ SUCCESS! Playing from Jio Saavn: {saavn_info['title']} by {saavn_info['artist']}")
-            return saavn_url, saavn_info, True
-        
-        # Step 5: Fallback to cookies (yt-dlp with cookies)
-        print(f"🔄 Jio Saavn not available, trying cookies fallback for: {youtube_title}")
+        # Step 3: Try yt-dlp with cookies FIRST (priority)
+        print(f"🍪 Trying yt-dlp with cookies (FIRST PRIORITY) for: {youtube_title}")
         print(f"📺 YouTube URL: {youtube_url}")
         
         try:
@@ -1225,22 +1477,39 @@ async def optimized_top1_youtube_saavn_play(query: str):
                         youtube_info = {
                             "title": youtube_title,
                             "artist": youtube_artist,
-                            "source": "YouTube (Cookies)",
+                            "source": "YouTube (yt-dlp)",
                             "quality": "High",
                             "duration": youtube_duration
                         }
-                        print(f"✅ Downloaded with cookies: {youtube_title}")
+                        print(f"✅ Downloaded with yt-dlp: {youtube_title}")
                         return downloaded_file, youtube_info, False
                     else:
-                        print("⚠️ Cookies download returned no file")
+                        print("⚠️ yt-dlp download returned no file")
                 except Exception as e:
-                    print(f"⚠️ Cookies download failed: {e}")
+                    print(f"⚠️ yt-dlp cookies download failed: {e}")
                     import traceback
                     traceback.print_exc()
             else:
-                print("⚠️ No cookies found, trying regular YouTube download")
+                print("⚠️ No cookies found, trying Saavn")
         except Exception as e:
             print(f"⚠️ Error getting cookie file: {e}")
+        
+        # Step 4: Fallback to Jio Saavn API with the exact title
+        print(f"🔍 yt-dlp failed, trying Jio Saavn API with: {youtube_title}")
+        saavn_url, saavn_info = await download_saavn_song(youtube_title)
+        
+        if saavn_url:
+            print(f"✅ SUCCESS! Playing from Jio Saavn: {saavn_info['title']} by {saavn_info['artist']}")
+            return saavn_url, saavn_info, True
+        
+        # Step 5: If Saavn fails, try with cleaned title
+        print(f"🔍 Trying Jio Saavn with cleaned title...")
+        cleaned_title = clean_youtube_title_for_saavn(youtube_title)
+        saavn_url, saavn_info = await download_saavn_song(cleaned_title)
+        
+        if saavn_url:
+            print(f"✅ SUCCESS! Playing from Jio Saavn: {saavn_info['title']} by {saavn_info['artist']}")
+            return saavn_url, saavn_info, True
         
         # Step 6: Final fallback to regular YouTube download
         print(f"🔄 Final fallback to regular YouTube download: {youtube_title}")
