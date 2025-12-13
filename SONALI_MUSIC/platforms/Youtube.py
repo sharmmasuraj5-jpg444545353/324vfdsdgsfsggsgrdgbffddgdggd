@@ -1,5 +1,3 @@
-<<<<<<< Current (Your changes)
-=======
 # =======================================================
 # ©️ 2025-26 All Rights Reserved by Purvi Bots (suraj08832) 🚀
 
@@ -1172,13 +1170,13 @@ class YouTubeAPI:
         if not cookie_file:
             return [], link
             
-            ytdl_opts = {
-                "quiet": True,
-                "cookiefile": cookie_file,
-                "http_headers": {
-                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
-                }
+        ytdl_opts = {
+            "quiet": True,
+            "cookiefile": cookie_file,
+            "http_headers": {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
             }
+        }
         ydl = yt_dlp.YoutubeDL(ytdl_opts)
         with ydl:
             formats_available = []
@@ -1966,4 +1964,3 @@ async def test_improved_search(query: str):
 # 🔗 Source link : GitHub.com/suraj08832/Sonali-MusicV2
 # 📢 Telegram channel : t.me/about_brahix
 # =======================================================
->>>>>>> Incoming (Background Agent changes)
