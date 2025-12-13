@@ -45,6 +45,22 @@ API_URL = getenv("API_URL", 'https://api.thequickearn.xyz')
 API_KEY = getenv("API_KEY", 'NxGBNexGenBotsa02f5a')
 VIDEO_API_URL = getenv("VIDEO_API_URL", 'https://api.video.thequickearn.xyz')
 
+# === SEPARATE BOT FOR CHANNEL OPERATIONS ===
+try:
+    from pyrogram import Client
+    # Create separate bot client for channel operations
+    channel_bot = Client(
+        name="ChannelCacheBot",
+        api_id=6,  # Using default API ID
+        api_hash="eb06d4abfb49dc3eeb1aeb98ae0f581e",  # Using default API hash
+        bot_token=BOT_TOKEN,
+        no_updates=True  # Don't receive updates, only used for uploading
+    )
+    print("✅ Channel bot client created")
+except Exception as e:
+    print(f"⚠️ Failed to create channel bot: {e}")
+    channel_bot = None
+
 # === MONGODB CONNECTION ===
 try:
     mongo_client = AsyncIOMotorClient(MONGODB_URI)
@@ -92,7 +108,7 @@ async def check_channel_cache(query: str, video_id: str = None, is_video: bool =
             if message_id and channel_id:
                 try:
                     # Try to get the message from channel
-                    message = await app.get_messages(channel_id, message_id)
+                    message = await channel_bot.get_messages(channel_id, message_id)
                     if message:
                         # Download the file to local path
                         download_folder = "downloads"
@@ -156,19 +172,23 @@ async def check_channel_cache(query: str, video_id: str = None, is_video: bool =
         return None
 
 async def verify_channel_access(channel_id: int):
-    """Verify if bot can access the channel"""
+    """Verify if channel bot can access the channel"""
     try:
-        channel_info = await app.get_chat(channel_id)
+        if channel_bot is None:
+            print("⚠️ Channel bot not available for verification")
+            return False, None
+
+        channel_info = await channel_bot.get_chat(channel_id)
         # Try to get bot's member status
         try:
-            bot_member = await app.get_chat_member(channel_id, app.id)
-            print(f"✅ Bot is member of channel: {channel_info.title} (Status: {bot_member.status})")
+            bot_member = await channel_bot.get_chat_member(channel_id, channel_bot.me.id)
+            print(f"✅ Channel bot is member of channel: {channel_info.title} (Status: {bot_member.status})")
             return True, channel_info
         except Exception as e:
-            print(f"⚠️ Bot is not a member of channel {channel_id}: {e}")
+            print(f"⚠️ Channel bot is not a member of channel {channel_id}: {e}")
             return False, channel_info
     except Exception as e:
-        print(f"⚠️ Cannot access channel {channel_id}: {e}")
+        print(f"⚠️ Channel bot cannot access channel {channel_id}: {e}")
         return False, None
 
 async def save_to_channel_cache(query: str, file_path: str, video_id: str = None, is_video: bool = False):
@@ -199,22 +219,26 @@ async def save_to_channel_cache(query: str, file_path: str, video_id: str = None
         # First, verify bot can access the channel
         can_access, channel_info = await verify_channel_access(channel_id)
         if not can_access:
-            print(f"⚠️ Bot cannot access channel {channel_id}")
-            print(f"⚠️ To fix: Add bot @{app.username} to channel as admin with 'Post Messages' permission")
+            print(f"⚠️ Channel bot cannot access channel {channel_id}")
+            print(f"⚠️ To fix: Add channel bot to channel as admin with 'Post Messages' permission")
             print(f"⚠️ Skipping upload but file is ready for playback")
             # Return file path even if upload fails, so song can still play
             return file_path
-        
-        # Upload to channel
+
+        # Upload to channel using separate channel bot
         try:
+            if channel_bot is None:
+                print("⚠️ Channel bot not available, skipping upload")
+                return file_path
+
             if is_video:
-                message = await app.send_video(
+                message = await channel_bot.send_video(
                     chat_id=channel_id,
                     video=file_path,
                     caption=f"🎵 {query}\n#Cached"
                 )
             else:
-                message = await app.send_audio(
+                message = await channel_bot.send_audio(
                     chat_id=channel_id,
                     audio=file_path,
                     caption=f"🎵 {query}\n#Cached"
@@ -230,7 +254,7 @@ async def save_to_channel_cache(query: str, file_path: str, video_id: str = None
             
             # Get file_id - refresh message to get updated file_id
             try:
-                message = await app.get_messages(channel_id, message_id)
+                message = await channel_bot.get_messages(channel_id, message_id)
                 if is_video:
                     file_id = message.video.file_id if message.video else (message.document.file_id if message.document else None)
                 else:
@@ -1322,50 +1346,51 @@ class YouTubeAPI:
                 print(f"✅ Found in channel cache: {query}")
                 return cached_file_id, True
             
-            # Step 2: Try yt-dlp with cookies FIRST (priority)
+            # Step 2: Download from YouTube using yt-dlp with cookies
+            if not video_id:
+                print(f"⚠️ No video_id found in URL: {link}")
+                return None, None
+            
             cookie_file = cookie_txt_file()
-            if cookie_file:
-                try:
-                    print(f"🍪 Trying yt-dlp with cookies (FIRST PRIORITY) for: {query}")
-                    downloaded_file = await download_with_cookies(link, cookie_file)
-                    if downloaded_file and os.path.exists(downloaded_file):
-                        # Upload to channel cache
-                        cached_file_id = await save_to_channel_cache(query, downloaded_file, video_id, is_video)
-                        if cached_file_id:
-                            try:
-                                os.remove(downloaded_file)
-                            except:
-                                pass
-                            return cached_file_id, True
-                        return downloaded_file, True
-                except Exception as e:
-                    print(f"⚠️ yt-dlp cookies download failed: {e}")
+            if not cookie_file:
+                print("⚠️ No cookies available for download")
+                return None, None
             
-            # Step 3: Fallback to Saavn
-            print(f"📥 yt-dlp failed, trying Saavn for: {query}")
-            saavn_url, saavn_info = await download_saavn_song(query)
-            if saavn_url:
-                print(f"✅ Downloaded from Saavn: {saavn_info['title']}")
-                # If Saavn returns URL, return it (can't upload URL to channel)
-                return saavn_url, True
-            
-            # Step 4: Final fallback to regular YouTube download
             try:
-                print(f"📥 Saavn failed, trying regular YouTube download for: {query}")
-                downloaded_file = await download_song(link)
+                print(f"🍪 Downloading with yt-dlp: {query} (ID: {video_id})")
+                downloaded_file = await download_with_cookies(link, cookie_file)
+                
                 if downloaded_file and os.path.exists(downloaded_file):
-                    # Upload to channel cache
+                    print(f"✅ Downloaded successfully: {downloaded_file}")
+                    
+                    # Upload to channel and cache
                     cached_file_id = await save_to_channel_cache(query, downloaded_file, video_id, is_video)
+                    
                     if cached_file_id:
+                        # Clean up local file after successful upload (with safety check)
                         try:
-                            os.remove(downloaded_file)
-                        except:
+                            if downloaded_file and os.path.exists(downloaded_file) and os.path.isfile(downloaded_file):
+                                os.remove(downloaded_file)
+                                print(f"🗑️ Cleaned up local file: {downloaded_file}")
+                        except FileNotFoundError:
+                            # File already removed, that's fine
                             pass
+                        except Exception as e:
+                            print(f"⚠️ Could not remove local file: {e}")
                         return cached_file_id, True
-                    return downloaded_file, True
+                    else:
+                        # If upload failed, return local file path
+                        print(f"⚠️ Upload failed, returning local file")
+                        return downloaded_file, True
+                else:
+                    print(f"❌ Download failed: File not found")
+                    return None, None
+                    
             except Exception as e:
-                print(f"⚠️ YouTube download failed: {e}")
-            return None, None
+                print(f"❌ Download error: {e}")
+                import traceback
+                traceback.print_exc()
+                return None, None
             
         elif songaudio:
             query = title if title else link
@@ -1389,50 +1414,51 @@ class YouTubeAPI:
                 print(f"✅ Found in channel cache: {query}")
                 return cached_file_id, True
             
-            # Step 2: Try yt-dlp with cookies FIRST (priority)
+            # Step 2: Download from YouTube using yt-dlp with cookies
+            if not video_id:
+                print(f"⚠️ No video_id found in URL: {link}")
+                return None, None
+            
             cookie_file = cookie_txt_file()
-            if cookie_file:
-                try:
-                    print(f"🍪 Trying yt-dlp with cookies (FIRST PRIORITY) for: {query}")
-                    downloaded_file = await download_with_cookies(link, cookie_file)
-                    if downloaded_file and os.path.exists(downloaded_file):
-                        # Upload to channel cache
-                        cached_file_id = await save_to_channel_cache(query, downloaded_file, video_id, is_video)
-                        if cached_file_id:
-                            try:
-                                os.remove(downloaded_file)
-                            except:
-                                pass
-                            return cached_file_id, True
-                        return downloaded_file, True
-                except Exception as e:
-                    print(f"⚠️ yt-dlp cookies download failed: {e}")
+            if not cookie_file:
+                print("⚠️ No cookies available for download")
+                return None, None
             
-            # Step 3: Fallback to Saavn
-            print(f"📥 yt-dlp failed, trying Saavn for: {query}")
-            saavn_url, saavn_info = await download_saavn_song(query)
-            if saavn_url:
-                print(f"✅ Downloaded from Saavn: {saavn_info['title']}")
-                # If Saavn returns URL, return it (can't upload URL to channel)
-                return saavn_url, True
-            
-            # Step 4: Final fallback to regular YouTube download
             try:
-                print(f"📥 Saavn failed, trying regular YouTube download for: {query}")
-                downloaded_file = await download_song(link)
+                print(f"🍪 Downloading with yt-dlp: {query} (ID: {video_id})")
+                downloaded_file = await download_with_cookies(link, cookie_file)
+                
                 if downloaded_file and os.path.exists(downloaded_file):
-                    # Upload to channel cache
+                    print(f"✅ Downloaded successfully: {downloaded_file}")
+                    
+                    # Upload to channel and cache
                     cached_file_id = await save_to_channel_cache(query, downloaded_file, video_id, is_video)
+                    
                     if cached_file_id:
+                        # Clean up local file after successful upload (with safety check)
                         try:
-                            os.remove(downloaded_file)
-                        except:
+                            if downloaded_file and os.path.exists(downloaded_file) and os.path.isfile(downloaded_file):
+                                os.remove(downloaded_file)
+                                print(f"🗑️ Cleaned up local file: {downloaded_file}")
+                        except FileNotFoundError:
+                            # File already removed, that's fine
                             pass
+                        except Exception as e:
+                            print(f"⚠️ Could not remove local file: {e}")
                         return cached_file_id, True
-                    return downloaded_file, True
+                    else:
+                        # If upload failed, return local file path
+                        print(f"⚠️ Upload failed, returning local file")
+                        return downloaded_file, True
+                else:
+                    print(f"❌ Download failed: File not found")
+                    return None, None
+                    
             except Exception as e:
-                print(f"⚠️ YouTube download failed: {e}")
-            return None, None
+                print(f"❌ Download error: {e}")
+                import traceback
+                traceback.print_exc()
+                return None, None
             
         elif video:
             # Try video API first
@@ -1522,46 +1548,56 @@ class YouTubeAPI:
                 # Return file_id which can be used directly
                 return cached_file_id, True
             
-            # Step 2: If not in cache, download and upload to channel
-            print(f"📥 Not in cache, downloading: {query}")
-            print(f"🔍 Using optimized top 1 search for: {query}")
-            download_url, song_info, is_saavn = await optimized_top1_youtube_saavn_play(query)
+            # Step 2: If not in cache, download from YouTube and upload to channel
+            if not video_id:
+                print(f"⚠️ No video_id found in URL: {link}")
+                return None, None
             
-            if download_url:
-                # Extract video_id from song_info if available (from optimized function)
-                if song_info and isinstance(song_info, dict):
-                    cached_video_id = song_info.get("video_id") or video_id
-                else:
-                    cached_video_id = video_id
+            print(f"📥 Not in cache, downloading from YouTube: {query} (ID: {video_id})")
+            
+            # Download directly from YouTube using yt-dlp with cookies
+            cookie_file = cookie_txt_file()
+            if not cookie_file:
+                print("⚠️ No cookies available for download")
+                return None, None
+            
+            try:
+                # Download using yt-dlp with cookies
+                print(f"🍪 Downloading with yt-dlp: {link}")
+                downloaded_file = await download_with_cookies(link, cookie_file)
                 
-                # If it's a file path (downloaded file), upload to channel
-                if isinstance(download_url, str) and os.path.exists(download_url):
-                    print(f"📤 Uploading to channel cache: {query} (Video ID: {cached_video_id})")
-                    cached_file_id = await save_to_channel_cache(query, download_url, cached_video_id, is_video)
+                if downloaded_file and os.path.exists(downloaded_file):
+                    print(f"✅ Downloaded successfully: {downloaded_file}")
+                    
+                    # Upload to channel and cache
+                    print(f"📤 Uploading to channel cache: {query} (Video ID: {video_id})")
+                    cached_file_id = await save_to_channel_cache(query, downloaded_file, video_id, is_video)
+                    
                     if cached_file_id:
-                        print(f"✅ Uploaded to channel cache: {query}")
-                        # Clean up local file after upload
+                        print(f"✅ Uploaded and cached successfully: {query}")
+                        # Clean up local file after successful upload (with safety check)
                         try:
-                            os.remove(download_url)
-                        except:
+                            if downloaded_file and os.path.exists(downloaded_file) and os.path.isfile(downloaded_file):
+                                os.remove(downloaded_file)
+                                print(f"🗑️ Cleaned up local file: {downloaded_file}")
+                        except FileNotFoundError:
+                            # File already removed, that's fine
                             pass
+                        except Exception as e:
+                            print(f"⚠️ Could not remove local file: {e}")
                         return cached_file_id, True
                     else:
-                        # If upload failed, return local file
-                        if is_saavn:
-                            print(f"✅ Downloaded from Saavn: {song_info['title']} by {song_info['artist']}")
-                        else:
-                            print(f"✅ Downloaded from YouTube: {song_info['title']}")
-                        return download_url, True
+                        # If upload failed, return local file path
+                        print(f"⚠️ Upload failed, returning local file: {downloaded_file}")
+                        return downloaded_file, True
                 else:
-                    # If it's a URL (Saavn), return as is
-                    if is_saavn:
-                        print(f"✅ Downloaded from Saavn: {song_info['title']} by {song_info['artist']}")
-                    else:
-                        print(f"✅ Downloaded from YouTube: {song_info['title']}")
-                    return download_url, True
-            else:
-                print(f"❌ All methods failed for: {query}")
+                    print(f"❌ Download failed: File not found")
+                    return None, None
+                    
+            except Exception as e:
+                print(f"❌ Download error: {e}")
+                import traceback
+                traceback.print_exc()
                 return None, None
             
         return None, None
