@@ -25,6 +25,8 @@ import glob
 import random
 import logging
 import aiohttp
+# Note: Configuration below is isolated in Youtube.py and NOT connected to config.py
+# This ensures independent operation of the channel caching system
 import config
 #from config import API_URL, VIDEO_API_URL, API_KEY
 from os import getenv
@@ -65,16 +67,23 @@ async def get_song_hash(query: str, is_video: bool = False):
     query_hash = hashlib.md5(f"{query_lower}_{'video' if is_video else 'audio'}".encode()).hexdigest()
     return query_hash
 
-async def check_channel_cache(query: str, is_video: bool = False):
+async def check_channel_cache(query: str, video_id: str = None, is_video: bool = False):
     """Check if song exists in MongoDB and Telegram channel, download and return file path"""
     try:
-        if not songs_db:
+        if songs_db is None:
             return None
         
-        query_hash = await get_song_hash(query, is_video)
+        # Use video_id/audio_id for caching instead of query hash
+        if video_id:
+            cache_key = video_id
+            search_field = "video_id" if is_video else "audio_id"
+        else:
+            # Fallback to query hash if no video_id provided
+            cache_key = await get_song_hash(query, is_video)
+            search_field = "query_hash"
         
         # Check MongoDB
-        song_data = await songs_db.find_one({"query_hash": query_hash})
+        song_data = await songs_db.find_one({search_field: cache_key})
         
         if song_data:
             message_id = song_data.get("message_id")
@@ -112,8 +121,9 @@ async def check_channel_cache(query: str, is_video: bool = False):
                                 file_extension = message.document.file_name.split('.')[-1] if message.document.file_name else "mp3"
                         
                         if file_to_download:
-                            # Create unique file path
-                            file_path = os.path.join(download_folder, f"{query_hash}.{file_extension}")
+                            # Create unique file path using video_id or cache_key
+                            file_name = video_id if video_id else cache_key
+                            file_path = os.path.join(download_folder, f"{file_name}.{file_extension}")
                             
                             # Check if file already exists
                             if os.path.exists(file_path):
@@ -134,7 +144,7 @@ async def check_channel_cache(query: str, is_video: bool = False):
                     traceback.print_exc()
                     # Message might be deleted, remove from DB
                     try:
-                        await songs_db.delete_one({"query_hash": query_hash})
+                        await songs_db.delete_one({search_field: cache_key})
                     except:
                         pass
         
@@ -145,11 +155,22 @@ async def check_channel_cache(query: str, is_video: bool = False):
         traceback.print_exc()
         return None
 
-async def save_to_channel_cache(query: str, file_path: str, is_video: bool = False):
+async def save_to_channel_cache(query: str, file_path: str, video_id: str = None, is_video: bool = False):
     """Upload file to channel and save to MongoDB"""
     try:
+        if songs_db is None:
+            return None
+            
         channel_id = VIDEO_CHANNEL_ID if is_video else AUDIO_CHANNEL_ID
-        query_hash = await get_song_hash(query, is_video)
+        
+        # Use video_id/audio_id for caching instead of query hash
+        if video_id:
+            cache_key = video_id
+            search_field = "video_id" if is_video else "audio_id"
+        else:
+            # Fallback to query hash if no video_id provided
+            cache_key = await get_song_hash(query, is_video)
+            search_field = "query_hash"
         
         # Upload to channel
         try:
@@ -179,24 +200,29 @@ async def save_to_channel_cache(query: str, file_path: str, is_video: bool = Fal
                 file_id = None
             
             if message_id:
-                # Save to MongoDB
-                if songs_db:
+                # Save to MongoDB - ONLY store video_id/audio_id, message_id, and channel_id
+                if songs_db is not None:
+                    # Minimal data structure - only what's needed for playback
+                    update_data = {
+                        "message_id": message_id,
+                        "channel_id": channel_id,
+                    }
+                    # Add the appropriate ID field (video_id or audio_id)
+                    if video_id:
+                        if is_video:
+                            update_data["video_id"] = video_id
+                        else:
+                            update_data["audio_id"] = video_id
+                    else:
+                        # Fallback: use query_hash if no video_id available
+                        update_data["query_hash"] = cache_key
+                    
                     await songs_db.update_one(
-                        {"query_hash": query_hash},
-                        {
-                            "$set": {
-                                "query": query,
-                                "query_hash": query_hash,
-                                "message_id": message_id,
-                                "channel_id": channel_id,
-                                "file_id": file_id,
-                                "is_video": is_video,
-                                "created_at": time.time()
-                            }
-                        },
+                        {search_field: cache_key},
+                        {"$set": update_data},
                         upsert=True
                     )
-                    print(f"✅ Saved to channel cache: {query} (Message ID: {message_id})")
+                    print(f"✅ Saved to channel cache: {query} (ID: {cache_key}, Message ID: {message_id})")
                     return file_id
             
         except Exception as e:
@@ -261,25 +287,30 @@ def create_hardcoded_cookie_file():
     try:
         # Hardcoded YouTube cookies for better quality downloads
         cookie_content = """# Netscape HTTP Cookie File
-# http://curl.haxx.se/rfc/cookie_spec.html
-# This is a generated file!  Do not edit.
+# https://curl.haxx.se/rfc/cookie_spec.html
+# This is a generated file! Do not edit.
 
-.youtube.com	TRUE	/	TRUE	1794632634	PREF	f6=40000000&f7=100&tz=Asia.Calcutta&f5=20000
-.youtube.com	TRUE	/	FALSE	1793529529	SID	g.a0001wi6wSDBfsN6vcJLr0MX2kS5AG6CDqm9fCkb22kCzGmOdRbREFX0M7G-9tGb0gPi1XBEHQACgYKAQASARYSFQHGX2MiiBdj1JxWjjI5KhfrU2_bgBoVAUF8yKpHYS2sXDhgy8-wqQGdO66Y0076
-.youtube.com	TRUE	/	TRUE	1790505529	__Secure-1PSIDTS	sidts-CjQBmkD5S0Tr41iJg43xhzU_a2Rb57BplSDRMIoGc6m2q8SphoMEjii1RgkfDyU9ahIS_7guEAA
-.youtube.com	TRUE	/	TRUE	1790505529	__Secure-3PSIDTS	sidts-CjQBmkD5S0Tr41iJg43xhzU_a2Rb57BplSDRMIoGc6m2q8SphoMEjii1RgkfDyU9ahIS_7guEAA
-.youtube.com	TRUE	/	TRUE	1793529529	__Secure-1PSID	g.a0001wi6wSDBfsN6vcJLr0MX2kS5AG6CDqm9fCkb22kCzGmOdRbR-xZc3oK8TgxZV6S1xmu84QACgYKAYESARYSFQHGX2Mi9ccw8lD91Mrzx4NHV_uz6BoVAUF8yKqLNVFcv4fUN9d5-aAV4i4u0076
-.youtube.com	TRUE	/	TRUE	1793529529	__Secure-3PSID	g.a0001wi6wSDBfsN6vcJLr0MX2kS5AG6CDqm9fCkb22kCzGmOdRbRMRwmhTfQy-35oV7JTif1xgACgYKAXcSARYSFQHGX2Mih8w9IZV8MAwMrFlWI16csBoVAUF8yKoo55dnJiqtNY1vxh1vyvyY0076
-.youtube.com	TRUE	/	FALSE	1793529529	HSID	A8tIMy1pL2zsiUr3W
-.youtube.com	TRUE	/	TRUE	1793529529	SSID	AjyQy9ZZ8206bls-Z
-.youtube.com	TRUE	/	FALSE	1793529529	APISID	YxaNUiE1o8pWzd0I/AEtYQR5dgiwScw3Z7
-.youtube.com	TRUE	/	TRUE	1793529529	SAPISID	y-Gb9C-0HOYskEXh/AWzDC741JiiNu3f0b
-.youtube.com	TRUE	/	TRUE	1793529529	__Secure-1PAPISID	y-Gb9C-0HOYskEXh/AWzDC741JiiNu3f0b
-.youtube.com	TRUE	/	TRUE	1793529529	__Secure-3PAPISID	y-Gb9C-0HOYskEXh/AWzDC741JiiNu3f0b
-.youtube.com	TRUE	/	TRUE	1794632626	LOGIN_INFO	AFmmF2swRQIhAJWsuoWEjADYflK6-W7gZBe13y1bjjfbfKjaPpTw_BYRAiBe5vjjWnZNW5nRrFapAwJzHxVyZphPW1BaefvLTEWQxw:QUQ3MjNmeVIxMmx1Z3lqWVJnYVllTkxZRmt2MWJRWktTbFBENUZEazhMS0pmNy0xWHFIeXgtZ2lqOGZsUXhMc0x2OV9sZHhHQWlyeUw0M3pWajFOcklPTDdKRGxtZFJtbnl3d1R6TFNmTGstbEx2RjVKVkVTTTZqOHMzbXJONjA4TFRHOU8zT2tOQlQ2LW9lTWZoVDVpOHhWbUlHeGdVOGR3
-.youtube.com	TRUE	/	FALSE	1791608631	SIDCC	AKEyXzWTMZr4AMyVXEwg6JStjCBoEcfi4odZpk1vsn6mpujYFyApVARFz1pvpOM0wFIJMYqi
-.youtube.com	TRUE	/	TRUE	1791608631	__Secure-1PSIDCC	AKEyXzUD77bZQkqggckam6dWAqiWtdNsSZGWxIwMy9d0stJVQ2CIml_hjMraLfBKQYD7FDNtZA
-.youtube.com	TRUE	/	TRUE	1791608631	__Secure-3PSIDCC	AKEyXzUdw7dVlMWay_bEDjQT9rasPnIX2OY1Gt6ABVGyJhktqREEdGNG0pdcgz7TDgbPUlQMeg"""
+.youtube.com	TRUE	/	TRUE	1770704847	LOGIN_INFO	AFmmF2swRQIgNGkDUBtCGpbyrghQT0tWFpfMQPS9KCEUpPODMlPNIWwCIQC2CBWceu81MCBsWB4Baw1pf3SqA_5D22GW3jbouhSGZA:QUQ3MjNmemtob3JkZ05YZ2lrUGpIbVBwRXk2ZHFrb0VtRzdIZ2tmaHFqeUZBeGxBdko5MzZvT0lCWXZkbFZwd0RyNkVqb1d6WVVkb0sxdFRUWEZhX0h2dTlfUHlXN2hkVElINzdhMEk2TUNGWnNMNDdCRnQ5WGU5ZWZXazhwOUJTMHpQYmVkRmpacy1UTk0yc2xtZFRBUGFCM2JTNi1hSzZB
+.youtube.com	TRUE	/	TRUE	1781160556	PREF	f4=4000000&tz=Asia.Calcutta&f7=100
+.youtube.com	TRUE	/	FALSE	1779360012	SID	g.a0003wjx1OxwERsi_jbYPTIgq4HWJZWqSvbIgLzwU6GALLBWI7sOIV4WHWrMyrhBGGVIaxPaqQACgYKAWISARESFQHGX2MiAhyUvJjR4x9yVvq6Nj9D2BoVAUF8yKqnAtflZguLc0drrBiCNZD-0076
+.youtube.com	TRUE	/	TRUE	1779360012	__Secure-1PSID	g.a0003wjx1OxwERsi_jbYPTIgq4HWJZWqSvbIgLzwU6GALLBWI7sO1aXec3YHL17L_XxHS8KFeQACgYKAUASARESFQHGX2Mi2NGsBkJi3Nk2Yi1rfEHh8BoVAUF8yKot0caG26LpEjagNX1V6mjD0076
+.youtube.com	TRUE	/	TRUE	1779360012	__Secure-3PSID	g.a0003wjx1OxwERsi_jbYPTIgq4HWJZWqSvbIgLzwU6GALLBWI7sO4-dinAqQInep8HXKTn1RrAACgYKASMSARESFQHGX2MiBRQO7NU5IsFh3ibcSGMBGRoVAUF8yKp5SyVc86pe_33LJF1xDdmU0076
+.youtube.com	TRUE	/	FALSE	1779360012	HSID	AZ6Ss-N5G7ikI8GJG
+.youtube.com	TRUE	/	TRUE	1779360012	SSID	ANr7N4jTducFotrlc
+.youtube.com	TRUE	/	FALSE	1779360012	APISID	E8SWJGBv2CN8NCd7/AWI75uMLfeTuF5AO3
+.youtube.com	TRUE	/	TRUE	1779360012	SAPISID	BSwotq3K_osWdRba/AJ07-3YcjI9m_ZicB
+.youtube.com	TRUE	/	TRUE	1779360012	__Secure-1PAPISID	BSwotq3K_osWdRba/AJ07-3YcjI9m_ZicB
+.youtube.com	TRUE	/	TRUE	1779360012	__Secure-3PAPISID	BSwotq3K_osWdRba/AJ07-3YcjI9m_ZicB
+.youtube.com	TRUE	/	TRUE	0	wide	1
+.youtube.com	TRUE	/	TRUE	1781160560	__Secure-1PSIDTS	sidts-CjQBflaCda5UDMRpmhLDfRKeul_B_rU9Kp5XeFYxMali2_aakpicRAA76i5xKyCkbJCYiUksEAA
+.youtube.com	TRUE	/	TRUE	1781160560	__Secure-3PSIDTS	sidts-CjQBflaCda5UDMRpmhLDfRKeul_B_rU9Kp5XeFYxMali2_aakpicRAA76i5xKyCkbJCYiUksEAA
+.youtube.com	TRUE	/	FALSE	1781160562	SIDCC	AKEyXzVCigEPPJxYXggHO1Zu0pLtL0s_HshdjYR1oT1lnjJDDK4GPLSJU0y272LKxxsHMlC477Y
+.youtube.com	TRUE	/	TRUE	1781160562	__Secure-1PSIDCC	AKEyXzVEAmZ6hj8C15lFDaouGEqJlQ2Ou8jWZvQ2FFYaTfDsJf4ktznmNUKk4xUYbluYCrMqKQ
+.youtube.com	TRUE	/	TRUE	1781160562	__Secure-3PSIDCC	AKEyXzVp1wOYBIMqdsUlVupQHB8gCior8H94CwOQn79njpC4gq_0aFWUbuapPHouj5TK3os7rjU
+.youtube.com	TRUE	/	TRUE	1781160562	VISITOR_INFO1_LIVE	bm_Jiq98kyw
+.youtube.com	TRUE	/	TRUE	1781160562	VISITOR_PRIVACY_METADATA	CgJJThIEGgAgTA%3D%3D
+.youtube.com	TRUE	/	TRUE	1781095671	__Secure-ROLLOUT_TOKEN	CO_2k4e6_-LopgEQ6dPNo5bzigMYs4y024q4kQM%3D
+.youtube.com	TRUE	/	TRUE	0	YSC	fePyUxJCWXI"""
         
         # Create cookies directory if it doesn't exist
         cookie_dir = f"{os.getcwd()}/cookies"
@@ -1211,9 +1242,20 @@ class YouTubeAPI:
             query = title if title else link
             is_video = True
             
+            # Extract video_id from link
+            video_id = None
+            try:
+                if "youtube.com" in link or "youtu.be" in link:
+                    if "v=" in link:
+                        video_id = link.split('v=')[-1].split('&')[0]
+                    elif "youtu.be/" in link:
+                        video_id = link.split('youtu.be/')[-1].split('?')[0]
+            except:
+                pass
+            
             # Step 1: Check channel cache first
-            print(f"🔍 Checking channel cache for video: {query}")
-            cached_file_id = await check_channel_cache(query, is_video)
+            print(f"🔍 Checking channel cache for video: {query} (ID: {video_id})")
+            cached_file_id = await check_channel_cache(query, video_id, is_video)
             if cached_file_id:
                 print(f"✅ Found in channel cache: {query}")
                 return cached_file_id, True
@@ -1251,7 +1293,7 @@ class YouTubeAPI:
                 downloaded_file = await download_song(link)
                 if downloaded_file and os.path.exists(downloaded_file):
                     # Upload to channel cache
-                    cached_file_id = await save_to_channel_cache(query, downloaded_file, is_video)
+                    cached_file_id = await save_to_channel_cache(query, downloaded_file, video_id, is_video)
                     if cached_file_id:
                         try:
                             os.remove(downloaded_file)
@@ -1267,9 +1309,20 @@ class YouTubeAPI:
             query = title if title else link
             is_video = False
             
+            # Extract video_id/audio_id from link
+            video_id = None
+            try:
+                if "youtube.com" in link or "youtu.be" in link:
+                    if "v=" in link:
+                        video_id = link.split('v=')[-1].split('&')[0]
+                    elif "youtu.be/" in link:
+                        video_id = link.split('youtu.be/')[-1].split('?')[0]
+            except:
+                pass
+            
             # Step 1: Check channel cache first
-            print(f"🔍 Checking channel cache for audio: {query}")
-            cached_file_id = await check_channel_cache(query, is_video)
+            print(f"🔍 Checking channel cache for audio: {query} (ID: {video_id})")
+            cached_file_id = await check_channel_cache(query, video_id, is_video)
             if cached_file_id:
                 print(f"✅ Found in channel cache: {query}")
                 return cached_file_id, True
@@ -1282,7 +1335,7 @@ class YouTubeAPI:
                     downloaded_file = await download_with_cookies(link, cookie_file)
                     if downloaded_file and os.path.exists(downloaded_file):
                         # Upload to channel cache
-                        cached_file_id = await save_to_channel_cache(query, downloaded_file, is_video)
+                        cached_file_id = await save_to_channel_cache(query, downloaded_file, video_id, is_video)
                         if cached_file_id:
                             try:
                                 os.remove(downloaded_file)
@@ -1307,7 +1360,7 @@ class YouTubeAPI:
                 downloaded_file = await download_song(link)
                 if downloaded_file and os.path.exists(downloaded_file):
                     # Upload to channel cache
-                    cached_file_id = await save_to_channel_cache(query, downloaded_file, is_video)
+                    cached_file_id = await save_to_channel_cache(query, downloaded_file, video_id, is_video)
                     if cached_file_id:
                         try:
                             os.remove(downloaded_file)
@@ -1387,9 +1440,20 @@ class YouTubeAPI:
                 except:
                     query = link
             
+            # Extract video_id from link
+            video_id = None
+            try:
+                if "youtube.com" in link or "youtu.be" in link:
+                    if "v=" in link:
+                        video_id = link.split('v=')[-1].split('&')[0]
+                    elif "youtu.be/" in link:
+                        video_id = link.split('youtu.be/')[-1].split('?')[0]
+            except:
+                pass
+            
             # Step 1: Check channel cache first
-            print(f"🔍 Checking channel cache for: {query}")
-            cached_file_id = await check_channel_cache(query, is_video)
+            print(f"🔍 Checking channel cache for: {query} (ID: {video_id})")
+            cached_file_id = await check_channel_cache(query, video_id, is_video)
             
             if cached_file_id:
                 print(f"✅ Found in channel cache: {query}")
@@ -1405,7 +1469,7 @@ class YouTubeAPI:
                 # If it's a file path (downloaded file), upload to channel
                 if isinstance(download_url, str) and os.path.exists(download_url):
                     print(f"📤 Uploading to channel cache: {query}")
-                    cached_file_id = await save_to_channel_cache(query, download_url, is_video)
+                    cached_file_id = await save_to_channel_cache(query, download_url, video_id, is_video)
                     if cached_file_id:
                         print(f"✅ Uploaded to channel cache: {query}")
                         # Clean up local file after upload
