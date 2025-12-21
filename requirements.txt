@@ -1,7 +1,6 @@
 aiofiles
-bard
 SpeechRecognition
-aiohttp 
+aiohttp
 asyncio
 deepai
 python-whois
@@ -11,11 +10,10 @@ gitpython
 hachoir
 Faker
 pydub
-#lottie==3.5.5
 pycountry
 heroku3
 apscheduler
-motor 
+motor
 numpy
 pillow==9.5.0
 psutil
@@ -27,7 +25,6 @@ search_engine_parser
 py-tgcalls==0.9.7
 pykeyboard
 pyshorteners
-#pyrogram==2.0.106
 pyrofork
 python-dotenv
 pyyaml==6.0.1
@@ -44,14 +41,13 @@ youtube-search-python
 gtts
 git+https://github.com/AsmSafone/SafoneAPI
 lexica-api==1.5.1
-httpx
+httpx>=0.28.1
 gpytranslate
 openai==0.28.0
 pickledb
 python-telegram-bot
 pycryptodome
 opencv-python
-bing-image-urls
 bing_image_downloader
 googlesearch-python
 sympy
