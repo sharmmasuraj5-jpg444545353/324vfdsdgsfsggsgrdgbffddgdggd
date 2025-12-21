@@ -11,9 +11,8 @@ from typing import Union
 from pyrogram.enums import MessageEntityType
 from pyrogram.types import Message
 from py_yt import VideosSearch, Playlist
-from SONALI.utils.database import is_on_off
-from SONALI.utils.formatters import time_to_seconds
-
+from SONALI_MUSIC.utils.database import is_on_off
+from SONALI_MUSIC.utils.formatters import time_to_seconds
 API_URL = getenv("API_URL", 'https://api.nexgenbots.xyz')
 VIDEO_API_URL = getenv("VIDEO_API_URL", 'https://api.video.nexgenbots.xyz')
 API_KEY = getenv("API_KEY", '30DxNexGenBotsf1b0a1') 
