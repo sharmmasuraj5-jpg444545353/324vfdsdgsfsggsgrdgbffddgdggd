@@ -1,26 +1,23 @@
-import asyncio
 import os
 import re
 import json
-from typing import Union
-import requests
 import yt_dlp
-from pyrogram.enums import MessageEntityType
-from pyrogram.types import Message
-from youtubesearchpython.__future__ import VideosSearch
-from SONALI_MUSIC.utils.database import is_on_off
-from SONALI_MUSIC.utils.formatters import time_to_seconds
-import os
-import glob
 import random
 import logging
 import aiohttp
-import config
+import asyncio
 from os import getenv
+from typing import Union
+from pyrogram.enums import MessageEntityType
+from pyrogram.types import Message
+from py_yt import VideosSearch, Playlist
+from SONALI.utils.database import is_on_off
+from SONALI.utils.formatters import time_to_seconds
 
-API_URL = getenv("API_URL", 'https://pytdbotapi.thequickearn.xyz')
-API_KEY = getenv("API_KEY", 'YOUR_KEY')
-VIDEO_API_URL = getenv("VIDEO_API_URL", 'https://api.video.thequickearn.xyz')
+API_URL = getenv("API_URL", 'https://api.nexgenbots.xyz')
+VIDEO_API_URL = getenv("VIDEO_API_URL", 'https://api.video.nexgenbots.xyz')
+API_KEY = getenv("API_KEY", '30DxNexGenBotsf1b0a1') 
+
 
 def cookie_txt_file():
     cookie_dir = f"{os.getcwd()}/cookies"
@@ -40,7 +37,6 @@ async def download_song(link: str):
     for ext in ["mp3", "m4a", "webm"]:
         file_path = f"{download_folder}/{video_id}.{ext}"
         if os.path.exists(file_path):
-            #print(f"File already exists: {file_path}")
             return file_path
         
     song_url = f"{API_URL}/song/{video_id}?api={API_KEY}"
@@ -251,7 +247,10 @@ class YouTubeAPI:
                         return entity.url
         if offset in (None,):
             return None
-        return text[offset : offset + length]
+        umm = text[offset : offset + length]
+        if "?si=" in umm:
+            umm = umm.split("?si=")[0]
+        return umm
 
     async def details(self, link: str, videoid: Union[bool, str] = None):
         if videoid:
@@ -338,24 +337,21 @@ class YouTubeAPI:
     async def playlist(self, link, limit, user_id, videoid: Union[bool, str] = None):
         if videoid:
             link = self.listbase + link
-        if "&" in link:
-            link = link.split("&")[0]
-        
-        cookie_file = cookie_txt_file()
-        if not cookie_file:
-            return []
-            
-        playlist = await shell_cmd(
-            f"yt-dlp -i --get-id --flat-playlist --cookies {cookie_file} --playlist-end {limit} --skip-download {link}"
-        )
         try:
-            result = playlist.split("\n")
-            for key in result:
-                if key == "":
-                    result.remove(key)
+            plist = await Playlist.get(link)
         except:
-            result = []
-        return result
+            return []
+
+        videos = plist.get("videos") or []
+        ids: list[str] = []
+        for data in videos[:limit]:
+            if not data:
+                continue
+            vid = data.get("id")
+            if not vid:
+                continue
+            ids.append(vid)
+        return ids
 
     async def track(self, link: str, videoid: Union[bool, str] = None):
         if videoid:
@@ -599,11 +595,3 @@ class YouTubeAPI:
             direct = True
             downloaded_file = await download_song(link)
         return downloaded_file, direct
-
- # ======================================================
-# ©️ 2025-26 All Rights Reserved by Purvi Bots (Im-Notcoder) 😎
-
-# 🧑‍💻 Developer : t.me/TheSigmaCoder
-# 🔗 Source link : GitHub.com/Im-Notcoder/Sonali-MusicV2
-# 📢 Telegram channel : t.me/Purvi_Bots
-# =======================================================
