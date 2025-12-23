@@ -32,7 +32,7 @@ HEROKU_API_KEY = getenv("HEROKU_API_KEY")
 UPSTREAM_REPO = getenv("UPSTREAM_REPO", "https://github.com/Suraj08832/heeriye",)
 UPSTREAM_BRANCH = getenv("UPSTREAM_BRANCH", "main")
 
-GIT_TOKEN = getenv("GIT_TOKEN", "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")
+GIT_TOKEN = getenv("GIT_TOKEN", "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")
 
 # -------------------- [ LOGGER & LINKS ] --------------------
 
