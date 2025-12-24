@@ -1,6 +1,10 @@
 import asyncio
+import os
 import shlex
 from typing import Tuple
+
+# Set GitPython to quiet mode to suppress git executable warnings
+os.environ.setdefault('GIT_PYTHON_REFRESH', 'quiet')
 
 try:
     from git import Repo
