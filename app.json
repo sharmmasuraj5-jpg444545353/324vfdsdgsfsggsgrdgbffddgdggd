@@ -56,6 +56,11 @@
         "description": "Your Log Group ID, add your bot and promote as an admin with full rights!. Channel ki id mat daal dena bsdk.",
         "value": "",
         "required": true
+      },
+      "GIT_PYTHON_REFRESH": {
+        "description": "GitPython refresh setting to suppress git executable warnings",
+        "value": "quiet",
+        "required": false
       }
     },
     "buildpacks": [
@@ -67,6 +72,9 @@
           },
           {
               "url": "https://github.com/jonathanong/heroku-buildpack-ffmpeg-latest.git"
+          },
+          {
+              "url": "https://github.com/heroku/heroku-buildpack-git.git"
           }
       ],
       "stack": "container"

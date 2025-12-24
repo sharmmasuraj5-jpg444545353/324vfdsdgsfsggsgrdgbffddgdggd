@@ -2,8 +2,15 @@ import asyncio
 import shlex
 from typing import Tuple
 
-from git import Repo
-from git.exc import GitCommandError, InvalidGitRepositoryError
+try:
+    from git import Repo
+    from git.exc import GitCommandError, InvalidGitRepositoryError
+    GIT_AVAILABLE = True
+except ImportError:
+    GIT_AVAILABLE = False
+    Repo = None
+    GitCommandError = Exception
+    InvalidGitRepositoryError = Exception
 
 import config
 
@@ -30,6 +37,10 @@ def install_req(cmd: str) -> Tuple[str, str, int, int]:
 
 
 def git():
+    if not GIT_AVAILABLE:
+        LOGGER(__name__).warning("Git is not available on this system. Skipping git operations.")
+        return
+
     REPO_LINK = config.UPSTREAM_REPO
     if config.GIT_TOKEN:
         GIT_USERNAME = REPO_LINK.split("com/")[1].split("/")[0]
