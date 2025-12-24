@@ -17,7 +17,7 @@ INFO_TEXT = """
 <b>● ᴘʀᴇᴍɪᴜᴍ ➠</b> {premium}
 <b>● ꜱᴄᴀᴍ ➠</b> {scam}
 
-<b>● ᴘᴏᴡᴇʀᴇᴅ ʙʏ ➠ <a href="https://t.me/about_brahix">𝐁𝐑𝐀𝐇𝐈𝐗 -ʙᴏᴛꜱ</a></b>
+<b>● ᴘᴏᴡᴇʀᴇᴅ ʙʏ ➠ <a href="https://t.me/Hexanerve_core">�꯭꯭𝐇͟ᴇ꯭𝐗꯭͟ᴀ꯭ɴ꯭ᴇ꯭Ʀ꯭ᴠ꯭ᴇ꯭𝆺꯭𝅥🎭 -ʙᴏᴛꜱ</a></b>
 """
 
 

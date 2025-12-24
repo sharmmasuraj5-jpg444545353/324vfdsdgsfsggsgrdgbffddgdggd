@@ -16,10 +16,10 @@ BOT_TOKEN = getenv("BOT_TOKEN")
 # -------------------- [ OWNER & BOT INFO ] --------------------
 
 OWNER_ID = int(getenv("OWNER_ID", 7727943403))
-OWNER_USERNAME = getenv("OWNER_USERNAME", "brahix")
+OWNER_USERNAME = getenv("OWNER_USERNAME", "Hexanerve")
 
-BOT_USERNAME = getenv("BOT_USERNAME", "saregama_musics_bot")
-BOT_NAME = getenv("BOT_NAME", "˹𝐌𝛊𝛕ຮ𝛖𝐫𝛊 𝐌𝛖ຮ𝛊𝛓⚡️˼ ♪")
+BOT_USERNAME = getenv("BOT_USERNAME", "Destiny_musicsbot")
+BOT_NAME = getenv("BOT_NAME", "˹🦋⃟������� ♪")
 ASSUSERNAME = getenv("ASSUSERNAME", "Sonali")
 
 # -------------------- [ DATABASE / HEROKU / REPO ] --------------------
@@ -38,9 +38,9 @@ GIT_TOKEN = getenv("GIT_TOKEN", "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")
 
 LOGGER_ID = int(getenv("LOGGER_ID", -1002933652916))
 
-PRIVACY_LINK = getenv("PRIVACY_LINK", "https://telegra.ph/Privacy-Policy-for-YukkiMusic-08-30")
-SUPPORT_CHANNEL = getenv("SUPPORT_CHANNEL", "https://t.me/about_brahix")
-SUPPORT_CHAT = getenv("SUPPORT_CHAT", "https://t.me/brahix_support")
+PRIVACY_LINK = getenv("PRIVACY_LINK", "https://graph.org/PRIVACY-POLICY--HEXANERVE-BOTS-12-24")
+SUPPORT_CHANNEL = getenv("SUPPORT_CHANNEL", "https://t.me/Hexanerve_core")
+SUPPORT_CHAT = getenv("SUPPORT_CHAT", "https://t.me/hexanerve_group")
 
 # -------------------- [ LIMITS & TIME SETTINGS ] --------------------
 

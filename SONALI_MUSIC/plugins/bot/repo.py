@@ -6,7 +6,7 @@ from SONALI_MUSIC.utils.errors import capture_err
 import httpx 
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
-start_txt = """**<u>❃ 𝐁𝐑𝐀𝐇𝐈𝐗  ʙᴏᴛs ʀєᴘσs ❃</u>
+start_txt = """**<u>❃ �꯭꯭𝐇͟ᴇ꯭𝐗꯭͟ᴀ꯭ɴ꯭ᴇ꯭Ʀ꯭ᴠ꯭ᴇ꯭𝆺꯭𝅥🎭  ʙᴏᴛs ʀєᴘσs ❃</u>
 
 ✼ ʀєᴘᴏ ɪs ηᴏᴡ ᴘʀɪᴠᴧᴛє ᴅᴜᴅє 😌
  
@@ -24,7 +24,7 @@ start_txt = """**<u>❃ 𝐁𝐑𝐀𝐇𝐈𝐗  ʙᴏᴛs ʀєᴘσs ❃</u>
 async def start(_, msg):
     buttons = [
     [
-        InlineKeyboardButton("• 𝐁𝐑𝐀𝐇𝐈𝐗  ᴍᴜsɪᴄ •", url="https://github.com/suraj08832/PURVI_MUSIC"),
+        InlineKeyboardButton("• �꯭꯭𝐇͟ᴇ꯭𝐗꯭͟ᴀ꯭ɴ꯭ᴇ꯭Ʀ꯭ᴠ꯭ᴇ꯭𝆺꯭𝅥🎭  ᴍᴜsɪᴄ •", url="https://github.com/suraj08832/PURVI_MUSIC"),
         InlineKeyboardButton("• sᴏɴᴀʟɪ ᴍᴜsɪᴄ •", url="https://github.com/suraj08832/SONALI_MUSIC")
     ],
     [

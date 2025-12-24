@@ -2,7 +2,7 @@
   <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif"/>
 </p>
 
-<h1 align="center">─「 brahix ᴍᴜsɪᴄ 」─</h1>
+<h1 align="center">─「 Hexanerve ᴍᴜsɪᴄ 」─</h1>
 
 <p align="center">
   <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif"/>
@@ -21,7 +21,7 @@
 </p>
 
 <p align="center">
-  <a href="https://dashboard.heroku.com/new?template=https://github.com/Suraj08832/brahix_music ">
+  <a href="https://dashboard.heroku.com/new?template=https://github.com/Suraj08832/Hexanerve_music ">
     <img src="https://img.shields.io/badge/Deploy%20On%20Heroku-8A2BE2?style=for-the-badge&logo=heroku" width="230" height="40"/>
   </a>
 </p>
@@ -51,7 +51,7 @@
    ```
  6. **📥 ᴄʟᴏɴᴇ ᴛʜᴇ ʀᴇᴘᴏsɪᴛᴏʀʏ**
    ```bash
-   git clone https://github.com/Suraj08832/brahix_music  && cd SonaliV2
+   git clone https://github.com/Suraj08832/Hexanerve_music  && cd SonaliV2
    ```
  7. **📂 ɪɴsᴛᴀʟʟ ʀᴇǫᴜɪʀᴇᴍᴇɴᴛs**
    ```bash
@@ -90,12 +90,12 @@
 
 <p align="center">  
   <!-- Dev -->  
-  <a href="https://t.me/brahix">  
+  <a href="https://t.me/Hexanerve">  
     <img src="https://img.shields.io/badge/ᴅᴇᴠ-ᴀʟᴘʜᴀ-ff9800?style=for-the-badge&logo=telegram&logoColor=white"/> 
   </a>  
 
   <!-- Purvi Bots -->    
-  <a href="https://t.me/about_brahix">  
+  <a href="https://t.me/Hexanerve_core">  
     <img src="https://img.shields.io/badge/ᴘᴜʀᴠ𝙸-%20ʙᴏᴛs-2196f3?style=for-the-badge&logo=telegram&logoColor=white"/> 
   </a>  
 

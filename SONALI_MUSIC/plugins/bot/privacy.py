@@ -6,10 +6,10 @@ from SONALI_MUSIC import app
 async def privacy_command(client: Client, message: Message):
     await message.reply_photo(
         photo="https://files.catbox.moe/0jpf7u.jpg",
-        caption="**➻ ᴡᴇʟᴄᴏᴍᴇ ᴛᴏ 𝐁𝐑𝐀𝐇𝐈𝐗  ʙᴏᴛꜱ ᴘʀɪᴠᴀᴄʏ ᴘᴏʟɪᴄʏ.**\n\n**⊚ ᴄʟɪᴄᴋ ᴛʜᴇ ʙᴇʟᴏᴡ ʙᴜᴛᴛᴏɴ ᴛʜᴇɴ ꜱᴇᴇ ᴘʀɪᴠᴀᴄʏ ᴘᴏʟɪᴄʏ 🔏**",
+        caption="**➻ ᴡᴇʟᴄᴏᴍᴇ ᴛᴏ �꯭꯭𝐇͟ᴇ꯭𝐗꯭͟ᴀ꯭ɴ꯭ᴇ꯭Ʀ꯭ᴠ꯭ᴇ꯭𝆺꯭𝅥🎭  ʙᴏᴛꜱ ᴘʀɪᴠᴀᴄʏ ᴘᴏʟɪᴄʏ.**\n\n**⊚ ᴄʟɪᴄᴋ ᴛʜᴇ ʙᴇʟᴏᴡ ʙᴜᴛᴛᴏɴ ᴛʜᴇɴ ꜱᴇᴇ ᴘʀɪᴠᴀᴄʏ ᴘᴏʟɪᴄʏ 🔏**",
         reply_markup=InlineKeyboardMarkup(
             [
-                [InlineKeyboardButton("˹ ᴘʀɪᴠᴀᴄʏ ˼", url="https://telegra.ph/Privacy-Policy--Purvi-Bots-by-ALPHA-BABY-08-06")]
+                [InlineKeyboardButton("˹ ᴘʀɪᴠᴀᴄʏ ˼", url="https://graph.org/PRIVACY-POLICY--HEXANERVE-BOTS-12-24")]
             ]
         )
     )
