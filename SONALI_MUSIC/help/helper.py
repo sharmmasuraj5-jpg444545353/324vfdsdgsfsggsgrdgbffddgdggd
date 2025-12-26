@@ -585,13 +585,13 @@ class Helper(object):
 ──────────────────────
    ❖ │ ʀєᴧʟ ᴛɪϻє ʙσᴛ's sᴛᴧᴛυs │❖
 ──────────────────────
-╭⎋ [ ᴅɪσʀ ꭙ ϻυsɪᴄ](https://t.me/Saregamaa_Music_bot) : ᴧʟɪᴠє 
+╭⎋ [ ᴅɪσʀ ꭙ ϻυsɪᴄ](https://t.me/diorxMusicbot) : ᴧʟɪᴠє 
 ╰⊚ υsᴧɢє : 24 ʜʀs | ᴧssɪsᴛᴧηᴛs : 01
        
-╭⎋ [𝐇ᴇᴇʀɪʏᴇ ꭙ ϻυsɪᴄ](https://t.me/Heeriye_musicbot) : ᴧʟɪᴠє 
+╭⎋ [𝐌𝛊𝛕ຮ𝛖𝐫𝛊 𝐌𝛖ຮ𝛊𝛓⚡️](https://t.me/saregama_musics_bot?start=_tgr_G6wWNSA0YTlh) : ᴧʟɪᴠє 
 ╰⊚ υsᴧɢє : 24 ʜʀs | ᴧssɪsᴛᴧηᴛs : 01
 
-╭⎋ [◄⏤͟͟🍸⃝⃪🐼𓆩꯭❛ 𝐑꯭𝚰𝐘꯭𝚨꯭❜꯭𓆪⁩⎯꯭̽⟶🤍 ꭙ ᴄʜᴧᴛ](https://t.me/sonaal_bot) : ᴧʟɪᴠє 
+╭⎋ [𓆩᪵𝐎𝐋𝐥𝐕𝐥𝚨𓆪 ᴄʜᴧᴛ](https://t.me/Oliivia_Robot?start=_tgr_fOGbMOE3ZDU1) : ᴧʟɪᴠє 
 ╰⊚ υsᴧɢє : 24 ʜʀs | ᴧssɪsᴛᴧηᴛs : 01
 ──────────────────────
 ⊚ ʙσᴛ sᴛᴧᴛυs & ϻσʀє ʙσᴛs - [ᴄʟɪᴄᴋ ʜєʀє](https://t.me/Hexanerve_core)
